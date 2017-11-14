@@ -400,8 +400,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			return 0;
 		}
 		try {
-			Date start = new SimpleDateFormat("dd/MM/yyyy").parse(startDate);
-			Date end = new SimpleDateFormat("dd/MM/yyyy").parse(endDate);
+			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
 			log.info("s :"+ start +" e: "+endDate);
 			Calendar calS = Calendar.getInstance();
 			calS.setTime(start);
@@ -429,9 +429,9 @@ log.severe("exception getting days count :" + e);		}
 	public static boolean isEventWithinRange(Date testDate) throws ParseException {
 		log.info("isEventWithRange ");
 		String event_date = "11/14/2017";
-		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(event_date);
+		Date today = new SimpleDateFormat("yyyy-MM-dd").parse(event_date);
 		event_date = "31/01/2018";
-		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(event_date);
+		Date last = new SimpleDateFormat("yyyy-MM-dd").parse(event_date);
 		System.out.println("method returns");
 		return testDate.before(today) && last.after(testDate);
 	}
