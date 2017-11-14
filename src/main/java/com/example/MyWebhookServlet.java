@@ -237,28 +237,52 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (! parameter.get("comment").getAsString().isEmpty()) {
 			comment = parameter.get("comment").getAsString();
 		}
-		message = "You want to apply for leave from " + parameter.get("startDate").getAsString() + " to "
-				+ parameter.get("endDate").getAsString() + comment;
-		outParameter.put("comment", new JsonPrimitive(comment));
+		int days = getDays(parameter.get("startDate").getAsString(), parameter.get("endDate").getAsString());
+		JSONObject hist = Data.getHolidays();
+		if (days < Integer.parseInt(hist.get("leave_balance").toString())) {
+			message = "You want to apply for leave from " + parameter.get("startDate").getAsString() + " to "
+					+ parameter.get("endDate").getAsString() + comment;
+			outParameter.put("comment", new JsonPrimitive(comment));
+			List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
+			AIOutputContext contextOut1 = new AIOutputContext();
+			contextOut1.setLifespan(2);
+			contextOut1.setName("confirmLeave - yes");
+			contextOut1.setParameters(outParameter);
+			contextOutList.add(contextOut1);
+			AIOutputContext contextOut2 = new AIOutputContext();
+			contextOut2.setLifespan(2);
+			contextOut2.setName("confirmLeave - no");
+			contextOut2.setParameters(outParameter);
+			contextOutList.add(contextOut2);
+			log.info("Context out parameters set");
+			output.setContextOut(contextOutList);
+		}else{
+			message = "Your leave balance is less than :" + days
+					+ ". You will need Delivery partner approval if you will apply. Still wanna apply? Or dear you can apply for "
+					+ days + " days.";
+			List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
+			AIOutputContext contextOut1 = new AIOutputContext();
+			contextOut1.setLifespan(2);
+			contextOut1.setName("SystemSugestionSatisfied-Yes");
+			contextOut1.setParameters(outParameter);
+			contextOutList.add(contextOut1);
+			AIOutputContext contextOut2 = new AIOutputContext();
+			contextOut2.setLifespan(2);
+			contextOut2.setName("SystemSugestionSatisfied-no");
+			contextOut2.setParameters(outParameter);
+			contextOutList.add(contextOut2);
+			log.info("Context out parameters : if low balance");
+			output.setContextOut(contextOutList);
+			log.info("balance < req days");
+		}
+		
 
 		message += " \n please confirm ";
 		log.info("message");
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		log.info("setting context");
-		List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
-		AIOutputContext contextOut1 = new AIOutputContext();
-		contextOut1.setLifespan(2);
-		contextOut1.setName("confirmLeave - yes");
-		contextOut1.setParameters(outParameter);
-		contextOutList.add(contextOut1);
-		AIOutputContext contextOut2 = new AIOutputContext();
-		contextOut2.setLifespan(2);
-		contextOut2.setName("confirmLeave - no");
-		contextOut2.setParameters(outParameter);
-		contextOutList.add(contextOut2);
-		log.info("Context out parameters set");
-		output.setContextOut(contextOutList);
+		
 		return output;
 	}
 
@@ -323,12 +347,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
 		AIOutputContext contextOut1 = new AIOutputContext();
 		contextOut1.setLifespan(2);
-		contextOut1.setName("CONFIRM_LEAVE_NO");
+		contextOut1.setName("confirmLeave-followup"); // send to confirm leave - no
 		contextOut1.setParameters(outParameter);
 		contextOutList.add(contextOut1);
 		AIOutputContext contextOut2 = new AIOutputContext();
 		contextOut2.setLifespan(2);
-		contextOut2.setName("APPLY_LEAVE_CUSTOM");
+		contextOut2.setName("applyForLeave-custom");
 		contextOut2.setParameters(outParameter);
 		contextOutList.add(contextOut2);
 
