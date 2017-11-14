@@ -116,8 +116,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int days = 0;
 		log.info("parms : " + parameter.get("startDate") + " , "+ parameter.get("endDate"));
 		HashMap<String, JsonElement> outParameters = new HashMap<String, JsonElement>();
-		log.info("parms equal :"+parameter.get("noOfDays").equals(""));
-		if (parameter.containsKey("noOfDays") && parameter.get("noOfDays").equals("")) {
+		log.info("parms equal :"+parameter.get("noOfDays").getAsString().isEmpty());
+		if (parameter.containsKey("noOfDays") && !(parameter.get("noOfDays").getAsString().isEmpty())) {
 			log.info("contains no of days");
 			// days = Integer.parseInt(parameter.get("noOfDays"));
 			JsonElement contextOutParameter;
@@ -125,19 +125,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			outParameters.put("noOfDays", contextOutParameter);
 		}
 		if (parameter.containsKey("startDate") && parameter.containsKey("endDate")) {
-			if (parameter.get("startDate").equals("")) {
+			if (! parameter.get("startDate").getAsString().isEmpty()) {
 				log.info("start date");
 				JsonElement startDate = new JsonPrimitive(parameter.get("startDate").toString());
 				outParameters.put("startDate", startDate);
 
 			}
-			if (parameter.get("endDate").equals("")) {
+			if (! parameter.get("endDate").getAsString().isEmpty()) {
 				log.info("endDate");
 				JsonElement endDate = new JsonPrimitive(parameter.get("endDate").toString());
 				outParameters.put("endDate", endDate);
 			}
-			log.info("resp " + (parameter.get("endDate").equals("") && parameter.get("startDate").equals("")));
-			if (parameter.get("endDate").equals("") && parameter.get("startDate").equals("")) {
+			log.info("resp " + ! (parameter.get("endDate").getAsString().isEmpty() && parameter.get("startDate").getAsString().isEmpty()));
+			if (!(parameter.get("endDate").getAsString().isEmpty() && parameter.get("startDate").getAsString().isEmpty())) {
 				days = getDays(parameter.get("startDate").toString(), parameter.get("endDate").toString());
 				JsonElement noOfDay = new JsonPrimitive(days);// fetched no of
 				outParameters.put("noOfDays", noOfDay);
@@ -145,9 +145,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 
 		}
-		if (parameter.containsKey("event") && parameter.get("event").equals("")) {
+		if (parameter.containsKey("event") && ! parameter.get("event").getAsString().isEmpty()) {
 			JsonElement contextOutParameter;
-			contextOutParameter = new JsonPrimitive(parameter.get("event").equals(""));
+			contextOutParameter = new JsonPrimitive(parameter.get("event").getAsString());
 			outParameters.put("event", contextOutParameter);
 		}
 		if (balance <= 0) {
@@ -229,12 +229,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String event = "";
 		String comment = "";
 		HashMap<String, JsonElement> outParameter = parameter;
-		if (parameter.get("event").equals("")) {
+		if (! parameter.get("event").getAsString().isEmpty()) {
 			event = parameter.get("event").getAsString();
 			comment = "Leave for " + event;
 			log.info("comment : " + comment);
 		}
-		if (parameter.get("comment").equals("")) {
+		if (! parameter.get("comment").getAsString().isEmpty()) {
 			comment = parameter.get("comment").getAsString();
 		}
 		message = "You want to apply for leave from " + parameter.get("startDate").getAsString() + " to "
@@ -323,7 +323,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
 		AIOutputContext contextOut1 = new AIOutputContext();
 		contextOut1.setLifespan(2);
-		contextOut1.setName("confirmLeave - no");
+		contextOut1.setName("CONFIRM_LEAVE_NO");
 		contextOut1.setParameters(outParameter);
 		contextOutList.add(contextOut1);
 		AIOutputContext contextOut2 = new AIOutputContext();
@@ -370,7 +370,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("get days");
 		int days = 0;
 		log.info("start date " + startDate + " end date "+endDate);
-		if (! (startDate.equals("") && endDate.equals(""))) {
+		if ( (startDate.isEmpty() && endDate.isEmpty())) {
 			return 0;
 		}
 		try {
