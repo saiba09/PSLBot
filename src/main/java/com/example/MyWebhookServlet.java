@@ -372,7 +372,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (isEventWithinRange(birthday)) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(birthday);
-			msg = "Hey! Its your birthday on " + cal.DATE +" "+cal.MONTH + ". Want to go out??";
+			msg = "Hey! Its your birthday on " + cal.DATE +"/"+cal.MONTH + ". Want to go out??";
 			event = "birthday";
 		} else {
 			JSONObject holidays = (JSONObject) holidayData.get("holidays");
@@ -428,10 +428,10 @@ log.severe("exception getting days count :" + e);		}
 
 	public static boolean isEventWithinRange(Date testDate) throws ParseException {
 		log.info("isEventWithRange ");
-		String event_date = "11/14/2017";
-		Date today = new SimpleDateFormat("yyyy-MM-dd").parse(event_date);
-		event_date = "31/01/2018";
-		Date last = new SimpleDateFormat("yyyy-MM-dd").parse(event_date);
+		Date event_date = new Date();
+		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
+		String date2 = "31/01/2018";
+		Date last = new SimpleDateFormat("yyyy-MM-dd").parse(date2);
 		System.out.println("method returns");
 		return testDate.before(today) && last.after(testDate);
 	}
