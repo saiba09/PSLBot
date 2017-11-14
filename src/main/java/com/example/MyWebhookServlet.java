@@ -426,14 +426,20 @@ log.severe("exception getting days count :" + e);		}
 		return days;
 	}
 
-	public static boolean isEventWithinRange(Date testDate) throws ParseException {
+	
+	public static boolean isEventWithinRange(Date testDate)  {
 		log.info("isEventWithRange ");
 		Date event_date = new Date();
+		try{
 		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
 		String date2 = "31/01/2018";
 		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
 		System.out.println("method returns");
 		return testDate.before(today) && last.after(testDate);
+		}catch(Exception e){
+			log.severe("exception "+e);
+		}
+		return false;
 	}
 
 }
