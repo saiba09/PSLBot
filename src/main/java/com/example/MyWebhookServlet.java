@@ -431,7 +431,7 @@ log.severe("exception getting days count :" + e);		}
 		Date event_date = new Date();
 		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
 		String date2 = "31/01/2018";
-		Date last = new SimpleDateFormat("yyyy-MM-dd").parse(date2);
+		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
 		System.out.println("method returns");
 		return testDate.before(today) && last.after(testDate);
 	}
