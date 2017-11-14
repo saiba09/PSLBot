@@ -58,7 +58,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "CONFIRM_LEAVE_NO":
 				log.info("CONFIRM_LEAVE_NO");
-				// output =
+				output = exitFlow(output); // response if yes replan goto custom
 				break;
 			case "RESTART":
 				log.info("intent : restart");
@@ -199,7 +199,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (Boolean.parseBoolean(eventResponse.get("present").toString())) {
 				outParameters.put("event", new JsonPrimitive(eventResponse.get("event").toString()));
 				message = eventResponse.get("message").toString();
-				message += "You have "+ balance + " available";
+				message += "You have "+ balance + " leaves available";
 			}else{
 			message = "Hurry you have " + balance + " leaves remaining. You can apply for leave. Shall we proceed or you have a second thought?";
 			}
@@ -246,12 +246,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			List<AIOutputContext> contextOutList = new LinkedList<AIOutputContext>();
 			AIOutputContext contextOut1 = new AIOutputContext();
 			contextOut1.setLifespan(2);
-			contextOut1.setName("confirmLeave - yes");
+			contextOut1.setName("CONFIRM_LEAVE_YES");
 			contextOut1.setParameters(outParameter);
 			contextOutList.add(contextOut1);
 			AIOutputContext contextOut2 = new AIOutputContext();
 			contextOut2.setLifespan(2);
-			contextOut2.setName("confirmLeave - no");
+			contextOut2.setName("CONFIRM_LEAVE_NO");
 			contextOut2.setParameters(outParameter);
 			contextOutList.add(contextOut2);
 			log.info("Context out parameters set");
@@ -370,7 +370,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String event = "";
 		JSONObject response = new JSONObject();
 		if (isEventWithinRange(birthday)) {
-			msg = "Your birthday is coming on " + birthday + ". Want to go out??";
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(birthday);
+			msg = "Hey! Its your birthday on " + cal.DATE +" "+cal.MONTH + ". Want to go out??";
 			event = "birthday";
 		} else {
 			JSONObject holidays = (JSONObject) holidayData.get("holidays");
