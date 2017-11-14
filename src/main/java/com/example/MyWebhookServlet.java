@@ -196,7 +196,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else {
 			// api call to check for event
 			JSONObject eventResponse = Suggest(parameter);
-			if (Boolean.parseBoolean(eventResponse.get("pressent").toString())) {
+			if (Boolean.parseBoolean(eventResponse.get("present").toString())) {
 				outParameters.put("event", new JsonPrimitive(eventResponse.get("event").toString()));
 				message = eventResponse.get("message").toString();
 				message += "You have "+ balance + " available";
@@ -362,7 +362,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		response.put("event", event);
 		response.put("message", msg);
-		response.put("present", true);
+		response.put("present", "true");
 		return response;
 	}
 
