@@ -116,8 +116,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int days = 0;
 		log.info("parms : " + parameter.get("startDate") + " , "+ parameter.get("endDate"));
 		HashMap<String, JsonElement> outParameters = new HashMap<String, JsonElement>();
-		System.out.println(parameter.get("noOfDays").equals(""));
-		if (parameter.containsKey("noOfDays") && !parameter.get("noOfDays").equals("")) {
+		log.info("parms equal :"+parameter.get("noOfDays").equals(""));
+		if (parameter.containsKey("noOfDays") && parameter.get("noOfDays").equals("")) {
 			log.info("contains no of days");
 			// days = Integer.parseInt(parameter.get("noOfDays"));
 			JsonElement contextOutParameter;
@@ -125,19 +125,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			outParameters.put("noOfDays", contextOutParameter);
 		}
 		if (parameter.containsKey("startDate") && parameter.containsKey("endDate")) {
-			if (!parameter.get("startDate").equals("")) {
+			if (parameter.get("startDate").equals("")) {
 				log.info("start date");
 				JsonElement startDate = new JsonPrimitive(parameter.get("startDate").toString());
 				outParameters.put("startDate", startDate);
 
 			}
-			if (!parameter.get("endDate").equals("")) {
+			if (parameter.get("endDate").equals("")) {
 				log.info("endDate");
 				JsonElement endDate = new JsonPrimitive(parameter.get("endDate").toString());
 				outParameters.put("endDate", endDate);
 			}
-			log.info("resp " + (!parameter.get("endDate").equals("") && !parameter.get("startDate").equals("")));
-			if (!parameter.get("endDate").equals("") && !parameter.get("startDate").equals("")) {
+			log.info("resp " + (parameter.get("endDate").equals("") && parameter.get("startDate").equals("")));
+			if (parameter.get("endDate").equals("") && parameter.get("startDate").equals("")) {
 				days = getDays(parameter.get("startDate").toString(), parameter.get("endDate").toString());
 				JsonElement noOfDay = new JsonPrimitive(days);// fetched no of
 				outParameters.put("noOfDays", noOfDay);
@@ -145,7 +145,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 
 		}
-		if (parameter.containsKey("event") && !parameter.get("event").equals("")) {
+		if (parameter.containsKey("event") && parameter.get("event").equals("")) {
 			JsonElement contextOutParameter;
 			contextOutParameter = new JsonPrimitive(parameter.get("event").equals(""));
 			outParameters.put("event", contextOutParameter);
@@ -229,12 +229,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String event = "";
 		String comment = "";
 		HashMap<String, JsonElement> outParameter = parameter;
-		if (!parameter.get("event").equals("")) {
+		if (parameter.get("event").equals("")) {
 			event = parameter.get("event").getAsString();
 			comment = "Leave for " + event;
 			log.info("comment : " + comment);
 		}
-		if (!parameter.get("comment").equals("")) {
+		if (parameter.get("comment").equals("")) {
 			comment = parameter.get("comment").getAsString();
 		}
 		message = "You want to apply for leave from " + parameter.get("startDate").getAsString() + " to "
@@ -370,7 +370,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("get days");
 		int days = 0;
 		log.info("start date " + startDate + " end date "+endDate);
-		if (startDate.equals("") && endDate.equals("")) {
+		if (! (startDate.equals("") && endDate.equals(""))) {
 			return 0;
 		}
 		try {
