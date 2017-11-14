@@ -14,6 +14,7 @@
     <init-param>
       <param-name>apiaiKey</param-name>
       <param-value>ac3143b5c50a4460b88373c865c1a7dc</param-value>
+      
     </init-param>
   </servlet>
   <servlet-mapping>
