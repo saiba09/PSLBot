@@ -114,6 +114,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int balance = holidayData.get("leave_balance");
 		log.info("bal :" + balance);
 		int days = 0;
+		log.info("parms : " + parameter.get("startDate") + " , "+ parameter.get("endDate"));
 		HashMap<String, JsonElement> outParameters = new HashMap<String, JsonElement>();
 		System.out.println(parameter.get("noOfDays").equals(""));
 		if (parameter.containsKey("noOfDays") && !parameter.get("noOfDays").equals("")) {
@@ -368,21 +369,26 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private static int  getDays(String startDate, String endDate) {
 		log.info("get days");
 		int days = 0;
+		log.info("start date " + startDate + " end date "+endDate);
 		if (startDate.equals("") && endDate.equals("")) {
 			return 0;
 		}
 		try {
 			Date start = new SimpleDateFormat("dd/MM/yyyy").parse(startDate);
 			Date end = new SimpleDateFormat("dd/MM/yyyy").parse(endDate);
-			System.out.println("s :"+ start +" e: "+endDate);
+			log.info("s :"+ start +" e: "+endDate);
 			Calendar calS = Calendar.getInstance();
 			calS.setTime(start);
 			Calendar calE = Calendar.getInstance();
 			calE.setTime(end);
+			log.info("cal s :"+ calS +" cal e: "+calE);
+
 			while(calS.compareTo(calE) != 0){
 				if (calS.DAY_OF_WEEK != Calendar.SATURDAY || calS.DAY_OF_WEEK != Calendar.SUNDAY) {
 					days ++;
+					log.info("inc date");
 					calS.add(Calendar.DATE, 1);
+					log.info("date inc : " + calS);
 				}
 			}
 			days ++;
