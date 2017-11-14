@@ -115,7 +115,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("bal :" + balance);
 		int days = 0;
 		HashMap<String, JsonElement> outParameters = new HashMap<String, JsonElement>();
-
+		System.out.println(parameter.get("noOfDays").equals(""));
 		if (parameter.containsKey("noOfDays") && !parameter.get("noOfDays").equals("")) {
 			log.info("contains no of days");
 			// days = Integer.parseInt(parameter.get("noOfDays"));
@@ -135,6 +135,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				JsonElement endDate = new JsonPrimitive(parameter.get("endDate").toString());
 				outParameters.put("endDate", endDate);
 			}
+			log.info("resp " + (!parameter.get("endDate").equals("") && !parameter.get("startDate").equals("")));
 			if (!parameter.get("endDate").equals("") && !parameter.get("startDate").equals("")) {
 				days = getDays(parameter.get("startDate").toString(), parameter.get("endDate").toString());
 				JsonElement noOfDay = new JsonPrimitive(days);// fetched no of
@@ -367,6 +368,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private static int  getDays(String startDate, String endDate) {
 		log.info("get days");
 		int days = 0;
+		if (startDate.equals("") && endDate.equals("")) {
+			return 0;
+		}
 		try {
 			Date start = new SimpleDateFormat("dd/MM/yyyy").parse(startDate);
 			Date end = new SimpleDateFormat("dd/MM/yyyy").parse(endDate);
