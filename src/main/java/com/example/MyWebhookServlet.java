@@ -130,6 +130,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		}
 		//else abort
+		output.setSpeech(message);
+		output.setDisplayText(message);
 		return output;
 	}
 
@@ -153,7 +155,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				//triggre event 
 			}
 		}
-		
+		output.setSpeech(message);
+		output.setDisplayText(message);
 		return output;
 	}
 
@@ -190,14 +193,17 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		else if(leave_balance > noOfLeaves) {
 			log.info("req > bal");
 			message = "Hurry you have " + leave_balance + " leaves remaining. You can apply for leave. Shall we proceed or you have a second thought?";
-			
+			output.setSpeech(message);
+			output.setDisplayText(message);
 		}			
 		else {
 			message = "Your leave balance is less than :" + noOfLeaves
 					+ ". You will need Delivery partner approval if you will apply. Or dear if you say shall I apply for "
 					+ leave_balance + " days.";
 			log.info(message);
-			//set out parmas end date- diff
+			output.setSpeech(message);
+			output.setDisplayText(message);
+			//IMP : set out parmas end date- diff
 		}
 
 		return output;
@@ -209,6 +215,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 	
 	private static JSONObject Suggest(HashMap<String, JsonElement> parameter)  {
+		log.info("suggest called");
 		JSONObject holidayData = Data.getHolidays();
 		String bday = holidayData.get("birthday").toString();
 		JSONObject response = new JSONObject();
@@ -236,6 +243,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		response.put("event", event);
 		response.put("message", msg);
 		response.put("present", "true");
+		log.info("returns from function");
 		return response;
 		}catch(Exception e) {
 			log.severe("error "+e);
@@ -251,7 +259,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
 		String date2 = "31/01/2018";
 		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
-		System.out.println("method returns");
+		log.info("method returns");
 		return testDate.before(today) && last.after(testDate);
 		}catch(Exception e){
 			log.severe("exception "+e);
