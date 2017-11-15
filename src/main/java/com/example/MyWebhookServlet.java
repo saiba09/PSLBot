@@ -278,7 +278,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String date2 = "31/01/2018";
 		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
 		log.info("method returns");
-		return testDate.before(today) && testDate.after(today);
+		return testDate.before(today) || testDate.after(today);
 		}catch(Exception e){
 			log.severe("exception "+e);
 		}
