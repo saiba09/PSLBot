@@ -159,6 +159,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);
 			}
+		}else {
+			log.info("already had an event");
+			message = "you have sufficient leave balance. apply";
+			//triggre event 
+			log.info("redirectToCustomApply event trig fun");
+			AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
+			log.info("rerouting to event : evt trg");
+			output.setFollowupEvent(followupEvent);
 		}
 		log.info(message);
 		output.setSpeech(message);
