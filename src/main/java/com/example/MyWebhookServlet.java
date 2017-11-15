@@ -103,7 +103,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String comment = parameter.get("comment").getAsString();
 		log.info("parms :"+startDate+" "+endDate+" comment : "+comment);
 		String message = "";
-		JSONObject sugestion = Suggest(parameter);
+		JSONObject sugestion = Data.getHolidays();
 		int leave_balance = Integer.parseInt(sugestion.get("leave_balance").toString());
 		// check bal if allow apply
 		int noOfLeaves = getDays(startDate, endDate);
@@ -190,7 +190,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String startDate = parameter.get("startDate").getAsString();
 		String endDate = parameter.get("endDate").getAsString();
 		String comment =""; String event ="";
-		JSONObject sugestion = Suggest(parameter);
+		JSONObject sugestion = Data.getHolidays();
 		String message ="";
 		log.info("parms :"+startDate+" "+endDate);
 		if (parameter.containsKey("comment")) {
@@ -252,7 +252,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (isEventWithinRange(birthday)) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(birthday);
-			msg = "Hey! Its your birthday on " + new SimpleDateFormat("MM d").format(birthday)+ ". Want to go out??";
+			msg = "Hey! Its your birthday on " + new SimpleDateFormat("MMM d").format(birthday)+ ". Want to go out??";
 			event = "birthday";
 			check = true;
 		} else {
