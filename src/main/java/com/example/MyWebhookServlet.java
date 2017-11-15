@@ -237,7 +237,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			msg = "Hey! Its your birthday on " + cal.DATE +"/"+cal.MONTH + ". Want to go out??";
 			event = "birthday";
 			check = true;
-		} else {
+		} /*else {
 			JSONObject holidays = (JSONObject) holidayData.get("holidays");
 			for (Iterator iterator = holidays.keySet().iterator(); iterator.hasNext();) {
 				String key = (String) iterator.next();
@@ -248,11 +248,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					event = (String) holidays.get(key);
 				}
 			}
-		}
+		}*/
 		response.put("event", event);
 		response.put("message", msg);
 		response.put("present", check);
 		log.info("returns from function");
+		log.info(response.toJSONString());
 		return response;
 		}catch(Exception e) {
 			log.severe("error "+e);
