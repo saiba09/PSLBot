@@ -148,8 +148,18 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("do have a suggestion");
 			if (event.isEmpty()) {
 				log.info("event suggested");
+				event = sugestion.get("event").toString();
 				message = sugestion.get("message").toString();
+				AIOutputContext contextOut = new AIOutputContext();
+				 HashMap<String, JsonElement> outParms = new HashMap<>();
+				 outParms.put("comment", new JsonPrimitive("leave for " +event ));
+				 outParms.put("event", new JsonPrimitive(event ));
+
+				contextOut.setLifespan(1);
+				contextOut.setName("QueryLeave-followup");
+				contextOut.setParameters(outParms);
 				//set cont.
+				output.setContextOut(contextOut );
 			}else {
 				log.info("already had an event");
 				message = "you have sufficient leave balance. apply";
@@ -242,7 +252,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (isEventWithinRange(birthday)) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(birthday);
-			msg = "Hey! Its your birthday on " + cal.DATE +"/"+cal.MONTH + ". Want to go out??";
+			msg = "Hey! Its your birthday on " + new SimpleDateFormat("MM d").format(birthday)+ ". Want to go out??";
 			event = "birthday";
 			check = true;
 		} else {
