@@ -130,6 +130,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		}
 		//else abort
+		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
@@ -155,6 +156,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				//triggre event 
 			}
 		}
+		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
@@ -205,6 +207,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setDisplayText(message);
 			//IMP : set out parmas end date- diff
 		}
+		log.info(message);
 
 		return output;
 	}
