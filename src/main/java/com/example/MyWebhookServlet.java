@@ -154,6 +154,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("already had an event");
 				message = "you have sufficient leave balance. apply";
 				//triggre event 
+				log.info("redirectToCustomApply event trig fun");
+				AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
+				log.info("rerouting to event : evt trg");
+				output.setFollowupEvent(followupEvent);
 			}
 		}
 		log.info(message);
@@ -226,11 +230,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		Date birthday = new SimpleDateFormat("dd/MM/yyyy").parse(bday);
 		String msg = "";
 		String event = "";
+		Boolean check = false;
 		if (isEventWithinRange(birthday)) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(birthday);
 			msg = "Hey! Its your birthday on " + cal.DATE +"/"+cal.MONTH + ". Want to go out??";
 			event = "birthday";
+			check = true;
 		} else {
 			JSONObject holidays = (JSONObject) holidayData.get("holidays");
 			for (Iterator iterator = holidays.keySet().iterator(); iterator.hasNext();) {
@@ -245,7 +251,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		response.put("event", event);
 		response.put("message", msg);
-		response.put("present", "true");
+		response.put("present", check);
 		log.info("returns from function");
 		return response;
 		}catch(Exception e) {
