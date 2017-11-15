@@ -29,6 +29,300 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	@Override
 	protected void doWebhook(AIWebhookRequest input, Fulfillment output) {
+		log.info("webhook call");
+		String action = input.getResult().getAction();
+		HashMap<String, JsonElement> parameter = input.getResult().getParameters();
+		// add constants in file
+		try {
+			switch (action) {
+			case "QUERY_LEAVE":
+				log.info("in action : query_leave");
+				output = queryLeave(output, parameter);
+				break;
+			case "SYSTEM_SUGESTION_SATISFIED_YES":
+				log.info(" intent SYSTEM_SUGESTION_SATISFIED_YES ");
+				output = getConfirmationMessage(output, parameter);
+				break;
+			case "SYSTEM_SUGESTION_SATISFIED_NO":
+				log.info("intent : SYSTEM_SUGESTION_SATISFIED_NO");
+				output = getConfirmationMessage(output, parameter);
+				break;
+			case "CONFIRM_LEAVE_APPLY":
+				log.info("intent APPLY_LEAVE_CUSTOM");
+				output = applyLeave(output, parameter);
+				break;
+			case "OPT_CUSTOM_REQ":
+				log.info("intent CONFIRM_LEAVE_YES");
+				output = redirectToCustomApply(output, parameter);
+				break;
+			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
+				log.info("SYST_SUG_NOT_SATISFIED_CUST_CONFIRM");
+				output = redirectToCustomApply(output,parameter); // response if yes replan goto custom
+				break;
+		/*	case "RESTART":
+				log.info("intent : restart");
+				output = fallbackCustomApply(output, parameter);
+				break;
+			case "EXIT":
+				log.info("exit");
+				output = exitFlow(output);
+				break;
+			case "input.welcome":
+				log.info("input.welcome");
+				output = eventTriggered(output);
+				break;*/
+			default:
+				output.setSpeech("Default case");
+				break;
+			}
+		} catch (Exception e) {
+			log.info("exception : " + e);
+		}
+
+		
+	}
+
+	private Fulfillment exitFlow(Fulfillment output) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Fulfillment redirectToCustomApply(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		//Trigger event for custom leave apply
+		log.info("redirectToCustomApply event trig fun");
+		AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
+		log.info("rerouting to event : evt trg");
+		output.setFollowupEvent(followupEvent);
+		return output;
+	}
+
+	private Fulfillment applyLeave(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		log.info("apply leave function");
+		String startDate = parameter.get("startDate").getAsString();
+		String endDate = parameter.get("endDate").getAsString();
+		String comment = parameter.get("comment").getAsString();
+		log.info("parms :"+startDate+" "+endDate+" comment : "+comment);
+		String message = "";
+		JSONObject sugestion = Suggest(parameter);
+		int leave_balance = Integer.parseInt(sugestion.get("leave_balance").toString());
+		// check bal if allow apply
+		int noOfLeaves = getDays(startDate, endDate);
+		if (leave_balance <= 0) {
+			log.info("bal < 0");
+			message = "Sorry dear, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
+			//Trigger dp approval intent
+			log.info("DP APPROVAL REQ event trig ");
+			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+			log.info("rerouting to event : evt trg");
+			output.setFollowupEvent(followupEvent);
+		}
+		else if(leave_balance > noOfLeaves) {
+			log.info("bal < no Leaves ");
+			message = "Here you go! Your leaves had been applied in the system.";
+		}			
+		else {
+			message = "Your leave balance is less than :" + noOfLeaves
+					+ ". You will need Delivery partner approval.";		
+			//set event trigg.
+			log.info("DP APPROVAL REQ event trig ");
+			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+			log.info("rerouting to event : evt trg");
+			output.setFollowupEvent(followupEvent);
+		}
+		//else abort
+		return output;
+	}
+
+	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter) throws ParseException {
+		log.info("querry leave function");
+		String startDate = parameter.get("startDate").getAsString();
+		String endDate = parameter.get("endDate").getAsString();
+		String event = parameter.get("event").getAsString();
+		log.info("parms :"+startDate+" "+endDate+" event: "+event);
+		String message ="";
+		JSONObject sugestion = Suggest(parameter);
+		if (Boolean.parseBoolean(sugestion.get("present").toString())) {
+			log.info("do have a suggestion");
+			if (event.isEmpty()) {
+				log.info("event suggested");
+				message = sugestion.get("message").toString();
+				//set cont.
+			}else {
+				log.info("already had an event");
+				message = "you have sufficient leave balance. apply";
+				//triggre event 
+			}
+		}
+		
+		return output;
+	}
+
+	
+	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		log.info("getConfirmationMessage");
+		String startDate = parameter.get("startDate").getAsString();
+		String endDate = parameter.get("endDate").getAsString();
+		String comment =""; String event ="";
+		JSONObject sugestion = Suggest(parameter);
+		String message ="";
+		log.info("parms :"+startDate+" "+endDate);
+		if (parameter.containsKey("comment")) {
+			comment = parameter.get("comment").getAsString();
+			log.info("comment "+comment);
+		}else {
+		event =  parameter.get("event").getAsString();
+		comment = getMessage(event);
+		log.info("event :"+event +" comment :"+comment);
+		}
+		//check leave balance > days to apply
+		int leave_balance = Integer.parseInt(sugestion.get("leave_balance").toString());
+		int noOfLeaves = getDays(startDate, endDate);
+		log.info("balance :"+leave_balance+" required :"+ noOfLeaves);
+		if (leave_balance <= 0) {
+			log.info("bal < 0");
+			message = "Sorry dear, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
+			//triggre dp approval inteent
+			log.info("DP APPROVAL REQ event trig ");
+			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+			log.info("rerouting to event : evt trg");
+			output.setFollowupEvent(followupEvent);
+		}
+		else if(leave_balance > noOfLeaves) {
+			log.info("req > bal");
+			message = "Hurry you have " + leave_balance + " leaves remaining. You can apply for leave. Shall we proceed or you have a second thought?";
+			
+		}			
+		else {
+			message = "Your leave balance is less than :" + noOfLeaves
+					+ ". You will need Delivery partner approval if you will apply. Or dear if you say shall I apply for "
+					+ leave_balance + " days.";
+			log.info(message);
+			//set out parmas end date- diff
+		}
+
+		return output;
+	}
+	
+	private static String getMessage(String event) {
+		// TODO Auto-generated method stub
+		return "Leave for "+event;
+	}
+	
+	private static JSONObject Suggest(HashMap<String, JsonElement> parameter)  {
+		JSONObject holidayData = Data.getHolidays();
+		String bday = holidayData.get("birthday").toString();
+		JSONObject response = new JSONObject();
+		try {
+		Date birthday = new SimpleDateFormat("dd/MM/yyyy").parse(bday);
+		String msg = "";
+		String event = "";
+		if (isEventWithinRange(birthday)) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(birthday);
+			msg = "Hey! Its your birthday on " + cal.DATE +"/"+cal.MONTH + ". Want to go out??";
+			event = "birthday";
+		} else {
+			JSONObject holidays = (JSONObject) holidayData.get("holidays");
+			for (Iterator iterator = holidays.keySet().iterator(); iterator.hasNext();) {
+				String key = (String) iterator.next();
+				Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(key);
+				if (isEventWithinRange(date1)) {
+					msg = holidays.get(key).toString() + " is coming up.. Wanna apply leave for that?"
+							+ holidays.get(key).toString();
+					event = (String) holidays.get(key);
+				}
+			}
+		}
+		response.put("event", event);
+		response.put("message", msg);
+		response.put("present", "true");
+		return response;
+		}catch(Exception e) {
+			log.severe("error "+e);
+		}
+		return response;
+	}
+	
+
+	public static boolean isEventWithinRange(Date testDate)  {
+		log.info("isEventWithRange ");
+		Date event_date = new Date();
+		try{
+		Date today = new SimpleDateFormat("dd/MM/yyyy").parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
+		String date2 = "31/01/2018";
+		Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
+		System.out.println("method returns");
+		return testDate.before(today) && last.after(testDate);
+		}catch(Exception e){
+			log.severe("exception "+e);
+		}
+		return false;
+	}
+	
+	private static int  getDays(String startDate, String endDate) {
+		log.info("get days");
+		int days = 0;
+		log.info("start date " + startDate + " end date "+endDate);
+		if ( (startDate.isEmpty() && endDate.isEmpty())) {
+			return 0;
+		}
+		try {
+			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+			log.info("s :"+ start +" e: "+endDate);
+			Calendar calS = Calendar.getInstance();
+			calS.setTime(start);
+			Calendar calE = Calendar.getInstance();
+			calE.setTime(end);
+			log.info("cal s :"+ calS +" cal e: "+calE);
+
+			while(calS.compareTo(calE) != 0){
+				if (calS.DAY_OF_WEEK != Calendar.SATURDAY || calS.DAY_OF_WEEK != Calendar.SUNDAY) {
+					days ++;
+					log.info("inc date");
+					calS.add(Calendar.DATE, 1);
+					log.info("date inc : " + calS);
+				}
+			}
+			days ++;
+			System.out.println("days :" + days);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+log.severe("exception getting days count :" + e);		}
+
+		return days;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+	private static final Logger log = Logger.getLogger(MyWebhookServlet.class.getName());
+
+	@Override
+	protected void doWebhook(AIWebhookRequest input, Fulfillment output) {
 
 		log.info("webhook call");
 		String action = input.getResult().getAction();
@@ -85,11 +379,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment eventTriggered(Fulfillment output) {
-		/*
+		
 		 * with all params except event go to custom leave apply
 		 * 
 		 * 
-		 */
+		 
 		log.info("event trig fun");
 		Map<String, String> outParameter = new HashMap<>();
 		AIEvent followupEvent = new AIEvent("event_triggered");
@@ -98,9 +392,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 		log.info("rerouting to event : evt trg");
 		output.setFollowupEvent(followupEvent);
-		/*
+		
 		 * output.setSpeech(message); output.setDisplayText(message);
-		 */
+		 
 		return output;
 	}
 
@@ -336,11 +630,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment fallbackCustomApply(Fulfillment output, HashMap<String, JsonElement> parameter) {
-		/*
+		
 		 * with all params except event go to custom leave apply
 		 * 
 		 * 
-		 */
+		 
 		log.info("fallback custom apply");
 		HashMap<String, JsonElement> outParameter = parameter;
 		String message = "Wanna do it yourself?  Okay! I would not give my suggestion, just let me know the details. I will apply for you. Does this sound good ?";
@@ -442,4 +736,4 @@ log.severe("exception getting days count :" + e);		}
 		return false;
 	}
 
-}
+*/}
