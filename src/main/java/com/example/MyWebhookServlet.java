@@ -195,7 +195,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		log.info(message);
 		//context : system-sugestion-satisfied-yes-yes-suggestOptions-followup
-		AIOutputContext contextOut = new AIOutputContext();
+		/*AIOutputContext contextOut = new AIOutputContext();
 		HashMap<String, JsonElement> outParms = new HashMap<>();
 		outParms.put("comment", new JsonPrimitive(comment));
 		outParms.put("startDate", new JsonPrimitive(startDate));
@@ -204,8 +204,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		contextOut.setName("system-sugestion-satisfied-yes-yes-suggestOptions-followup");
 		contextOut.setParameters(outParms);
 		// set cont.
-		output.setContextOut(contextOut);
-		
+		output.setContextOut(contextOut);*/
+		output.setSpeech(message);
+		output.setDisplayText(message);
 		return output;
 
 	}
@@ -345,8 +346,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance > noOfLeaves) {
 			log.info("req > bal");
-			if (action.equalsIgnoreCase("SUGGEST_LEAVES_OPTION")) {
-				
+			// suggestion for ol cf if present
+			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
+				message = "So you want to apply from "+startDate + " to " + endDate + "as " +comment; 
 				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
 					HashMap<String, String> holidayMap = (HashMap<String, String>) jsonDays.get("holidayTrack");
 					message += "However its, ";
@@ -357,24 +359,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					message += "shall we continue the plan ?";
 				}else{
 					message += "No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
-				}
-				
-				
-/*				if (Boolean.parseBoolean(getLeaveInfo().get("isAvailable").toString())) {
-					message += "And"+getLeaveInfo().get("message") +" Do you still want to apply privilage leave ?";
-				}*/
-			}
-			// suggestion for ol cf if present
-			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
-				/**/
-				message = "So you want to apply from "+startDate + " to " + endDate + "as " +comment; 
-				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
-					HashMap<String, String> holidayMap = (HashMap<String, String>) jsonDays.get("holidayTrack");
-					message += "However its, ";
-					for (String date : holidayMap.keySet()) {
-						String day = holidayMap.get(date).toString();
-						message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
-					}
 				}
 				message += "Should I confirm?";
 				AIOutputContext contextOut = new AIOutputContext();
@@ -614,17 +598,23 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("cal s :" + calS + " cal e: " + calE);
 
 			while (calS.compareTo(calE) != 0) {
-				if (calS.DAY_OF_WEEK != Calendar.SATURDAY || calS.DAY_OF_WEEK != Calendar.SUNDAY) {
+				if (calS.DAY_OF_WEEK != Calendar.SATURDAY){
+					if(calS.DAY_OF_WEEK != Calendar.SUNDAY) {
+				
 					days++;
 					log.info("inc date");
 					calS.add(Calendar.DATE, 1);
-					log.info("date inc : " + calS);
-				} else {
+					log.info("date inc : " + calS.DATE + " " + calS.MONTH);
+				} 
+				}else {
 					if (calS.DAY_OF_WEEK == Calendar.SATURDAY) {
 						holidayTrack.put(calS, "Saturday");
+						log.info( Calendar.SATURDAY + " : on "+calS.DATE);
 
 					} else {
 						holidayTrack.put(calS, "Sunday");
+						log.info( Calendar.SUNDAY + " : on "+calS.DATE);
+
 					}
 					isWeekEnd = true;
 				}
