@@ -48,26 +48,26 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				output = getConfirmationMessage(output, parameter);
 				break;
 			case "CONFIRM_LEAVE_APPLY":
-				log.info("intent APPLY_LEAVE_CUSTOM");
+				log.info("intent : CONFIRM_LEAVE_APPLY");
 				output = applyLeave(output, parameter);
 				break;
 			case "OPT_CUSTOM_REQ":
-				log.info("intent CONFIRM_LEAVE_YES");
+				log.info("intent: OPT_CUSTOM_REQ");
 				output = redirectToCustomApply(output, parameter);
 				break;
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
 				log.info("SYST_SUG_NOT_SATISFIED_CUST_CONFIRM");
-				output = redirectToCustomApply(output,parameter); // response if yes replan goto custom
+				output = applyLeave(output, parameter);  //APPLY LEAVE IN SYSTEM
 				break;
-		/*	case "RESTART":
-				log.info("intent : restart");
-				output = fallbackCustomApply(output, parameter);
+			case "CUSTOM_FORM_SUBMIT":
+				log.info("intent : CUSTOM_FORM_SUBMIT");
+				output =  getConfirmationMessage(output, parameter);
 				break;
-			case "EXIT":
-				log.info("exit");
-				output = exitFlow(output);
+			case "CUSTOM_FORM_SUBMIT_CONFIRM":
+				log.info("INTENT : CUSTOM_FORM_SUBMIT_CONFIRM");
+				output = applyLeave(output, parameter);
 				break;
-			case "input.welcome":
+			/*case "input.welcome":
 				log.info("input.welcome");
 				output = eventTriggered(output);
 				break;*/
@@ -216,7 +216,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		else if(leave_balance > noOfLeaves) {
 			log.info("req > bal");
-			message = "Hurry you have " + leave_balance + " leaves remaining. You can apply for leave. Shall we proceed or you have a second thought?";
+			message = "Great you have " + leave_balance + " leaves remaining. You can apply for leave. Shall I proceed ?";
 			output.setSpeech(message);
 			output.setDisplayText(message);
 		}			
