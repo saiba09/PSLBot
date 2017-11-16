@@ -11,8 +11,10 @@ public class Data {
 	@SuppressWarnings({ "unused", "deprecation", "unchecked" })
 	public static JSONObject getHolidays() {
 		// TODO Auto-generated method stub
-    	int leaveBalance = 4;
-		
+    	int leaveBalance = 5;
+		int oh = 1;
+		int ol = 0;
+		int cf = 3;
 		JSONObject responseObject = new JSONObject();
 		
 		String event_date="21/11/2017";  
@@ -26,7 +28,11 @@ public class Data {
 		holidays.put(event_date, "new year eve");
 		
 		responseObject.put("holidays", holidays);
+		responseObject.put("optional_leave", oh);
+		responseObject.put("optional_holiday", ol);
+		responseObject.put("compensatiory_off", cf);
 		responseObject.put("leave_balance", leaveBalance);
+
 		return responseObject;
 	}
 
