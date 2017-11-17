@@ -150,7 +150,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (PL < noOfLeaves ) {
-			message = "Your PL balance is less than what is you opt. for "+noOfLeaves+ "and applying for same, will need DP approval if you wish to continue.";
+			message = "Your PL balance is less than what is you opt. for "+noOfLeaves+ " days and applying for same will need DP approval,However You can take a combination of other leaves type."+
+						" Do you want to continue with privilage leaves ?";
 			/*
 			if (leave_balance >= noOfLeaves) {
 				message = "Your privillage leave balance is low, you can "; /////
@@ -336,7 +337,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject jsonDays = getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString()); 
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
-		if (leave_balance <= 0) {
+		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
 			message = "Sorry dear, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
 			// triggre dp approval inteent
@@ -344,7 +345,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
 			log.info("rerouting to event : evt trg");
 			output.setFollowupEvent(followupEvent);
-		} else if (leave_balance > noOfLeaves) {
+		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			// suggestion for ol cf if present
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
@@ -383,13 +384,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setSpeech(message);
 			output.setDisplayText(message);
 		} else {
-			message = "Your leave balance is less than :" + noOfLeaves
-					+ ". You will need Delivery partner approval if you will apply. Or dear if you say shall I apply for "
-					+ leave_balance + " days.";
-
+			message = "Your leave balance is less than : " + noOfLeaves
+					+ ". You will need Delivery partner approval if you will apply. ";
 			log.info(message);
 			output.setSpeech(message);
 			output.setDisplayText(message);
+			AIOutputContext contextOut = new AIOutputContext();
+			HashMap<String, JsonElement> outParms = parameter;
+			outParms.put("comment", new JsonPrimitive(comment));
+			contextOut.setLifespan(1);
+			contextOut.setName("system-sugestion-satisfied-no-follow-up");
+			contextOut.setParameters(outParms);
+			// set cont.
+			output.setContextOut(contextOut);
 			// IMP : set out parmas end date- diff
 		}
 		log.info(message);
