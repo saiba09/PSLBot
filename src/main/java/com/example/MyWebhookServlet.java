@@ -78,6 +78,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "LEAVE_TYPE_SELECTION":
 				log.info("intent : LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE");
+				output = getLeaveBreakup(output, parameter);
 				// message for confirmation returns leave brk up
 				break;
 			case "LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE":
@@ -87,6 +88,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				 * case "input.welcome": log.info("input.welcome"); output =
 				 * eventTriggered(output); break;
 				 */
+				break;
+			case "CONFIRM_LEAVE_APPLY":
+				log.info("intent : CONFIRM_LEAVE_APPLY");
+				output = applyLeaveWithTypes(output,parameter);
+				break;
+			case "AGAIN_SELECT_LEAVE_TYPE":
+				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
+				output = redirectToComboLeaveForm(output, parameter);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -95,6 +105,66 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment applyLeaveWithTypes(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
+		String leaveBreakUp = parameter.get("leaveBreakUp").getAsString().trim();
+		String message = "Your leaves had been applied.";
+		output.setDisplayText(message);
+		output.setSpeech(message);
+		return output;
+	}
+
+	private Fulfillment getLeaveBreakup(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		// TODO Auto-generated method stub
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
+		JSONObject data = Data.getHolidays();
+		int noPL = Integer.parseInt(parameter.get("noPL").toString().trim());
+		int noOL = Integer.parseInt(parameter.get("noOL").toString().trim());
+		int noOH = Integer.parseInt(parameter.get("noOH").toString().trim());
+		int noCF = Integer.parseInt(parameter.get("noCF").toString().trim());
+		int PL = Integer.parseInt(data.get("leave_balance").toString());
+		int OH = Integer.parseInt(data.get("optional_holiday").toString());
+		int OL = Integer.parseInt(data.get("optional_leave").toString());
+		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		String message = "";
+		JSONObject leaveJson = new JSONObject();
+		int sum = noCF+noOH+noOL+noOL;
+		int days = Integer.parseInt(getDays(startDate, endDate).get("days").toString().trim());
+		if (sum == days) {
+			//APPLY LEAVE
+			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment+" of which "; 	
+
+			if (noPL != 0 && noPL <= PL) {
+				leaveJson.put("PL", noPL);
+				message += noPL +" are privilage ";
+			}
+			if (noCF != 0 && noCF <= CF) {
+				leaveJson.put("CF", noCF);
+				message += noCF +" are comp. offs";
+			}
+			if (noOH != 0 && noOH <= OH) {
+				leaveJson.put("OH", noOH);
+				message += noOH +" are optional holiday";
+			}
+			if (noOL != 0 && noOL <= OL) {
+				leaveJson.put("OL", noOL);
+				message += noOL +" are optional leave";
+			}
+			message += "please confirm.";
+		}else{
+			//sorry someting went wrong.
+			//Go back to  
+			message = "Sorry somthing went wrong. Try again";
+		}
+		output.setDisplayText(message);
+		output.setSpeech(message);
+		return output;
 	}
 
 	private Fulfillment redirectToComboLeaveForm(Fulfillment output, HashMap<String, JsonElement> parameter) {
