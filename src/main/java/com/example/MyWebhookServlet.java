@@ -598,25 +598,30 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("cal s :" + calS + " cal e: " + calE);
 
 			while (calS.compareTo(calE) != 0) {
-				if (calS.DAY_OF_WEEK != Calendar.SATURDAY){
-					if(calS.DAY_OF_WEEK != Calendar.SUNDAY) {
 				
+				if (calS.DAY_OF_WEEK == Calendar.SATURDAY){
+					holidayTrack.put(calS, "Saturday");
+					log.info( Calendar.SATURDAY + " : on "+calS.DATE);
+				}
+				else if(calS.DAY_OF_WEEK == Calendar.SUNDAY) {
+					holidayTrack.put(calS, "Sunday");
+					log.info( Calendar.SUNDAY + " : on "+calS.DATE);
+				}else {
+					
 					days++;
 					log.info("inc date");
 					calS.add(Calendar.DATE, 1);
 					log.info("date inc : " + calS.DATE + " " + calS.MONTH);
-				} 
-				}else {
-					if (calS.DAY_OF_WEEK == Calendar.SATURDAY) {
+					/*if (calS.DAY_OF_WEEK == Calendar.SATURDAY) {
 						holidayTrack.put(calS, "Saturday");
 						log.info( Calendar.SATURDAY + " : on "+calS.DATE);
 
-					} else {
+					} else if (calS.DAY_OF_WEEK == Calendar.SUNDAY) {
 						holidayTrack.put(calS, "Sunday");
 						log.info( Calendar.SUNDAY + " : on "+calS.DATE);
 
 					}
-					isWeekEnd = true;
+					isWeekEnd = true;*/
 				}
 			}
 			days++;
