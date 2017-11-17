@@ -355,7 +355,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					HashMap<String, String> holidayMap = (HashMap<String, String>) jsonDays.get("holidayTrack");
 					log.info("holiday map fetched");
 					message += "However its, ";
-					for (String date : holidayMap.keySet()) {
+					for (Object date : holidayMap.keySet()) {
 						String day = holidayMap.get(date).toString();
 						message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
 					}
@@ -606,13 +606,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				
 				if (calS.DAY_OF_WEEK == Calendar.SATURDAY){
 					holidayTrack.put(calS, "Saturday");
-					log.info( Calendar.SATURDAY + " : on "+calS.DATE);
+					log.info( Calendar.SATURDAY + " : on "+calS.DATE + " saturday");
 					calS.add(Calendar.DATE, 1);
 					isWeekEnd = true;
 				}
 				else if(calS.DAY_OF_WEEK == Calendar.SUNDAY) {
 					holidayTrack.put(calS, "Sunday");
-					log.info( Calendar.SUNDAY + " : on "+calS.DATE);
+					log.info( Calendar.SUNDAY + " : on "+calS.DATE + " sunday");
 					calS.add(Calendar.DATE, 1);
 					isWeekEnd = true;
 
