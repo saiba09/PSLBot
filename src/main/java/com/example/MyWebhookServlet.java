@@ -232,7 +232,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String comment = parameter.get("comment").getAsString();
 		log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 		String message = "";
-		int leave_balance = Integer.parseInt(Data.getHolidays().get("PL").toString());
+		int leave_balance = Integer.parseInt(Data.getHolidays().get("leave_balance").toString());
 		// check bal if allow apply
 		JSONObject jsonDays = getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
@@ -348,7 +348,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("req > bal");
 			// suggestion for ol cf if present
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
-				message = "So you want to apply from "+startDate + " to " + endDate + "as " +comment; 
+				message = "So you want to apply from "+startDate + " to " + endDate + "as  " +comment; 
 				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
 					HashMap<String, String> holidayMap = (HashMap<String, String>) jsonDays.get("holidayTrack");
 					message += "However its, ";
@@ -356,9 +356,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 						String day = holidayMap.get(date).toString();
 						message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
 					}
-					message += "shall we continue the plan ?";
+					message += " shall we continue the plan ?";
 				}else{
-					message += "No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
+					message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
 				}
 				message += "Should I confirm?";
 				AIOutputContext contextOut = new AIOutputContext();
@@ -603,11 +603,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					holidayTrack.put(calS, "Saturday");
 					log.info( Calendar.SATURDAY + " : on "+calS.DATE);
 					calS.add(Calendar.DATE, 1);
+					isWeekEnd = true;
 				}
 				else if(calS.DAY_OF_WEEK == Calendar.SUNDAY) {
 					holidayTrack.put(calS, "Sunday");
 					log.info( Calendar.SUNDAY + " : on "+calS.DATE);
 					calS.add(Calendar.DATE, 1);
+					isWeekEnd = true;
+
 				}else {
 					
 					days++;
