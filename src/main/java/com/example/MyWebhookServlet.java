@@ -604,13 +604,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			while (calS.compareTo(calE) != 0) {
 				
-				if (calS.DAY_OF_WEEK == Calendar.SATURDAY){
+				if (calS.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
 					holidayTrack.put(calS.getTime(), "Saturday");
 					log.info( Calendar.SATURDAY + " : on "+calS.DATE + " saturday");
 					calS.add(Calendar.DATE, 1);
 					isWeekEnd = true;
 				}
-				else if(calS.DAY_OF_WEEK == Calendar.SUNDAY) {
+				else if(calS.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
 					holidayTrack.put(calS.getTime(), "Sunday");
 					log.info( Calendar.SUNDAY + " : on "+calS.DATE + " sunday");
 					calS.add(Calendar.DATE, 1);
