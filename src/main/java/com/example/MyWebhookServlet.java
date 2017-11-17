@@ -602,10 +602,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				if (calS.DAY_OF_WEEK == Calendar.SATURDAY){
 					holidayTrack.put(calS, "Saturday");
 					log.info( Calendar.SATURDAY + " : on "+calS.DATE);
+					calS.add(Calendar.DATE, 1);
 				}
 				else if(calS.DAY_OF_WEEK == Calendar.SUNDAY) {
 					holidayTrack.put(calS, "Sunday");
 					log.info( Calendar.SUNDAY + " : on "+calS.DATE);
+					calS.add(Calendar.DATE, 1);
 				}else {
 					
 					days++;
