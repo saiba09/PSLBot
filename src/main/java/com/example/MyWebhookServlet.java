@@ -99,9 +99,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment redirectToComboLeaveForm(Fulfillment output, HashMap<String, JsonElement> parameter) {
 		log.info("redirectToComboLeaveForm event trig fun");
-		String startDate = parameter.get("startDate").getAsString();
-		String endDate = parameter.get("endDate").getAsString();
-		String comment = parameter.get("comment").getAsString();
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
 		JSONObject data = Data.getHolidays();
 		int PL = Integer.parseInt(data.get("leave_balance").toString());
 		int OH = Integer.parseInt(data.get("optional_holiday").toString());
@@ -131,11 +131,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment getLeaveComboSuggestion(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String string) {
 		log.info("getLeaveComboSuggestion");
-		String startDate = parameter.get("startDate").getAsString();
-		String endDate = parameter.get("endDate").getAsString();
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = "";
 		log.info("parms :" + startDate + " " + endDate);
-		comment = parameter.get("comment").getAsString();
+		comment = parameter.get("comment").getAsString().trim();
 		log.info("comment " + comment);
 		JSONObject sugestion = Data.getHolidays();
 		String message = "";
@@ -227,9 +227,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment applyLeave(Fulfillment output, HashMap<String, JsonElement> parameter) {
 		log.info("apply leave function");
-		String startDate = parameter.get("startDate").getAsString();
-		String endDate = parameter.get("endDate").getAsString();
-		String comment = parameter.get("comment").getAsString();
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
 		log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 		String message = "";
 		int leave_balance = Integer.parseInt(Data.getHolidays().get("leave_balance").toString());
@@ -264,9 +264,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter) throws ParseException {
 		log.info("querry leave function");
-		String startDate = parameter.get("startDate").getAsString();
-		String endDate = parameter.get("endDate").getAsString();
-		String event = parameter.get("event").getAsString();
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String event = parameter.get("event").getAsString().trim();
 		log.info("parms :" + startDate + " " + endDate + " event: " + event);
 		String message = "";
 		message += " " + getLeaveInfo().get("message") + "  ";
@@ -316,18 +316,18 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter , String action) {
 		log.info("getConfirmationMessage");
-		String startDate = parameter.get("startDate").getAsString();
-		String endDate = parameter.get("endDate").getAsString();
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = "";
 		String event = "";
 		JSONObject sugestion = Data.getHolidays();
 		String message = "";
 		log.info("parms :" + startDate + " " + endDate);
 		if (parameter.containsKey("comment")) {
-			comment = parameter.get("comment").getAsString();
+			comment = parameter.get("comment").getAsString().trim();
 			log.info("comment " + comment);
 		} else {
-			event = parameter.get("event").getAsString();
+			event = parameter.get("event").getAsString().trim();
 			comment = getMessage(event);
 			log.info("event :" + event + " comment :" + comment);
 		}
@@ -348,16 +348,21 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("req > bal");
 			// suggestion for ol cf if present
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
-				message = "So you want to apply from "+startDate + " to " + endDate + "as  " +comment; 
+				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
+				message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
 				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
+					log.info("dates contains weekend in Between");
 					HashMap<String, String> holidayMap = (HashMap<String, String>) jsonDays.get("holidayTrack");
+					log.info("holiday map fetched");
 					message += "However its, ";
 					for (String date : holidayMap.keySet()) {
 						String day = holidayMap.get(date).toString();
 						message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
 					}
+					log.info("message for weekend addded");
 					message += " shall we continue the plan ?";
 				}else{
+					log.info("no weekend in between ");
 					message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
 				}
 				message += "Should I confirm?";
