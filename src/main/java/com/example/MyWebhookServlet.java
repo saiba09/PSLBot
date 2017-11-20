@@ -93,7 +93,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : CONFIRM_LEAVE_APPLY");
 				output = applyLeaveWithTypes(output,parameter);
 				break;
-			case "AGAIN_SELECT_LEAVE_TYPE":
+			case "AGAIN_SELECT_LEAVE_TYPE": 
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
 				output = redirectToComboLeaveForm(output, parameter);
 				break;
@@ -255,7 +255,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			}
 			if (OH != 0) {
-				message += OH+ " optional leave, ";
+				message += OH+ " optional holiday, ";
 			}
 			if (OL != 0) {
 				message += OL+ " optional leave.";
@@ -418,7 +418,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			// suggestion for ol cf if present
-			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
+			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES") || action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_NO")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
 				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
