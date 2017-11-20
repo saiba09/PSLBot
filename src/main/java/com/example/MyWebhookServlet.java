@@ -178,7 +178,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}else{
 			//sorry someting went wrong.
 			//Go back to  
-			message = "Sorry somthing went wrong. Try again";
+			message = "You have entered wrong combination. Try again!";
+			
 		}
 		AIOutputContext contextOut = new AIOutputContext();
 		HashMap<String, JsonElement> outParms = new HashMap<>();
@@ -749,7 +750,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					}
 					isWeekEnd = true;*/
 				}
-			}while (calS.compareTo(calE) != 0);
+			}while (calS.compareTo(calE) >= 0); 
+			
 			System.out.println("days :" + days);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
