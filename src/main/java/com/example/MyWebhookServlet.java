@@ -180,6 +180,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			//Go back to  
 			message = "Sorry somthing went wrong. Try again";
 		}
+		AIOutputContext contextOut = new AIOutputContext();
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		outParms.put("leaveBreakUp", new JsonPrimitive(leaveJson.toJSONString()));
+		contextOut.setLifespan(1);
+		contextOut.setName("allOtherPresent-followup");
+		contextOut.setParameters(outParms);
+		output.setContextOut(contextOut);
 		output.setDisplayText(message);
 		output.setSpeech(message);
 		return output;
