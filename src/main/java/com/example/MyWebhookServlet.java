@@ -750,7 +750,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					}
 					isWeekEnd = true;*/
 				}
-			}while (calS.compareTo(calE) >= 0); 
+			}while (calS.compareTo(calE) <= 0); 
 			
 			System.out.println("days :" + days);
 		} catch (ParseException e) {
