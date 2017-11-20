@@ -151,7 +151,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info(" pressent values : PL "+PL + " CF "+CF +" OH "+OH +"  OL  "+OL);
 		String message = "";
 		JSONObject leaveJson = new JSONObject();
-		int sum = noCF+noOH+noOL+noOL;
+		int sum = noCF+noOH+noOL+noPL;
 		int days = Integer.parseInt(getDays(startDate, endDate).get("days").toString().trim());
 		log.info("sum : "+ sum + " days : "+days);
 		if (sum == days) {
@@ -438,10 +438,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			
 			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
 			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
-				log.info("dates contains weekend in Between");
+				log.info(" dates contains weekend in Between");
 				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 				log.info("holiday map fetched");
-				message += "However its, ";
+				message += " However its, ";
 				for (Date date : holidayMap.keySet()) {
 					String day = holidayMap.get(date).toString();
 					message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
