@@ -53,6 +53,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				output = getLeaveComboSuggestion(output, parameter, "SUGGEST_LEAVES_OPTION"); 
 				// give suggestion for oh pl combo, calc no of days,
 				break;
+			//case not found
 			case "OPT_CUSTOM_REQ":
 				log.info("intent: OPT_CUSTOM_REQ");
 				output = redirectToCustomApply(output, parameter);
@@ -60,27 +61,34 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			case "CONFIRM_APPLY":
 				log.info("intent : CONFIRM_APPLY");
 				output = applyLeave(output, parameter);
+				break;
+			//not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
 				log.info("SYST_SUG_NOT_SATISFIED_CUST_CONFIRM");
 				output = applyLeave(output, parameter); // APPLY LEAVE IN SYSTEM
 				break;
+				
 			case "CUSTOM_FORM_SUBMIT":
 				log.info("intent : CUSTOM_FORM_SUBMIT");
 				output = getConfirmationMessage(output, parameter,"CUSTOM_FORM_SUBMIT");
 				break;
+				
 			case "APPLY_COMBO_LEAVE" :
 				log.info("intent : APPLY_COMBO_LEAVE");
 				output = redirectToComboLeaveForm(output, parameter);
 				break;
+				
 			case "CUSTOM_FORM_SUBMIT_CONFIRM":
 				log.info("INTENT : CUSTOM_FORM_SUBMIT_CONFIRM");
 				output = applyLeave(output, parameter);
 				break;
+				
 			case "LEAVE_TYPE_SELECTION":
 				log.info("intent : LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE");
 				output = getLeaveBreakup(output, parameter);
 				// message for confirmation returns leave brk up
 				break;
+			//case not found
 			case "LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE":
 				log.info("intent : LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE");
 				// apply leave
@@ -89,14 +97,17 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				 * eventTriggered(output); break;
 				 */
 				break;
+			
 			case "CONFIRM_LEAVE_APPLY":
 				log.info("intent : CONFIRM_LEAVE_APPLY");
 				output = applyLeaveWithTypes(output,parameter);
 				break;
+			
 			case "AGAIN_SELECT_LEAVE_TYPE": 
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
 				output = redirectToComboLeaveForm(output, parameter);
 				break;
+			//not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES":
 				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
 				output =  getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES"); 
@@ -132,14 +143,17 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int noOL = Integer.parseInt(parameter.get("noOL").toString().trim());
 		int noOH = Integer.parseInt(parameter.get("noOH").toString().trim());
 		int noCF = Integer.parseInt(parameter.get("noCF").toString().trim());
+		log.info("applied for : PL " + noPL + " CF "+noCF + " OH  "+ noOH + "  OL  "+noOL  );
 		int PL = Integer.parseInt(data.get("leave_balance").toString());
 		int OH = Integer.parseInt(data.get("optional_holiday").toString());
 		int OL = Integer.parseInt(data.get("optional_leave").toString());
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		log.info(" pressent values : PL "+PL + " CF "+CF +" OH "+OH +"  OL  "+OL);
 		String message = "";
 		JSONObject leaveJson = new JSONObject();
 		int sum = noCF+noOH+noOL+noOL;
 		int days = Integer.parseInt(getDays(startDate, endDate).get("days").toString().trim());
+		log.info("sum : "+ sum + " days : "+days);
 		if (sum == days) {
 			//APPLY LEAVE
 			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment+" of which "; 	
@@ -319,7 +333,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
 			log.info("rerouting to event : evt trg");
 			output.setFollowupEvent(followupEvent);
-		} else if (leave_balance > noOfLeaves) {
+		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal < no Leaves ");
 			message = "Here you go! Your leaves had been applied in the system.";
 		} else {
