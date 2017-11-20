@@ -97,6 +97,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
 				output = redirectToComboLeaveForm(output, parameter);
 				break;
+			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES":
+				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
+				output =  getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES"); 
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -417,26 +421,26 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
-			// suggestion for ol cf if present
-			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES") || action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_NO")) {
-				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
-				message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
-				if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
-					log.info("dates contains weekend in Between");
-					HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
-					log.info("holiday map fetched");
-					message += "However its, ";
-					for (Date date : holidayMap.keySet()) {
-						String day = holidayMap.get(date).toString();
-						message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
-					}
-					log.info("message for weekend addded");
-					message += " shall we continue the plan ?";
-				}else{
-					log.info("no weekend in between ");
-					message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
+			
+			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
+			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
+				log.info("dates contains weekend in Between");
+				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
+				log.info("holiday map fetched");
+				message += "However its, ";
+				for (Date date : holidayMap.keySet()) {
+					String day = holidayMap.get(date).toString();
+					message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
 				}
-				message += "Should I confirm?";
+				log.info("message for weekend addded");
+				message += " shall we continue the plan ?";
+			}else{
+				log.info("no weekend in between ");
+				message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
+			}
+			message += "Should I confirm?";
+			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
+				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("comment", new JsonPrimitive(comment));
@@ -444,11 +448,25 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				outParms.put("endDate",new JsonPrimitive(endDate));
 
 				contextOut.setLifespan(1);
-				contextOut.setName("system-sugestion-satisfied-no-follow-up");
+				contextOut.setName("system-sugestion-satisfied-yes-follow-up");
 				contextOut.setParameters(outParms);
 				// set cont.
 				output.setContextOut(contextOut);
 			}
+			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_NO")) {/*
+				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_NO");
+				AIOutputContext contextOut = new AIOutputContext();
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("comment", new JsonPrimitive(comment));
+				outParms.put("startDate",new JsonPrimitive(startDate));
+				outParms.put("endDate",new JsonPrimitive(endDate));
+
+				contextOut.setLifespan(1);
+				contextOut.setName("system-sugestion-satisfied-yes-follow-up");
+				contextOut.setParameters(outParms);
+				// set cont.
+				output.setContextOut(contextOut);
+			*/}
 			/*			
 	*/
 			output.setSpeech(message);
