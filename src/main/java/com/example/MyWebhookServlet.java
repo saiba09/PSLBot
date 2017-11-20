@@ -711,7 +711,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			calE.setTime(end);
 			log.info("cal s :" + calS + " cal e: " + calE);
 
-			while (calS.compareTo(calE) != 0) {
+			do {
 				
 				if (calS.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
 					holidayTrack.put(calS.getTime(), "Saturday");
@@ -742,8 +742,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					}
 					isWeekEnd = true;*/
 				}
-			}
-			days++;
+			}while (calS.compareTo(calE) != 0);
 			System.out.println("days :" + days);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
