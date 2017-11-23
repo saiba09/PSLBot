@@ -132,7 +132,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
 		output.setDisplayText((String) response.get("answer"));
 		output.setSpeech((String) response.get("answer"));
-		return null;
+		return output;
 	}
 
 	private Fulfillment applyLeaveWithTypes(Fulfillment output, HashMap<String, JsonElement> parameter) {
