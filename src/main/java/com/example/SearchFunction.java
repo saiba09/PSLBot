@@ -23,8 +23,10 @@ public class SearchFunction {
 		String[] inputKeywords = question.split(" ");
 		
 		//Datastore datastore = DatastoreOptions.newBuilder().setProjectId("dummyproject-05042017").build().getService();
-		String projectId = ServiceOptions.getDefaultProjectId(); // "dummyproject-05042017"
+		/*String projectId = ServiceOptions.getDefaultProjectId(); // "dummyproject-05042017"
 		Datastore datastore = DatastoreOptions.newBuilder().setProjectId(projectId).build().getService();
+		*/
+		Datastore datastore = DatastoreOptions.getDefaultInstance().getService(); 
 		Query<Entity> query = Query.newEntityQueryBuilder().setKind("LeaveInformation").build();
 		QueryResults<Entity> tasks = datastore.run(query);
 		
