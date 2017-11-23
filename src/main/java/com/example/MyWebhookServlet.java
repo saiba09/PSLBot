@@ -34,6 +34,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String action = input.getResult().getAction();
 		HashMap<String, JsonElement> parameter = input.getResult().getParameters();
 		// add constants in file
+		log.info("action : " +action);
 		try {
 			switch (action) {
 			case "QUERY_LEAVE":
