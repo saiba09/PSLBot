@@ -39,13 +39,13 @@ public class SearchFunction {
 			
 			ArrayList<String> targetKeywordsList = (ArrayList<String>) currentEntity.getProperty("keywords");
 			
-			String[] targetKeywords = (String[]) targetKeywordsList.toArray();
+			Object[] targetKeywords = targetKeywordsList.toArray();
 			
 			int count = 0;
 			for(int i=0;i<inputKeywords.length;i++){
 	            for(int j=0;j<targetKeywords.length;j++){
 	            	
-	            	String curentKeyword = targetKeywords[j];
+	            	String curentKeyword = targetKeywords[j].toString();
 	            	//System.out.println(curentKeyword.get());
 	            	
 	                if( inputKeywords[i].equalsIgnoreCase(curentKeyword) ){
