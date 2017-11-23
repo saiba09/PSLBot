@@ -3,6 +3,7 @@ package com.example;
 
 import org.json.simple.JSONObject;
 
+import com.google.cloud.ServiceOptions;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -21,7 +22,9 @@ public class SearchFunction {
 		
 		String[] inputKeywords = question.split(" ");
 		
-		Datastore datastore = DatastoreOptions.newBuilder().setProjectId("dummyproject-05042017").build().getService();
+		//Datastore datastore = DatastoreOptions.newBuilder().setProjectId("dummyproject-05042017").build().getService();
+		String projectId = ServiceOptions.getDefaultProjectId(); // "dummyproject-05042017"
+		Datastore datastore = DatastoreOptions.newBuilder().setProjectId(projectId).build().getService();
 		Query<Entity> query = Query.newEntityQueryBuilder().setKind("LeaveInformation").build();
 		QueryResults<Entity> tasks = datastore.run(query);
 		
