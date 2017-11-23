@@ -112,7 +112,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
 				output =  getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES"); 
 				break;
-			case "FALLABCK":
+			case "FALLBACK":
 				log.info("intent : fallback");
 				output = getFallBackResponse(output,input);
 				break;
@@ -130,6 +130,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		// TODO Auto-generated method stub
 		String question = input.getResult().getResolvedQuery();
 		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
+		log.info(response.toJSONString());
 		output.setDisplayText((String) response.get("answer"));
 		output.setSpeech((String) response.get("answer"));
 		return output;
