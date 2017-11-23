@@ -1,15 +1,17 @@
 package com.example;
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.json.simple.JSONObject;
 
-import com.google.cloud.ServiceOptions;
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StringValue;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+
 
 
 public class SearchFunction {
@@ -21,31 +23,32 @@ public class SearchFunction {
 		JSONObject result = new JSONObject();
 		
 		String[] inputKeywords = question.split(" ");
+
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
-		//Datastore datastore = DatastoreOptions.newBuilder().setProjectId("dummyproject-05042017").build().getService();
-		/*String projectId = ServiceOptions.getDefaultProjectId(); // "dummyproject-05042017"
-		Datastore datastore = DatastoreOptions.newBuilder().setProjectId(projectId).build().getService();
-		*/
-		Datastore datastore = DatastoreOptions.getDefaultInstance().getService(); 
-		Query<Entity> query = Query.newEntityQueryBuilder().setKind("LeaveInformation").build();
-		QueryResults<Entity> tasks = datastore.run(query);
+		Query q = new Query("LeaveInformation");
+		PreparedQuery pq = datastore.prepare(q);
+		
+		Iterator<Entity> iterator = pq.asIterator();
 		
 		int resultCount = 0;
 
-		while(tasks.hasNext()){	
-			Entity currentEntity = tasks.next();
-			//System.out.println(currentEntity.getList("keywords").toString());
+		while(iterator.hasNext()){
+			Entity currentEntity = iterator.next();
 			
-			Object[] targetKeywords = currentEntity.getList("keywords").toArray();
+			ArrayList<String> targetKeywordsList = (ArrayList<String>) currentEntity.getProperty("keywords");
+			
+			String[] targetKeywords = (String[]) targetKeywordsList.toArray();
 			
 			int count = 0;
 			for(int i=0;i<inputKeywords.length;i++){
 	            for(int j=0;j<targetKeywords.length;j++){
 	            	
-	            	StringValue curentKeyword = (StringValue)targetKeywords[j];
+	            	String curentKeyword = targetKeywords[j];
 	            	//System.out.println(curentKeyword.get());
 	            	
-	                if( inputKeywords[i].equalsIgnoreCase(curentKeyword.get()) ){
+	                if( inputKeywords[i].equalsIgnoreCase(curentKeyword) ){
 	                    count++;
 	                }
 	            }
@@ -53,8 +56,8 @@ public class SearchFunction {
 			
 			if(count > resultCount){
 				try {
-					result.put("answer", currentEntity.getString("answer"));
-					result.put("question", currentEntity.getString("question"));
+					result.put("answer", currentEntity.getProperty("answer").toString());
+					result.put("question", currentEntity.getProperty("question").toString());
 					resultCount = count;
 				} catch (Exception e) {
 					System.err.println("ERROR : "+e);
