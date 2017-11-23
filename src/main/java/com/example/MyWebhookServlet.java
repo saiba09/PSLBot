@@ -112,6 +112,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
 				output =  getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES"); 
 				break;
+			case "FALLABCK":
+				log.info("intent : fallback");
+				output = getFallBackResponse(output,input);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -120,6 +124,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getFallBackResponse(Fulfillment output, AIWebhookRequest input) {
+		// TODO Auto-generated method stub
+		String question = input.getResult().getResolvedQuery();
+		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
+		output.setDisplayText((String) response.get("answer"));
+		output.setSpeech((String) response.get("answer"));
+		return null;
 	}
 
 	private Fulfillment applyLeaveWithTypes(Fulfillment output, HashMap<String, JsonElement> parameter) {
@@ -156,7 +169,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("sum : "+ sum + " days : "+days);
 		if (sum == days) {
 			//APPLY LEAVE
-			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment+" of which "; 	
+			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + " as " +comment+" of which "; 	
 
 			if (noPL != 0 && noPL <= PL) {
 				leaveJson.put("PL", noPL);
@@ -174,7 +187,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				leaveJson.put("OL", noOL);
 				message += noOL +" are optional leave";
 			}
-			message += "please confirm.";
+			message += " Please confirm.";
 		}else{
 			//sorry someting went wrong.
 			//Go back to  
