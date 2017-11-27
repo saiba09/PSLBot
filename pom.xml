@@ -6,11 +6,12 @@
   <artifactId>persistent-webhook</artifactId>
   
 <dependencies>
-<dependency>
+	<!-- <dependency>
 	  <groupId>com.google.cloud</groupId>
 	  <artifactId>google-cloud-datastore</artifactId>
 	  <version>1.12.0</version>
 	</dependency> 
+   -->
   <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
@@ -27,6 +28,12 @@
     <artifactId>libai-web-servlet</artifactId>
     <version>1.6.12</version>
 	</dependency>
+	
+	<dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
+      <version>1.9.53</version>
+  </dependency>
   </dependencies>
   <build>
     <!-- for hot reload of the web application -->
