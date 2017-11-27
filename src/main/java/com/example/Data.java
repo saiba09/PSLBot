@@ -28,7 +28,7 @@ public class Data {
 		int cf = Integer.parseInt(employeeDetails.get("CompensatoryOff ").toString().trim()); 
 		JSONObject responseObject = new JSONObject();
 		
-		String event_date="21/11/2017";  
+		String event_date= employeeDetails.get("DateOfBirth").toString();  
 		responseObject.put("birthday", event_date);
 		
 		JSONObject holidays = new JSONObject();

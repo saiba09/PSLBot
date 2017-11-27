@@ -705,10 +705,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		try {
 			Date today = new SimpleDateFormat("dd/MM/yyyy")
 					.parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
-			String date2 = "31/01/2018";
+			String date2 = "31/04/2018";
 			Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
 			log.info("method returns");
-			return testDate.before(today) || testDate.after(today);
+			return testDate.after(today) || testDate.before(last);
 		} catch (Exception e) {
 			log.severe("exception " + e);
 		}
