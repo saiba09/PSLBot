@@ -18,7 +18,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 import ai.api.model.AIEvent;
-
 import ai.api.model.AIOutputContext;
 import ai.api.model.Fulfillment;
 import ai.api.web.AIWebhookServlet;
@@ -115,6 +114,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
 				output =  getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES" ,sessionId); 
 				break;
+			case "GET_LEAVE_BALANCE":
+				log.info("intent : getLeaveBalance");
+				output = getLeaveBalance(output, parameter, sessionId);
+				break;
 			case "FALLBACK":
 				log.info("intent : fallback");
 				output = getFallBackResponse(output,input);
@@ -127,6 +130,20 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getLeaveBalance(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
+		
+		JSONObject employeeData =  Data.getHolidays(sessionId);
+		int PL = Integer.parseInt(employeeData.get("privillage_leave").toString());
+		int OH = Integer.parseInt(employeeData.get("optional_holiday").toString());
+		int OL = Integer.parseInt(employeeData.get("optional_leave").toString());
+		int CF = Integer.parseInt(employeeData.get("compensatiory_off").toString());
+
+		output.setDisplayText("You have "+PL+" PL, "+OL+" OL, "+OH+" OH and "+CF+" Comp. Off"+" #false");
+		output.setSpeech("You have "+PL+" PL, "+OL+" OL, "+OH+" OH and "+CF+" Comp. Off"+" #false");
+		
+		return output;
 	}
 
 	private Fulfillment getFallBackResponse(Fulfillment output, AIWebhookRequest input) {
