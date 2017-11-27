@@ -132,8 +132,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String question = input.getResult().getResolvedQuery();
 		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
 		log.info(response.toJSONString());
-		output.setDisplayText((String) response.get("answer"));
-		output.setSpeech((String) response.get("answer"));
+		String answer = (String) response.get("answer") + "#false";
+		output.setDisplayText(answer);
+		output.setSpeech(answer);
 		return output;
 	}
 
@@ -142,7 +143,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveBreakUp = parameter.get("leaveBreakUp").getAsString().trim();
-		String message = "Your leaves had been applied.";
+		String message = "Your leaves had been applied.#false";
 		output.setDisplayText(message);
 		output.setSpeech(message);
 		return output;
@@ -179,15 +180,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			if (noCF != 0 && noCF <= CF) {
 				leaveJson.put("CF", noCF);
-				message += noCF +" are comp. offs";
+				message += noCF +" are comp. offs ";
 			}
 			if (noOH != 0 && noOH <= OH) {
 				leaveJson.put("OH", noOH);
-				message += noOH +" are optional holiday";
+				message += noOH +" are optional holiday ";
 			}
 			if (noOL != 0 && noOL <= OL) {
 				leaveJson.put("OL", noOL);
-				message += noOL +" are optional leave";
+				message += noOL +" are optional leave ";
 			}
 			message += " Please confirm.";
 		}else{
@@ -369,6 +370,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		// else abort
 		log.info(message);
+		message += "#false";
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
@@ -403,7 +405,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					output.setContextOut(contextOut);
 				} else {
 					log.info("already had an event");
-					message += "you have sufficient leave balance. apply";
+					message += "You have sufficient leave balance. apply";
 					// triggre event
 					log.info("redirectToCustomApply event trig fun");
 					AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
@@ -459,7 +461,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			
-			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + "as  " +comment; 
+			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + " as  " +comment; 
 			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
 				log.info(" dates contains weekend in Between");
 				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
@@ -475,7 +477,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("no weekend in between ");
 				message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
 			}
-			message += "Should I confirm?";
+			message += " Should I confirm?";
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				AIOutputContext contextOut = new AIOutputContext();
@@ -547,7 +549,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (isEventWithinRange(birthday)) {
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(birthday);
-				msg = "And! Its your birthday on " + new SimpleDateFormat("MMM d").format(birthday)
+				msg = " And! Its your birthday on " + new SimpleDateFormat("MMM d").format(birthday)
 						+ ". Want to go out??";
 				event = "birthday";
 				check = true;
@@ -666,11 +668,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					log.info("no oh");
 					if (OL <= 0) {
 						log.info("no OL");
-						message = "Buddy! you have " + PL + "previlage leave with you."
+						message = "Buddy! you have " + PL + " previlage leave with you."
 								+ "But I would suggest you should take compensatiory leaves as you have " + CF
 								+ " comp. off available Do consume it, I know you don't wanna lose them.";
 					} else {
-						message = "Buddy! you have " + PL + "previlage leave with you."
+						message = "Buddy! you have " + PL + " previlage leave with you."
 								+ "But I would suggest you should take compensatiory leaves as you have " + CF
 								+ " comp. off available. However you can also opt for optional leave as you have " + OL
 								+ " optional leave available.Do consume it, I know you don't wanna lose them.";
@@ -678,7 +680,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				} else {
 					if (OL <= 0) {
 						log.info("no OL");
-						message = "Buddy! you have " + PL + "previlage leave with you."
+						message = "Buddy! you have " + PL + " previlage leave with you."
 								+ "But I would suggest you should take compensatiory leaves as you have " + CF
 								+ " comp. off available. However you can also opt for optional leave as you have " + OL
 								+ " optional leave available.Do consume it, I know you don't wanna lose them.";
