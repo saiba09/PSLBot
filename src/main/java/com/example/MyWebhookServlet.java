@@ -584,10 +584,16 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private static JSONObject getLeaveInfo(String sessionId) {
 		String message = "";
 		JSONObject data = Data.getHolidays(sessionId);
+		
+		log.info("data : "+data.toJSONString());
+		
 		int PL = Integer.parseInt(data.get("privillage_leave").toString());
 		int OH = Integer.parseInt(data.get("optional_holiday").toString());
 		int OL = Integer.parseInt(data.get("optional_leave").toString());
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		
+		log.info("recieved leaves");
+		
 		boolean isAvailable = false;
 		int count = PL + CF + OH + OL;
 		JSONObject response = new JSONObject();
