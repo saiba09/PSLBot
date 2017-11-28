@@ -48,7 +48,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "SYSTEM_SUGESTION_SATISFIED_NO":
 				log.info("intent : SYSTEM_SUGESTION_SATISFIED_NO");
-				output = getConfirmationMessage(output, parameter, "SYSTEM_SUGESTION_SATISFIED_NO",sessionId);
+				//output = getConfirmationMessage(output, parameter, "SYSTEM_SUGESTION_SATISFIED_NO",sessionId);
+				output = exitFlow(output);
 				break;
 			case "SUGGEST_LEAVES_OPTION":
 				log.info("intent : SUGGEST_LEAVES_OPTION");
@@ -345,8 +346,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment exitFlow(Fulfillment output) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Auto-generated method stub TERMINATE
+		log.info("redirectToCustomApply event trig fun");
+		AIEvent followupEvent = new AIEvent("TERMINATE");
+		log.info("rerouting to event TERMINATE: evt trg");
+		output.setFollowupEvent(followupEvent);
+		return output;
+		
 	}
 
 	private Fulfillment redirectToCustomApply(Fulfillment output, HashMap<String, JsonElement> parameter) {
