@@ -403,7 +403,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String event = parameter.get("event").getAsString().trim();
 		log.info("parms :" + startDate + " " + endDate + " event: " + event);
 		String message = "";
-		message += " " + getLeaveInfo(sessionId).get("message") + "  ";
+		//message += " " + getLeaveInfo(sessionId).get("message") + "  ";
 		JSONObject sugestion = Suggest(parameter, sessionId);
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		if (leave_balance > 0) {
