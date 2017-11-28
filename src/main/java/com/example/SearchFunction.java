@@ -22,6 +22,8 @@ public class SearchFunction {
 		
 		JSONObject result = new JSONObject();
 		
+		
+		
 		String[] inputKeywords = question.split(" ");
 
 

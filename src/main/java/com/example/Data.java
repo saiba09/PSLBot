@@ -22,13 +22,13 @@ public class Data {
 		
 		JSONObject employeeDetails = getResponseFromAPI(userName);
 		
-    	int privillage_leave = Integer.parseInt(employeeDetails.get("PrivilegedLeave ").toString().trim()); 
+    	int privillage_leave = Integer.parseInt(employeeDetails.get("PrivilegedLeave").toString().trim()); 
 		int oh = Integer.parseInt(employeeDetails.get("OptionalHoliday").toString().trim()); 
 		int ol = Integer.parseInt(employeeDetails.get("OptionalLeave").toString().trim()); 
-		int cf = Integer.parseInt(employeeDetails.get("CompensatoryOff ").toString().trim()); 
+		int cf = Integer.parseInt(employeeDetails.get("CompensatoryOff").toString().trim()); 
 		JSONObject responseObject = new JSONObject();
 		
-		String event_date="21/11/2017";  
+		String event_date= employeeDetails.get("DateOfBirth").toString();  
 		responseObject.put("birthday", event_date);
 		
 		JSONObject holidays = new JSONObject();
