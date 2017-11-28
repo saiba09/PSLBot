@@ -1,4 +1,4 @@
-package com.example;
+ package com.example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -414,7 +414,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		if (leave_balance > 0) {
 			if (event.isEmpty() && startDate.isEmpty() && endDate.isEmpty()) {
-				message += "You have "+leave_balance+" Leave balance, shall we proceed?";
+				//message += "You have "+leave_balance+" Leave balance, shall we proceed?";
+				message += "You have sufficient leave balance, shall we proceed?";
 			}
 			else {
 				log.info("redirect to event without asking dates event trig fun");
