@@ -508,12 +508,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			
-			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + " as  " +comment; 
+			message = "So you want to apply from "+startDate.toString() + " to " + endDate.toString() + " as  " +comment+"."; 
 			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
 				log.info(" dates contains weekend in Between");
 				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 				log.info("holiday map fetched");
-				message += " However its, ";
+				message += "However its,";
 				for (Date date : holidayMap.keySet()) {
 					String day = holidayMap.get(date).toString();
 					message += "  " +day+" on "+new SimpleDateFormat("MMM d").format(date);
