@@ -140,8 +140,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int OL = Integer.parseInt(employeeData.get("optional_leave").toString());
 		int CF = Integer.parseInt(employeeData.get("compensatiory_off").toString());
 
-		output.setDisplayText("You have "+PL+" PL, "+OL+" OL, "+OH+" OH and "+CF+" Comp. Off"+" #false");
-		output.setSpeech("You have "+PL+" PL, "+OL+" OL, "+OH+" OH and "+CF+" Comp. Off"+" #false");
+		output.setDisplayText("You have "+PL+" privileged leave, "+OL+" optional leave, "+OH+" optional holiday and "+CF+" compensatory Off"+" #false");
+		output.setSpeech("You have "+PL+" privileged leave, "+OL+" optional leave, "+OH+" optional holiday and "+CF+" compensatory Off"+" #false");
 		
 		return output;
 	}
@@ -195,11 +195,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			if (noPL != 0 && noPL <= PL) {
 				leaveJson.put("PL", noPL);
-				message += noPL +" are privilage ";
+				message += noPL +" are privileged leave";
 			}
 			if (noCF != 0 && noCF <= CF) {
 				leaveJson.put("CF", noCF);
-				message += noCF +" are comp. offs ";
+				message += noCF +" are compensatory offs ";
 			}
 			if (noOH != 0 && noOH <= OH) {
 				leaveJson.put("OH", noOH);
@@ -281,7 +281,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (PL < noOfLeaves ) {
-			message = "Your PL balance is less than what is you opt. for "+noOfLeaves+ " days and applying for same will need DP approval,However You can take a combination of other leaves type."+
+			message = "Your privileged leave balance is less than what is you opt. for "+noOfLeaves+ " days and applying for same will need DP approval,However You can take a combination of other leaves type."+
 						" Do you want to continue with privilage leaves?";
 			/*
 			if (leave_balance >= noOfLeaves) {
@@ -312,7 +312,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += "You also have ";
 			}
 			if (CF != 0) {
-				message += CF+" comp. off, ";
+				message += CF+" compensatory off, ";
 
 			}
 			if (OH != 0) {
@@ -323,7 +323,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			if (CF != 0 || OH != 0 || OL != 0) {
 			//	message += "Do you still want to apply for privilage leave ? Don't forget these leaves won't carry forward.";
-				message += "Do you still want to apply for privilage leave?.";
+				message += "Do you still want to apply for privilaged leave?.";
 			}
 		}
 		log.info(message);
@@ -371,7 +371,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		if (leave_balance <= 0) {
 			log.info("bal < 0");
-			message = "Sorry dear, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
+			message = "Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
 			// Trigger dp approval intent
 			log.info("DP APPROVAL REQ event trig ");
 			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
@@ -407,6 +407,25 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject sugestion = Suggest(parameter, sessionId);
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		if (leave_balance > 0) {
+			if (event.isEmpty() && startDate.isEmpty() && endDate.isEmpty()) {
+				message += "You have "+leave_balance+" Leave balance, shall we proceed?";
+			}
+			else {
+				log.info("redirect to event without asking dates event trig fun");
+				AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
+				log.info("rerouting to event : evt trg");
+				output.setFollowupEvent(followupEvent);
+				}
+			}
+		else{
+			//message = "Your l You will need Delivery partner approval.";
+			// set event trigg.
+			log.info("DP APPROVAL REQ event trig ");
+			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+			log.info("rerouting to event : evt trg");
+			output.setFollowupEvent(followupEvent);
+		}
+			/*
 			if (Boolean.parseBoolean(sugestion.get("present").toString())) {
 				log.info("do have a suggestion");
 				if (event.isEmpty()) {
@@ -441,7 +460,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);
 			}
-		}
+		*/
+			
+		
 		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
@@ -472,7 +493,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
-			message = "Sorry dear, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
+			message = "Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
 			// triggre dp approval inteent
 			log.info("DP APPROVAL REQ event trig ");
 			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
@@ -495,7 +516,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += " shall we continue the plan ?";
 			}else{
 				log.info("no weekend in between ");
-				message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
+				//message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
 			}
 			message += " Should I confirm?";
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
