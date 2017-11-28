@@ -265,7 +265,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (PL < noOfLeaves ) {
 			message = "Your PL balance is less than what is you opt. for "+noOfLeaves+ " days and applying for same will need DP approval,However You can take a combination of other leaves type."+
-						" Do you want to continue with privilage leaves ?";
+						" Do you want to continue with privilage leaves?";
 			/*
 			if (leave_balance >= noOfLeaves) {
 				message = "Your privillage leave balance is low, you can "; /////
@@ -305,7 +305,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += OL+ " optional leave.";
 			}
 			if (CF != 0 || OH != 0 || OL != 0) {
-				message += "Do you still want to apply for privilage leave ? Don't forget these leaves won't carry forward.";
+			//	message += "Do you still want to apply for privilage leave ? Don't forget these leaves won't carry forward.";
+				message += "Do you still want to apply for privilage leave?.";
 			}
 		}
 		log.info(message);
