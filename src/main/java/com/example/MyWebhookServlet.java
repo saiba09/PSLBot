@@ -245,8 +245,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setSpeech(message);
 		}else{
 			log.info("redirect to DP Approval event trig fun");
-			AIEvent followupEvent = new AIEvent("TERMINATE");
-			log.info("rerouting to event TERMINATE: evt trg");
+			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+			log.info("rerouting to event DP_APPROVAL: evt trg");
 			output.setFollowupEvent(followupEvent);
 		}
 		/*
