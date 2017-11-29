@@ -21,7 +21,7 @@ public class SearchFunction {
 		System.out.println("Searching for similar questions in knowledge base");
 		
 		JSONObject result = new JSONObject();
-		result.put("answer","I Missed it, Say that again!");
+		result.put("answer","I Missed it, Say that again! #true");
 		
 		String[] inputKeywords = question.split(" ");
 
@@ -57,7 +57,7 @@ public class SearchFunction {
 			
 			if(count > resultCount){
 				try {
-					result.put("answer", currentEntity.getProperty("answer").toString());
+					result.put("answer", currentEntity.getProperty("answer").toString() + "#false" );
 					result.put("question", currentEntity.getProperty("question").toString());
 					resultCount = count;
 				} catch (Exception e) {
