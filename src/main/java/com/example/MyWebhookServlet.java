@@ -186,6 +186,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String leaveType = parameter.get("leaveType").getAsString().trim();
 		String leave = parameter.get("noOfLeave").getAsString().trim();
 		log.info(leave + " no of leaves");
+		leave = leave.substring(0, leave.indexOf("."));
+		log.info("leave post sub string :"+leave);
 		int noOfLeave = Integer.parseInt(leave.trim());
 		JSONObject data = Data.getHolidays(sessionId);
 		/*
