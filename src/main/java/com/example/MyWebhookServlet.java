@@ -466,10 +466,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				outParms.put("comment", new JsonPrimitive(event));
 				outParms.put("startDate", new JsonPrimitive(startDate));
 				outParms.put("endDate", new JsonPrimitive(endDate));
-				
 				contextOut.setLifespan(1);
 				contextOut.setName("leaveParms");
 				contextOut.setParameters(outParms);
+				output.setContextOut(contextOut);
 			}
 		} else {
 			// message = "Your l You will need Delivery partner approval.";
