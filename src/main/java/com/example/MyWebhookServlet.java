@@ -148,7 +148,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment getFallBackResponse(Fulfillment output, AIWebhookRequest input) {
-		// TODO Auto-generated method stub
+		
 		String question = input.getResult().getResolvedQuery();
 		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
 		log.info(response.toJSONString());
@@ -522,10 +522,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("message for weekend addded");
 				message += " Shall we continue the plan?";
 			}else{
-				log.info("no weekend in between ");
+				log.info("no weekend in between ");	
+				message += " Should I confirm?";
 				//message += " No weekends or holidays in between. Are you sure you wanna plan this vaccation ?";
 			}
-			message += " Should I confirm?";
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				AIOutputContext contextOut = new AIOutputContext();

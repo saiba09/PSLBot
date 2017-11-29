@@ -21,8 +21,7 @@ public class SearchFunction {
 		System.out.println("Searching for similar questions in knowledge base");
 		
 		JSONObject result = new JSONObject();
-		
-		
+		result.put("answer","I Missed it, Say that again!");
 		
 		String[] inputKeywords = question.split(" ");
 
