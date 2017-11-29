@@ -461,6 +461,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);
+				AIOutputContext contextOut = new AIOutputContext();
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("comment", new JsonPrimitive(event));
+				outParms.put("startDate", new JsonPrimitive(startDate));
+				outParms.put("endDate", new JsonPrimitive(endDate));
+				
+				contextOut.setLifespan(1);
+				contextOut.setName("leaveParms");
+				contextOut.setParameters(outParms);
 			}
 		} else {
 			// message = "Your l You will need Delivery partner approval.";
