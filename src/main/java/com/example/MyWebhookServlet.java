@@ -280,7 +280,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int OL = Integer.parseInt(data.get("optional_leave").toString());
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
 		int noOfLeave = Integer.parseInt(getDays(startDate, endDate).get("days").toString().trim());
-
+		log.info("no of leaves: "+ noOfLeave+ " triggering event combo leave");
 		AIEvent followupEvent = new AIEvent("CUSTOMIZE_LEAVE_TYPE");
 		log.info("re-routing to event : evt trg");
 		output.setFollowupEvent(followupEvent);
