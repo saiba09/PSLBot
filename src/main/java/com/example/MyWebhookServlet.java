@@ -92,7 +92,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 
 			case "LEAVE_TYPE_SELECTION":
-				log.info("intent : LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE");
+				log.info("intent : LEAVE_TYPE_SELECTION");
 				output = getLeaveBreakup(output, parameter, sessionId);
 				// message for confirmation returns leave brk up
 				break;
@@ -179,11 +179,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment getLeaveBreakup(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
 		// TODO Auto-generated method stub
+		log.info("getLeavebreakup");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveType = parameter.get("leaveType").getAsString().trim();
-		int noOfLeave = Integer.parseInt(parameter.get("noOfLeave").toString().trim());
+		int noOfLeave = Integer.parseInt(parameter.get("noOfLeave").getAsString().trim());
 		JSONObject data = Data.getHolidays(sessionId);
 		/*
 		 * int noPL = Integer.parseInt(parameter.get("noPL").toString().trim());
