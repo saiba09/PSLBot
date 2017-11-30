@@ -546,7 +546,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
 				if (leave_balance > 0) {
 					if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty() ) {
-11
+
 						log.info("redirect to event without asking dates event trig fun");
 						AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
 						log.info("rerouting to event : evt trg");
