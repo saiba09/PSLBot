@@ -1,15 +1,24 @@
 package com.example;
 
+import static org.hamcrest.CoreMatchers.is;
+
+import java.sql.Array;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Iterator;
 import java.util.logging.Logger;
+
+import javax.xml.stream.events.StartDocument;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,6 +27,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.util.PropertyLoader;
 
 import ai.api.model.AIEvent;
 import ai.api.model.AIOutputContext;
@@ -125,6 +135,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : fallback");
 				output = getFallBackResponse(output, input);
 				break;
+			case "FAQ":
+			log.info("intent : FAQ");
+			output = getFallBackResponse(output, input);
+			break; 
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -448,8 +462,39 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
-			message += " You want to apply leave on "+startDate+" as its "+event;
-			
+		    comment = parameter.get("comment").getAsString().trim();
+			JSONObject responseMessageObject = getMessageForFestival( event ,  startDate, comment);
+			Boolean isHoliday = Boolean.parseBoolean(responseMessageObject.get("isHoliday").toString());
+			Boolean isFestival = Boolean.parseBoolean(responseMessageObject.get("isFestival").toString());
+			Boolean isOneDay = Boolean.parseBoolean(responseMessageObject.get("isOnDay").toString());
+			message += responseMessageObject.get("message").toString();
+			//isHoliday no long weekend || if isfestival no long weekend || with long weekend ==>> same intent yes/No || set a boolean isHoliday
+			if (leave_balance <= 0 && !isHoliday) {
+				message += "You have insufficient leave balance" ;
+				log.info("DP APPROVAL REQ event trig ");
+				AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+				log.info("rerouting to event : evt trg");
+				output.setFollowupEvent(followupEvent);	
+			}
+			else if (isFestival || isHoliday || isOneDay) {
+				AIOutputContext contextOut = new AIOutputContext();
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("comment", new JsonPrimitive(comment));
+				outParms.put("startDate", new JsonPrimitive(startDate));
+				outParms.put("endDate", new JsonPrimitive(startDate));
+				outParms.put("isHoliday",new JsonPrimitive( isHoliday));
+				outParms.put("isFestival",new JsonPrimitive( isFestival));
+				outParms.put("isOneDay",new JsonPrimitive( isOneDay));
+
+				contextOut.setLifespan(1);
+				contextOut.setName("oneDayLeaveFollowup");
+				contextOut.setParameters(outParms);
+				output.setContextOut(contextOut);
+			}
+			//if is oneday go to SUGGEST_lEAVES_OPTION
+			else if (isOneDay) {
+				
+			}
 			
 		}
 		if (action.equals("QUERY_LEAVE")) {
@@ -499,7 +544,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 		
 		// message += " " + getLeaveInfo(sessionId).get("message") + " ";
-		JSONObject sugestion = Suggest(parameter, sessionId);
+		//JSONObject sugestion = Suggest(parameter, sessionId);
 		
 		
 		/*
@@ -532,6 +577,65 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
+	}
+
+	private JSONObject getMessageForFestival(String event, String date,String comment) {
+		// TODO Auto-generated method stub
+		JSONObject response = new JSONObject();
+		String longVaccSugestion = "";
+		String message = "";
+		Boolean isHoliday = false;
+		Boolean isOneDay = false;
+		Boolean isFestival = false;
+		try {
+			String holidays = PropertyLoader.getList("INDIA_HOLIDAY");
+			String[] arrayHolidays = holidays.split(",");
+			List<String> listOfHoliday = Arrays.asList(arrayHolidays);
+			for (String holiday : listOfHoliday) {
+				if (holiday.equalsIgnoreCase(event)) {
+					message += "Its holiday on "+ date +" for "+event+".";
+					longVaccSugestion +="Do you want to make it a long vaccation?";
+					isHoliday = true;
+					isFestival = true;
+					break;
+				}
+			}
+			String festivals = PropertyLoader.getList("INDIA_OCCASSION");
+			String[] arrayFestivals = festivals.split(",");
+			List<String> listOfFestival = Arrays.asList(arrayFestivals);
+			for (String festival : listOfFestival) {
+				if (festival.equalsIgnoreCase(event)) {
+					message += "Oh! Great so you want to apply leave for "+event+" on "+date;
+					isFestival = true;
+					break;
+				}
+			}
+			if (! isFestival) {
+				message += "You want to apply leave on "+date;
+				if (event.equalsIgnoreCase("today")) {
+					comment += " as you are "+comment;
+					isOneDay = true;
+					
+				}
+				if (event.equalsIgnoreCase("tomorrow")) {
+					comment += "as you was "+comment;
+					isOneDay = true;
+				}
+				
+			}
+			message += "Please Confirm";
+			
+			response.put("message", message);
+			response.put("isFestival", isFestival);
+			response.put("isOneDay", isOneDay);
+			response.put("isHoliday", isHoliday);
+			response.put("longVaccationSugestion", longVaccSugestion);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return response;
 	}
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
