@@ -16,11 +16,13 @@ import org.json.simple.parser.JSONParser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import ai.api.model.AIEvent;
 import ai.api.model.AIOutputContext;
 import ai.api.model.Fulfillment;
+import ai.api.model.Result;
 import ai.api.web.AIWebhookServlet;
 
 // [START example]
@@ -452,13 +454,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
 			
-			OriginalRequest context = input.getOriginalRequest();
-			log.info("original request : "+context);
-			Map<String, ?> dataMap = context.getData();
-			for (String key : dataMap.keySet()) {
-				log.info("key : "+ key);
-				log.info("key : "+key + " value : "+dataMap.get(key));
-			}
+			Result result = input.getResult();
+			log.info("original request : "+result);
+			List<AIOutputContext> context =  result.getContexts();
+			AIOutputContext con = context.get(0);
+			Map<String, JsonElement> contextObj = con.getParameters();
+			log.info("original Date " + contextObj.get("date.original") );
+			
 			
 		}
 		if (action.equals("QUERY_LEAVE")) {
