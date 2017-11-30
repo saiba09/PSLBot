@@ -72,9 +72,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
 				log.info("SYST_SUG_NOT_SATISFIED_CUST_CONFIRM");
-				output = applyLeave(output, parameter, sessionId); // APPLY
-																	// LEAVE IN
-																	// SYSTEM
+				output = applyLeave(output, parameter, sessionId); 
 				break;
 
 			case "CUSTOM_FORM_SUBMIT":
@@ -101,11 +99,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			case "ONE_DAY_LEAVE":
 				log.info("intent : ONE_DAY_LEAVE");
 				output = queryLeave(output, parameter, sessionId, action, input);
-				// apply leave
-				/*
-				 * case "input.welcome": log.info("input.welcome"); output =
-				 * eventTriggered(output); break;
-				 */
+		
 				break;
 
 			case "CONFIRM_LEAVE_APPLY":
@@ -457,6 +451,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			Result result = input.getResult();
 			log.info("original request : "+result);
 			List<AIOutputContext> context =  result.getContexts();
+			log.info(" parms resv query : "+ result.getResolvedQuery());
+			log.info("  source "+ result.getSource());
+		log.info(" complex Parms date " +	result.getComplexParameter("date").toString());
+			log.info("size :" + context.size()); 
 			AIOutputContext con = context.get(0);
 			Map<String, JsonElement> contextObj = con.getParameters();
 			log.info("original Date " + contextObj.get("date.original") );
