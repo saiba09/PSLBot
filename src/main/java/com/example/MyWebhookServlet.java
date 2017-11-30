@@ -452,11 +452,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject sugestion = Suggest(parameter, sessionId);
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		if (leave_balance > 0) {
-			if (event.isEmpty() && startDate.isEmpty() && endDate.isEmpty()) {
+			if (event.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
 				// message += "You have "+leave_balance+" Leave balance, shall
 				// we proceed?";
-				message += "You have sufficient leave balance, shall we proceed?";
-			} else {
 				log.info("redirect to event without asking dates event trig fun");
 				AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
 				log.info("rerouting to event : evt trg");
@@ -470,6 +468,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setName("leaveParms");
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
+			} else {
+				
+				message += "You have sufficient leave balance, shall we proceed?";
+				
 			}
 		} else {
 			// message = "Your l You will need Delivery partner approval.";
