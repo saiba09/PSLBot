@@ -451,9 +451,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (action.equals("ONE_DAY_LEAVE")) {
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
+			
 			OriginalRequest context = input.getOriginalRequest();
+			log.info("original request : "+context);
 			Map<String, ?> dataMap = context.getData();
 			for (String key : dataMap.keySet()) {
+				log.info("key : "+ key);
 				log.info("key : "+key + " value : "+dataMap.get(key));
 			}
 			
