@@ -489,7 +489,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setName("oneDayLeaveFollowup");
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
-				message += responseMessageObject.get("longVaccationSugestion").toString(); 343
+				message += responseMessageObject.get("longVaccationSugestion").toString(); 
 			}
 			//if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
