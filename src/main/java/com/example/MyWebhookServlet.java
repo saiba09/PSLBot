@@ -581,6 +581,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private JSONObject getMessageForFestival(String event, String date,String comment) {
 		// TODO Auto-generated method stub
+		log.info("inside get message");
 		JSONObject response = new JSONObject();
 		String longVaccSugestion = "";
 		String message = "";
@@ -589,6 +590,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		Boolean isFestival = false;
 		try {
 			String holidays = PropertyLoader.getList("INDIA_HOLIDAY");
+			log.info("INDIA_HOLIDAY loaded : "+holidays);
 			String[] arrayHolidays = holidays.split(",");
 			List<String> listOfHoliday = Arrays.asList(arrayHolidays);
 			for (String holiday : listOfHoliday) {
@@ -601,6 +603,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				}
 			}
 			String festivals = PropertyLoader.getList("INDIA_OCCASSION");
+			log.info("festivals loaded "+ festivals);
 			String[] arrayFestivals = festivals.split(",");
 			List<String> listOfFestival = Arrays.asList(arrayFestivals);
 			for (String festival : listOfFestival) {
@@ -624,7 +627,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				
 			}
 			message += "Please Confirm";
-			
+			log.info("message : "+message);
 			response.put("message", message);
 			response.put("isFestival", isFestival);
 			response.put("isOneDay", isOneDay);
