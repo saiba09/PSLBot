@@ -139,6 +139,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("intent : FAQ");
 			output = getFallBackResponse(output, input);
 			break; 
+			case "ONE_DAY_LEAVE_YES_FOLLOWUP":
+				log.info("intent : ONE_DAY_LEAVE_YES_FOLLOWUP");
+				output = getResponseForOneDayLeaveIntent(output,parameter);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -147,6 +151,38 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		// TODO Auto-generated method stub
+		log.info("getResponseForOneDayLeaveIntent");
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
+		Boolean isFestival = Boolean.parseBoolean(parameter.get("isFestival").getAsString().trim());
+		Boolean isHoliday = Boolean.parseBoolean(parameter.get("isHoliday").getAsString().trim());
+		Boolean isOneDay = Boolean.parseBoolean(parameter.get("isOneDay").getAsString().trim());
+		log.info("Parms : "+startDate+" "+endDate+" "+comment+" isFest "+isFestival+" isHoliday "+isHoliday+" isOne "+isOneDay);
+		log.info("redirect to event without asking dates event trig fun");
+		AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
+		log.info("rerouting to event : evt trg");
+		output.setFollowupEvent(followupEvent);
+		AIOutputContext contextOut = new AIOutputContext();
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		outParms.put("comment", new JsonPrimitive(comment));
+		contextOut.setLifespan(1);
+		contextOut.setName("leaveParms");
+		if (isHoliday || isFestival) {
+			
+		}
+		if (isOneDay) {
+			// SUGGEST_LEAVE_OPTION || WITH ALL PARMS
+			outParms.put("startDate", new JsonPrimitive(startDate));
+			outParms.put("endDate", new JsonPrimitive(endDate));
+		}
+		contextOut.setParameters(outParms);
+		output.setContextOut(contextOut);
+		return output;
 	}
 
 	private Fulfillment getLeaveBalance(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
@@ -510,7 +546,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
 				if (leave_balance > 0) {
 					if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty() ) {
-
+11
 						log.info("redirect to event without asking dates event trig fun");
 						AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
 						log.info("rerouting to event : evt trg");
@@ -626,7 +662,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				}
 				
 			}
-			message += "Please Confirm";
 			log.info("message : "+message);
 			response.put("message", message);
 			response.put("isFestival", isFestival);
