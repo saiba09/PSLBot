@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
@@ -40,9 +41,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			switch (action) {
 			case "QUERY_LEAVE":
 				log.info("in action : query_leave");
-				output = queryLeave(output, parameter, sessionId); // check for
-																	// oh , cf
-																	// etc
+				output = queryLeave(output, parameter, sessionId, action, null); 
 				break;
 			case "SYSTEM_SUGESTION_SATISFIED_YES":
 				log.info(" intent SYSTEM_SUGESTION_SATISFIED_YES ");
@@ -97,8 +96,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				// message for confirmation returns leave brk up
 				break;
 			// case not found
-			case "LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE":
-				log.info("intent : LEAVE_TYPE_SELECTION_CONFRIM_MESSAGE");
+			case "ONE_DAY_LEAVE":
+				log.info("intent : ONE_DAY_LEAVE");
+				output = queryLeave(output, parameter, sessionId, action, input);
 				// apply leave
 				/*
 				 * case "input.welcome": log.info("input.welcome"); output =
@@ -440,54 +440,74 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId)
+	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId, String action,AIWebhookRequest input)
 			throws ParseException {
 		log.info("querry leave function");
-		String startDate = parameter.get("startDate").getAsString().trim();
-		String endDate = parameter.get("endDate").getAsString().trim();
-		String event = parameter.get("event").getAsString().trim();
-		String comment = parameter.get("comment").getAsString().trim();
-
-		log.info("parms :" + startDate + " " + endDate + " event: " + event);
-		String message = "";
-		// message += " " + getLeaveInfo(sessionId).get("message") + " ";
-		JSONObject sugestion = Suggest(parameter, sessionId);
+		String startDate;
+		String endDate;
+		String comment;
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
-		if (leave_balance > 0) {
-			if (!event.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty() || !comment.isEmpty()) {
-				// message += "You have "+leave_balance+" Leave balance, shall
-				// we proceed?";
-				log.info("redirect to event without asking dates event trig fun");
-				AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
-				log.info("rerouting to event : evt trg");
-				output.setFollowupEvent(followupEvent);
-				AIOutputContext contextOut = new AIOutputContext();
-				HashMap<String, JsonElement> outParms = new HashMap<>();
-				if (comment.isEmpty()) {
+		String message = "";
+		if (action.equals("ONE_DAY_LEAVE")) {
+			log.info("one day leave apply");
+			startDate = parameter.get("date").getAsString().trim();
+			OriginalRequest context = input.getOriginalRequest();
+			Map<String, ?> dataMap = context.getData();
+			for (String key : dataMap.keySet()) {
+				log.info("key : "+key + " value : "+dataMap.get(key));
+			}
+			
+		}
+		if (action.equals("QUERY_LEAVE")) {
+			 startDate = parameter.get("startDate").getAsString().trim();
+			 endDate = parameter.get("endDate").getAsString().trim();
+			 comment = parameter.get("comment").getAsString().trim();
+			 if (comment.isEmpty()) {
+					String event = parameter.get("event").getAsString().trim();
 					if (!event.isEmpty()) {
 						comment = "leave for "+event;
 					}
-				}
-				outParms.put("comment", new JsonPrimitive(comment));
-				outParms.put("startDate", new JsonPrimitive(startDate));
-				outParms.put("endDate", new JsonPrimitive(endDate));
-				contextOut.setLifespan(1);
-				contextOut.setName("leaveParms");
-				contextOut.setParameters(outParms);
-				output.setContextOut(contextOut);
-			} else {
-				
-				message += "You have sufficient leave balance, shall we proceed?";
-				
 			}
-		} else {
-			// message = "Your l You will need Delivery partner approval.";
-			// set event trigg.
-			log.info("DP APPROVAL REQ event trig ");
-			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-			log.info("rerouting to event : evt trg");
-			output.setFollowupEvent(followupEvent);
+				log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
+				if (leave_balance > 0) {
+					if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty() ) {
+
+						log.info("redirect to event without asking dates event trig fun");
+						AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
+						log.info("rerouting to event : evt trg");
+						output.setFollowupEvent(followupEvent);
+						AIOutputContext contextOut = new AIOutputContext();
+						HashMap<String, JsonElement> outParms = new HashMap<>();
+
+						outParms.put("comment", new JsonPrimitive(comment));
+						outParms.put("startDate", new JsonPrimitive(startDate));
+						outParms.put("endDate", new JsonPrimitive(endDate));
+						contextOut.setLifespan(1);
+						contextOut.setName("leaveParms");
+						contextOut.setParameters(outParms);
+						output.setContextOut(contextOut);
+					} else {
+						
+						message += "You have sufficient leave balance, shall we proceed?";
+						
+					}
+				} else {
+					// message = "Your l You will need Delivery partner approval.";
+					// set event trigg.
+					log.info("DP APPROVAL REQ event trig ");
+					AIEvent followupEvent = new AIEvent("DP_APPROVAL");
+					log.info("rerouting to event : evt trg");
+					output.setFollowupEvent(followupEvent);
+				}
+			
 		}
+		
+
+		
+		// message += " " + getLeaveInfo(sessionId).get("message") + " ";
+		JSONObject sugestion = Suggest(parameter, sessionId);
+		
+		
 		/*
 		 * if (Boolean.parseBoolean(sugestion.get("present").toString())) {
 		 * log.info("do have a suggestion"); if (event.isEmpty()) {
