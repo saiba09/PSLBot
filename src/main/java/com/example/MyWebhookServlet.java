@@ -447,17 +447,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (action.equals("ONE_DAY_LEAVE")) {
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
-			
-			Result result = input.getResult();
-			log.info("original request : "+result);
-			List<AIOutputContext> context =  result.getContexts();
-			log.info(" parms resv query : "+ result.getResolvedQuery());
-			log.info("  source "+ result.getSource());
-		log.info(" complex Parms date " +	result.getComplexParameter("date").toString());
-			log.info("size :" + context.size()); 
-			AIOutputContext con = context.get(0);
-			Map<String, JsonElement> contextObj = con.getParameters();
-			log.info("original Date " + contextObj.get("date.original") );
+			String event = parameter.get("comment").getAsString().trim();
+			message += " You want to apply leave on "+startDate+" as its "+event;
 			
 			
 		}
