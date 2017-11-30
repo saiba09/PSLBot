@@ -447,7 +447,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (action.equals("ONE_DAY_LEAVE")) {
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
-			String event = parameter.get("comment").getAsString().trim();
+			String event = parameter.get("dateEvent").getAsString().trim();
 			message += " You want to apply leave on "+startDate+" as its "+event;
 			
 			
