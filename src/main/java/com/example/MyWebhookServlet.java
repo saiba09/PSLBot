@@ -446,13 +446,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String event = parameter.get("event").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
+
 		log.info("parms :" + startDate + " " + endDate + " event: " + event);
 		String message = "";
 		// message += " " + getLeaveInfo(sessionId).get("message") + " ";
 		JSONObject sugestion = Suggest(parameter, sessionId);
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		if (leave_balance > 0) {
-			if (event.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
+			if (!event.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty() || !comment.isEmpty()) {
 				// message += "You have "+leave_balance+" Leave balance, shall
 				// we proceed?";
 				log.info("redirect to event without asking dates event trig fun");
@@ -461,7 +463,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				output.setFollowupEvent(followupEvent);
 				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
-				outParms.put("comment", new JsonPrimitive(event));
+				if (comment.isEmpty()) {
+					if (!event.isEmpty()) {
+						comment = "leave for "+event;
+					}
+				}
+				outParms.put("comment", new JsonPrimitive(comment));
 				outParms.put("startDate", new JsonPrimitive(startDate));
 				outParms.put("endDate", new JsonPrimitive(endDate));
 				contextOut.setLifespan(1);

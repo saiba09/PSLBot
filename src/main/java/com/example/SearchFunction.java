@@ -59,6 +59,7 @@ public class SearchFunction {
 				try {
 					result.put("answer", currentEntity.getProperty("answer").toString() + "#false" );
 					result.put("question", currentEntity.getProperty("question").toString());
+					result.put("keywords matched", count);
 					resultCount = count;
 				} catch (Exception e) {
 					System.err.println("ERROR : "+e);
