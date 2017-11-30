@@ -16,10 +16,10 @@ public class PropertyLoader {
 			.getName());
 	static {
 		log.info("inside get property method");
-		InputStream queryPropertyStream = getPropertyStream("Festival.property");
+		InputStream queryPropertyStream = getPropertyStream("Festivals.property");
 		if (queryPropertyStream == null) {
 			log.severe("input stream null");
-			throw new RuntimeException("Unable to load property file: Festival.property");
+			throw new RuntimeException("Unable to load property file: Festivals.property");
 		}
 		/*InputStream emailPropertyStream = getPropertyStream(EYConstants.EMAIL_PROPERTY);
 		if (emailPropertyStream == null) {
@@ -46,7 +46,7 @@ public class PropertyLoader {
 				Festival.load(queryPropertyStream);
 			} catch (IOException e) {
 				throw new RuntimeException("Unable to load property file: "
-						+ "Festival.property" + "\n" + e.getMessage());
+						+ "Festivals.property" + "\n" + e.getMessage());
 			} catch (Exception e1) {
 				log.info("error  : " + e1);
 			}
