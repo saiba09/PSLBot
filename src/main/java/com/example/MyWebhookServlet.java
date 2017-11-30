@@ -463,10 +463,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
 		    comment = parameter.get("comment").getAsString().trim();
-			JSONObject responseMessageObject = getMessageForFestival( event ,  startDate, comment);
+			JSONObject responseMessageObject = getMessageForFestival( event ,  startDate, comment); 
 			Boolean isHoliday = Boolean.parseBoolean(responseMessageObject.get("isHoliday").toString());
 			Boolean isFestival = Boolean.parseBoolean(responseMessageObject.get("isFestival").toString());
-			Boolean isOneDay = Boolean.parseBoolean(responseMessageObject.get("isOnDay").toString());
+			Boolean isOneDay = Boolean.parseBoolean(responseMessageObject.get("isOneDay").toString());
 			message += responseMessageObject.get("message").toString();
 			//isHoliday no long weekend || if isfestival no long weekend || with long weekend ==>> same intent yes/No || set a boolean isHoliday
 			if (leave_balance <= 0 && !isHoliday) {
@@ -485,11 +485,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				outParms.put("isHoliday",new JsonPrimitive( isHoliday));
 				outParms.put("isFestival",new JsonPrimitive( isFestival));
 				outParms.put("isOneDay",new JsonPrimitive( isOneDay));
-
 				contextOut.setLifespan(1);
 				contextOut.setName("oneDayLeaveFollowup");
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
+				message += responseMessageObject.get("longVaccationSugestion").toString(); 343
 			}
 			//if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
