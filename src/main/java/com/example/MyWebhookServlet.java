@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.swing.text.AbstractDocument.LeafElement;
 import javax.xml.stream.events.StartDocument;
 
 import org.json.simple.JSONObject;
@@ -27,6 +28,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.util.Formator;
+import com.util.LeaveMessageFormator;
 import com.util.PropertyLoader;
 
 import ai.api.model.AIEvent;
@@ -142,7 +145,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			break; 
 			case "ONE_DAY_LEAVE_YES_FOLLOWUP":
 				log.info("intent : ONE_DAY_LEAVE_YES_FOLLOWUP");
-				output = getResponseForOneDayLeaveIntent(output,parameter);
+				output = getResponseForOneDayLeaveIntent(output,parameter, sessionId);
+				break;
+			case "ONE_DAY_TYPE":
+				log.info("intent : ONE_DAY_TYPE");
+				output = applyLeaveWithTypes(output, parameter);
 				break;
 			default:
 				output.setSpeech("Default case");
@@ -154,7 +161,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	}
 
-	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter) {
+	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter , String sessionId) {
 		// TODO Auto-generated method stub
 		log.info("getResponseForOneDayLeaveIntent");
 		String startDate = parameter.get("startDate").getAsString().trim();
@@ -163,6 +170,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		Boolean isFestival = Boolean.parseBoolean(parameter.get("isFestival").getAsString().trim());
 		Boolean isHoliday = Boolean.parseBoolean(parameter.get("isHoliday").getAsString().trim());
 		Boolean isOneDay = Boolean.parseBoolean(parameter.get("isOneDay").getAsString().trim());
+		String message = "";
 		log.info("Parms : "+startDate+" "+endDate+" "+comment+" isFest "+isFestival+" isHoliday "+isHoliday+" isOne "+isOneDay);
 		log.info("redirect to event without asking dates event trig fun");
 		AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
@@ -174,15 +182,21 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		contextOut.setLifespan(1);
 		contextOut.setName("leaveParms");
 		if (isHoliday || isFestival) {
-			
+			//redirect to custom form
+			contextOut.setParameters(outParms);
+			output.setContextOut(contextOut);
+			output = redirectToCustomApply(output, parameter);
 		}
-		if (isOneDay) {
+		else if (isOneDay) {
 			// SUGGEST_LEAVE_OPTION || WITH ALL PARMS
 			outParms.put("startDate", new JsonPrimitive(startDate));
 			outParms.put("endDate", new JsonPrimitive(endDate));
+			contextOut.setParameters(outParms);
+			output.setContextOut(contextOut);
+			message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
+			message += "Which type of leave you want to opt for?";
 		}
-		contextOut.setParameters(outParms);
-		output.setContextOut(contextOut);
+		
 		return output;
 	}
 
@@ -280,7 +294,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			day += "s";
 		}
 		if (noOfLeave <= balance) {
-			message += "So want to apply : "+noOfLeave+ " "+ day+" "+type+" from "+startDate+" to "+endDate+". Shall I confirm?";
+			message += "So want to apply : "+noOfLeave+ " "+ day+" "+type+" from "+Formator.getFormatedDate(startDate)+" to "+Formator.getFormatedDate(endDate)+". Shall I confirm?";
 			AIOutputContext contextOut = new AIOutputContext();
 			HashMap<String, JsonElement> outParms = new HashMap<>();
 			outParms.put("leaveBreakUp", new JsonPrimitive(leaveJson.toJSONString()));
@@ -375,10 +389,18 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int OL = Integer.parseInt(data.get("optional_leave").toString());
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
-		if (PL < noOfLeaves) {
-			message = "Your privileged leave balance is less than what is you opt. for " + noOfLeaves
-					+ " days and applying for same will need DP approval,However You can take a combination of other leaves type."
-					+ " Do you want to continue with privilage leaves?";
+		if (PL < noOfLeaves ) {
+			//check if any leave >= req . if give option else go to dp
+					if (CF < noOfLeaves) {
+						if (OH < noOfLeaves) {
+							if (OL < noOfLeaves) {
+								//dp approval
+							}
+						}
+					}
+					else{
+						message += "You have in-sufficient privillaged leave, still want to apply for it? You will need toh apply for LWP in that case.";
+					}
 			/*
 			 * if (leave_balance >= noOfLeaves) { message =
 			 * "Your privillage leave balance is low, you can "; ///// if (PL !=
@@ -393,7 +415,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			 * } }
 			 */} else {
 			if (CF != 0 || OH != 0 || OL != 0) {
-				message += "You also have ";
+				message += "You have ";
 			}
 			if (CF != 0) {
 				message += CF + " compensatory off, ";
@@ -445,6 +467,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("redirectToCustomApply event trig fun");
 		AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
 		log.info("rerouting to event : evt trg");
+		AIOutputContext contextOut = new AIOutputContext();
+		contextOut.setLifespan(1);
+		contextOut.setName("customFormContext");
+		contextOut.setParameters(parameter);
+		output.setContextOut(contextOut);
 		output.setFollowupEvent(followupEvent);
 		return output;
 	}
@@ -470,7 +497,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal < no Leaves ");
-			message = "Here you go! Your leaves had been applied in the system.";
+			message = "Here you go! Your leaves had been applied in the system.#false";
 		} else {
 			message = "Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.";
 			// set event trigg.
@@ -512,6 +539,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				AIEvent followupEvent = new AIEvent("DP_APPROVAL");
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);	
+			}
+			else if(leave_balance <= 0 && isHoliday){
+				// intent to display text and break;
+				message += "no leave balance however its holiday for "+event;
+				log.info("Display text event triggred ");
+				AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
+				log.info("rerouting to event : evt trg");
+				output.setFollowupEvent(followupEvent);	
+				
 			}
 			else if (isFestival || isHoliday || isOneDay) {
 				AIOutputContext contextOut = new AIOutputContext();
@@ -645,7 +681,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			List<String> listOfFestival = Arrays.asList(arrayFestivals);
 			for (String festival : listOfFestival) {
 				if (festival.equalsIgnoreCase(event)) {
-					message += "Oh! Great so you want to apply leave for "+event+" on "+date;
+					message += "Oh! Great so you want to apply leave for "+event+" on "+Formator.getFormatedDate(date);
 					isFestival = true;
 					break;
 				}
@@ -711,7 +747,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 
-			message = "So you want to apply from " + startDate.toString() + " to " + endDate.toString() + " as "
+			message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to " + Formator.getFormatedDate(endDate.toString()) + " as "
 					+ comment + ".";
 			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
 				log.info(" dates contains weekend in Between");
@@ -720,7 +756,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += " However its,";
 				for (Date date : holidayMap.keySet()) {
 					String day = holidayMap.get(date).toString();
-					message += " " + day + " on " + new SimpleDateFormat("MMM d").format(date);
+					message += " " + day + " on " + Formator.getFormatedDate(date);
 				}
 				log.info("message for weekend addded");
 				message += " Shall we continue the plan?";
