@@ -556,10 +556,16 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);
-
+				AIOutputContext contextOut = new AIOutputContext();
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("message", new JsonPrimitive(message));
+				contextOut.setLifespan(1);
+				contextOut.setName("displayMessage");
+				contextOut.setParameters(outParms);
+				output.setContextOut(contextOut);
 			} else if (isFestival || isHoliday) {
 			
-					message += responseMessageObject.get("longVaccSugestion");
+					message += responseMessageObject.get("longVaccationSugestion");
 					comment = getMessage(event);
 			
 				AIOutputContext contextOut = new AIOutputContext();
@@ -577,6 +583,31 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
+				JSONObject jsonDays = getDays(startDate, startDate);
+				Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());		
+				if (isWeekend) {
+					if (event.equalsIgnoreCase("today")) {
+						comment += " Its weekend today.";
+						isOneDay = true;
+
+					}
+					if (event.equalsIgnoreCase("tomorrow")) {
+						comment += "It was weekend yesterday.";
+						isOneDay = true;
+					}
+					message += "";
+					log.info("Display text event triggred ");
+					AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
+					log.info("rerouting to event : evt trg");
+					output.setFollowupEvent(followupEvent);
+					AIOutputContext contextOut = new AIOutputContext();
+					HashMap<String, JsonElement> outParms = new HashMap<>();
+					outParms.put("message", new JsonPrimitive(message));
+					contextOut.setLifespan(1);
+					contextOut.setName("displayMessage");
+					contextOut.setParameters(outParms);
+					output.setContextOut(contextOut);
+				}
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("comment", new JsonPrimitive(comment));
 				outParms.put("startDate", new JsonPrimitive(startDate));
@@ -688,6 +719,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		JSONObject jsonDays = getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
@@ -699,10 +731,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
-
+			 if (noOfLeaves == 1) {
+				message += "You want to apply leave on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
+			}
+			else{
 			message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
 					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment + ".";
-			if (Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString())) {
+			
+			if (isWeekend) {
 				log.info(" dates contains weekend in Between");
 				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 				log.info("holiday map fetched");
@@ -718,6 +754,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += " Should I confirm?";
 				// message += " No weekends or holidays in between. Are you sure
 				// you wanna plan this vaccation ?";
+			}
 			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
