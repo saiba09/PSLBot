@@ -168,7 +168,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String sessionId, String action) {
 		// TODO Auto-generated method stub
-		redirect to intent suggestleave for one day case
 		
 		log.info("getResponseForOneDayLeaveIntent");
 		String startDate = parameter.get("startDate").getAsString().trim();
