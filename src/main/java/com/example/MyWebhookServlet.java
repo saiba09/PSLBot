@@ -300,9 +300,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			day += "s";
 		}
 		if (noOfLeave <= balance) {
+			if (noOfLeave == 1) {
+				message += "You want to apply 1 "+type+" on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
+
+			}else{
 			message += "So want to apply : " + noOfLeave + " " + day + " " + type + " from "
 					+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
 					+ ". Shall I confirm?";
+			}
 			AIOutputContext contextOut = new AIOutputContext();
 			HashMap<String, JsonElement> outParms = new HashMap<>();
 			outParms.put("leaveBreakUp", new JsonPrimitive(leaveJson.toJSONString()));
@@ -437,7 +442,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (CF != 0 || OH != 0 || OL != 0) {
 				// message += "Do you still want to apply for privilage leave ?
 				// Don't forget these leaves won't carry forward.";
-				message += "Do you still want to apply for privilaged leave?.";
+				message += "Do you still want to apply for privilaged leave?";
 			}
 		}
 		log.info(message);
