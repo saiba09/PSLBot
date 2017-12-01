@@ -523,6 +523,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
 		String message = "";
 		if (action.equals("ONE_DAY_LEAVE")) {
+
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
@@ -550,6 +551,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				
 			}
 			else if (isFestival || isHoliday || isOneDay) {
+				if (isFestival || isHoliday) {
+					message += " "+responseMessageObject.get("longVaccSugestion");
+					comment = getMessage(event);
+				}
+				
 				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("comment", new JsonPrimitive(comment));
@@ -661,6 +667,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		Boolean isHoliday = false;
 		Boolean isOneDay = false;
 		Boolean isFestival = false;
+		longVaccSugestion +="Do you want to make it a long vaccation?";
 		try {
 			String holidays = PropertyLoader.getList("INDIA_HOLIDAY");
 			log.info("INDIA_HOLIDAY loaded : "+holidays);
@@ -669,7 +676,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			for (String holiday : listOfHoliday) {
 				if (holiday.equalsIgnoreCase(event)) {
 					message += "Its holiday on "+ date +" for "+event+".";
-					longVaccSugestion +="Do you want to make it a long vaccation?";
 					isHoliday = true;
 					isFestival = true;
 					break;
