@@ -168,6 +168,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String sessionId, String action) {
 		// TODO Auto-generated method stub
+		redirect to intent suggestleave for one day case
+		
 		log.info("getResponseForOneDayLeaveIntent");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
@@ -188,6 +190,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		contextOut.setLifespan(1);
 		contextOut.setName("leaveParms");
 		if (action.equals("APPLY_ONE_DAY") || isOneDay) {
+			//SUGGEST_LEAVES_OPTION
 			outParms.put("startDate", new JsonPrimitive(startDate));
 			outParms.put("endDate", new JsonPrimitive(endDate));
 			contextOut.setParameters(outParms);
@@ -196,9 +199,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			message += "Which type of leave you want to opt for?";
 		} else if (isHoliday || isFestival) {
 			// redirect to custom form
-			contextOut.setParameters(outParms);
-			output.setContextOut(contextOut);
-			output = redirectToCustomApply(output, parameter);
+			
+			
+			output = redirectToCustomApply(output, outParms);
 		}
 
 		return output;
@@ -459,7 +462,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment exitFlow(Fulfillment output) {
 		// TODO Auto-generated method stub TERMINATE
-		log.info("redirectToCustomApply event trig fun");
+		log.info("exit event trig fun");
 		AIEvent followupEvent = new AIEvent("TERMINATE");
 		log.info("rerouting to event TERMINATE: evt trg");
 		output.setFollowupEvent(followupEvent);
@@ -533,7 +536,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
 			comment = parameter.get("comment").getAsString().trim();
-			JSONObject responseMessageObject = getMessageForFestival(event, startDate, comment);
+			JSONObject responseMessageObject = LeaveMessageFormator.getMessageForFestival(event, startDate, comment);
 			Boolean isHoliday = Boolean.parseBoolean(responseMessageObject.get("isHoliday").toString());
 			Boolean isFestival = Boolean.parseBoolean(responseMessageObject.get("isFestival").toString());
 			Boolean isOneDay = Boolean.parseBoolean(responseMessageObject.get("isOneDay").toString());
@@ -555,12 +558,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("rerouting to event : evt trg");
 				output.setFollowupEvent(followupEvent);
 
-			} else if (isFestival || isHoliday || isOneDay) {
-				if (isFestival || isHoliday) {
-					message += " " + responseMessageObject.get("longVaccSugestion");
+			} else if (isFestival || isHoliday) {
+			
+					message += responseMessageObject.get("longVaccSugestion");
 					comment = getMessage(event);
-				}
-
+			
 				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("comment", new JsonPrimitive(comment));
@@ -573,11 +575,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setName("oneDayLeaveFollowup");
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
-				message += responseMessageObject.get("longVaccationSugestion").toString();
 			}
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
-
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("comment", new JsonPrimitive(comment));
+				outParms.put("startDate", new JsonPrimitive(startDate));
+				outParms.put("endDate", new JsonPrimitive(startDate));
+				output = redirectToCustomApply(output, outParms);
 			}
 
 		}
@@ -660,67 +665,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private JSONObject getMessageForFestival(String event, String date, String comment) {
-		// TODO Auto-generated method stub
-		log.info("inside get message");
-		JSONObject response = new JSONObject();
-		String longVaccSugestion = "";
-		String message = "";
-		Boolean isHoliday = false;
-		Boolean isOneDay = false;
-		Boolean isFestival = false;
-		longVaccSugestion += "Do you want to make it a long vaccation?";
-		try {
-			String holidays = PropertyLoader.getList("INDIA_HOLIDAY");
-			log.info("INDIA_HOLIDAY loaded : " + holidays);
-			String[] arrayHolidays = holidays.split(",");
-			List<String> listOfHoliday = Arrays.asList(arrayHolidays);
-			for (String holiday : listOfHoliday) {
-				if (holiday.equalsIgnoreCase(event)) {
-					message += "Its holiday on " + date + " for " + event + ". ";
-					isHoliday = true;
-					isFestival = true;
-					break;
-				}
-			}
-			String festivals = PropertyLoader.getList("INDIA_OCCASSION");
-			log.info("festivals loaded " + festivals);
-			String[] arrayFestivals = festivals.split(",");
-			List<String> listOfFestival = Arrays.asList(arrayFestivals);
-			for (String festival : listOfFestival) {
-				if (festival.equalsIgnoreCase(event)) {
-					message += "Oh! Great so you want to apply leave for " + event + " on "
-							+ Formator.getFormatedDate(date) + ". ";
-					isFestival = true;
-					break;
-				}
-			}
-			if (!isFestival) {
-				message += "You want to apply leave on " + date;
-				if (event.equalsIgnoreCase("today")) {
-					comment += " as you are " + comment;
-					isOneDay = true;
-
-				}
-				if (event.equalsIgnoreCase("tomorrow")) {
-					comment += "as you was " + comment;
-					isOneDay = true;
-				}
-
-			}
-			log.info("message : " + message);
-			response.put("message", message);
-			response.put("isFestival", isFestival);
-			response.put("isOneDay", isOneDay);
-			response.put("isHoliday", isHoliday);
-			response.put("longVaccationSugestion", longVaccSugestion);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return response;
-	}
+	
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String action, String sessionId) {
