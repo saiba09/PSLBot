@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.util.DateDetails;
 import com.util.Formator;
 import com.util.LeaveMessageFormator;
 import com.util.PropertyLoader;
@@ -63,6 +64,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info(" intent SYSTEM_SUGESTION_SATISFIED_YES ");
 				output = getConfirmationMessage(output, parameter, "SYSTEM_SUGESTION_SATISFIED_YES", sessionId);
 				break;
+			case "QUERY_LEAVE_PARMS":
+				log.info("intent : QUERY_LEAVE_PARMS");
+				output = queryLeave(output, parameter, sessionId, action, input);
+				break;
 			case "SYSTEM_SUGESTION_SATISFIED_NO":
 				log.info("intent : SYSTEM_SUGESTION_SATISFIED_NO");
 				// output = getConfirmationMessage(output, parameter,
@@ -77,7 +82,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			// case not found
 			case "OPT_CUSTOM_REQ":
 				log.info("intent: OPT_CUSTOM_REQ");
-				output = redirectToCustomApply(output, parameter);
+				output = Redirections.redirectToCustomApply(output, parameter);
 				break;
 			case "CONFIRM_APPLY":
 				log.info("intent : CONFIRM_APPLY");
@@ -96,7 +101,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			case "APPLY_COMBO_LEAVE":
 				log.info("intent : APPLY_COMBO_LEAVE");
-				output = redirectToComboLeaveForm(output, parameter, sessionId);
+				output = Redirections.redirectToComboLeaveForm(output, parameter, sessionId);
 				break;
 
 			case "CUSTOM_FORM_SUBMIT_CONFIRM":
@@ -123,7 +128,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			case "AGAIN_SELECT_LEAVE_TYPE":
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
-				output = redirectToComboLeaveForm(output, parameter, sessionId);
+				output = Redirections.redirectToComboLeaveForm(output, parameter, sessionId);
 				break;
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES":
@@ -168,7 +173,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String sessionId, String action) {
 		// TODO Auto-generated method stub
-		
+
 		log.info("getResponseForOneDayLeaveIntent");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
@@ -179,17 +184,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String message = "";
 		log.info("Parms : " + startDate + " " + endDate + " " + comment + " isFest " + isFestival + " isHoliday "
 				+ isHoliday + " isOne " + isOneDay);
-		log.info("redirect to event without asking dates event trig fun");
-		AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
-		log.info("rerouting to event : evt trg");
-		output.setFollowupEvent(followupEvent);
-		AIOutputContext contextOut = new AIOutputContext();
 		HashMap<String, JsonElement> outParms = new HashMap<>();
 		outParms.put("comment", new JsonPrimitive(comment));
-		contextOut.setLifespan(1);
-		contextOut.setName("leaveParms");
 		if (action.equals("APPLY_ONE_DAY") || isOneDay) {
-			//SUGGEST_LEAVES_OPTION
+			// Ask leave type
+			AIOutputContext contextOut = new AIOutputContext();
 			outParms.put("startDate", new JsonPrimitive(startDate));
 			outParms.put("endDate", new JsonPrimitive(endDate));
 			contextOut.setParameters(outParms);
@@ -198,9 +197,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			message += "Which type of leave you want to opt for?";
 		} else if (isHoliday || isFestival) {
 			// redirect to custom form
-			
-			
-			output = redirectToCustomApply(output, outParms);
+			output = Redirections.redirectToCustomApply(output, outParms);
 		}
 
 		return output;
@@ -238,7 +235,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveBreakUp = parameter.get("leaveBreakUp").getAsString().trim();
-		String message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you..#false";
+		String message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you.#false";
 		output.setDisplayText(message);
 		output.setSpeech(message);
 		return output;
@@ -301,12 +298,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		if (noOfLeave <= balance) {
 			if (noOfLeave == 1) {
-				message += "You want to apply 1 "+type+" on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
+				message += "You want to apply 1 " + type + " on " + Formator.getFormatedDate(startDate) + " as "
+						+ comment + ". Should I confirm?";
 
-			}else{
-			message += "So want to apply : " + noOfLeave + " " + day + " " + type + " from "
-					+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
-					+ ". Shall I confirm?";
+			} else {
+				message += "So want to apply : " + noOfLeave + " " + day + " " + type + " from "
+						+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
+						+ ". Shall I confirm?";
 			}
 			AIOutputContext contextOut = new AIOutputContext();
 			HashMap<String, JsonElement> outParms = new HashMap<>();
@@ -318,10 +316,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setDisplayText(message);
 			output.setSpeech(message);
 		} else {
-			log.info("redirect to DP Approval event trig fun");
-			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-			log.info("rerouting to event DP_APPROVAL: evt trg");
-			output.setFollowupEvent(followupEvent);
+			output = Redirections.redirectToDPApproval(output, parameter);
 		}
 		/*
 		 * int sum = noCF+noOH+noOL+noPL; log.info("sum : "+ sum +
@@ -347,40 +342,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private Fulfillment redirectToComboLeaveForm(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String sessionId) {
-		log.info("redirectToComboLeaveForm event trig fun");
-		String startDate = parameter.get("startDate").getAsString().trim();
-		String endDate = parameter.get("endDate").getAsString().trim();
-		String comment = parameter.get("comment").getAsString().trim();
-		JSONObject data = Data.getHolidays(sessionId);
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
-		int noOfLeave = Integer.parseInt(getDays(startDate, endDate).get("days").toString().trim());
-		log.info("no of leaves: " + noOfLeave + " triggering event combo leave");
-		AIEvent followupEvent = new AIEvent("CUSTOMIZE_LEAVE_TYPE");
-		log.info("re-routing to event : evt trg");
-		output.setFollowupEvent(followupEvent);
-		AIOutputContext contextOut = new AIOutputContext();
-		HashMap<String, JsonElement> outParms = new HashMap<>();
-		outParms.put("comment", new JsonPrimitive(comment));
-		outParms.put("startDate", new JsonPrimitive(startDate));
-		outParms.put("endDate", new JsonPrimitive(endDate));
-		outParms.put("presentPL", new JsonPrimitive(PL));
-		outParms.put("presentOL", new JsonPrimitive(OL));
-		outParms.put("presentOH", new JsonPrimitive(OH));
-		outParms.put("presentCF", new JsonPrimitive(CF));
-		outParms.put("noOfLeave", new JsonPrimitive(noOfLeave));
-		contextOut.setLifespan(1);
-		contextOut.setName("sugestLeaveOption");
-		contextOut.setParameters(outParms);
-		// set cont.
-		output.setContextOut(contextOut);
-		return output;
-	}
-
 	private Fulfillment getLeaveComboSuggestion(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String action, String sessionId) {
 		log.info("getLeaveComboSuggestion");
@@ -393,8 +354,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject sugestion = Data.getHolidays(sessionId);
 		String message = "";
 		// check leave balance > days to apply
-		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
-		JSONObject jsonDays = getDays(startDate, endDate);
+		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		JSONObject data = Data.getHolidays(sessionId);
 		int PL = Integer.parseInt(data.get("privillage_leave").toString());
@@ -407,25 +368,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (CF < noOfLeaves) {
 				if (OH < noOfLeaves) {
 					if (OL < noOfLeaves) {
-						// dp approval
+						output = Redirections.redirectToDPApproval(output, parameter);
 					}
 				}
 			} else {
 				message += "You have in-sufficient privillaged leave, still want to apply for it? You will need toh apply for LWP in that case.";
 			}
-			/*
-			 * if (leave_balance >= noOfLeaves) { message =
-			 * "Your privillage leave balance is low, you can "; ///// if (PL !=
-			 * 0) { int diff = noOfLeaves - PL; if (CF != 0) { if (CF >= diff) {
-			 * message += "You have "+ PL+ "privilage leave and "+
-			 * CF+" comp. offs. Do you want to consume both in a go? "; } else{
-			 * if (OH != 0 && diff<= OH) {
-			 * 
-			 * } } } } if (noOfLeaves <= CF) { message +=
-			 * "apply for comp. offs. As you have  "+CF +" available."; } else{
-			 * 
-			 * } }
-			 */} else {
+		} else {
 			if (CF != 0 || OH != 0 || OL != 0) {
 				message += "You have ";
 			}
@@ -466,26 +415,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment exitFlow(Fulfillment output) {
 		// TODO Auto-generated method stub TERMINATE
-		log.info("exit event trig fun");
-		AIEvent followupEvent = new AIEvent("TERMINATE");
-		log.info("rerouting to event TERMINATE: evt trg");
-		output.setFollowupEvent(followupEvent);
-		return output;
+		return Redirections.redirectToTerminate(output);
 
-	}
-
-	private Fulfillment redirectToCustomApply(Fulfillment output, HashMap<String, JsonElement> parameter) {
-		// Trigger event for custom leave apply
-		log.info("redirectToCustomApply event trig fun");
-		AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
-		log.info("rerouting to event : evt trg");
-		AIOutputContext contextOut = new AIOutputContext();
-		contextOut.setLifespan(1);
-		contextOut.setName("customFormContext");
-		contextOut.setParameters(parameter);
-		output.setContextOut(contextOut);
-		output.setFollowupEvent(followupEvent);
-		return output;
 	}
 
 	private Fulfillment applyLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
@@ -497,26 +428,18 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String message = "";
 		int leave_balance = Integer.parseInt(Data.getHolidays(sessionId).get("privillage_leave").toString());
 		// check bal if allow apply
-		JSONObject jsonDays = getDays(startDate, endDate);
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		if (leave_balance <= 0) {
 			log.info("bal < 0");
-			message = "Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
-			// Trigger dp approval intent
-			log.info("DP APPROVAL REQ event trig ");
-			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-			log.info("rerouting to event : evt trg");
-			output.setFollowupEvent(followupEvent);
+			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal < no Leaves ");
 			message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you.";
 		} else {
-			message = "Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.";
-			// set event trigg.
-			log.info("DP APPROVAL REQ event trig ");
-			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-			log.info("rerouting to event : evt trg");
-			output.setFollowupEvent(followupEvent);
+			log.info("Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.");
+			output = Redirections.redirectToDPApproval(output, parameter);
+
 		}
 		// else abort
 		log.info(message);
@@ -532,10 +455,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String startDate;
 		String endDate;
 		String comment;
-		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
+		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
 		String message = "";
 		if (action.equals("ONE_DAY_LEAVE")) {
-
 			log.info("one day leave apply");
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
@@ -548,31 +470,18 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			// isHoliday no long weekend || if isfestival no long weekend ||
 			// with long weekend ==>> same intent yes/No || set a boolean
 			// isHoliday
-			if (leave_balance <= 0 && !isHoliday) {
-				message += "You have insufficient leave balance";
-				log.info("DP APPROVAL REQ event trig ");
-				AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-				log.info("rerouting to event : evt trg");
-				output.setFollowupEvent(followupEvent);
-			} else if (leave_balance <= 0 && isHoliday) {
+		 if (leave_balance <= 0 && isHoliday) {
 				// intent to display text and break;
 				message = "No leave balance however its holiday for " + event;
-				log.info("Display text event triggred ");
-				AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
-				log.info("rerouting to event : evt trg");
-				output.setFollowupEvent(followupEvent);
-				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("message", new JsonPrimitive(message));
-				contextOut.setLifespan(1);
-				contextOut.setName("displayMessage");
-				contextOut.setParameters(outParms);
-				output.setContextOut(contextOut);
-			} else if (isFestival || isHoliday) {
+				output = Redirections.redirectToDisplayMessage(output, outParms);
 				
-					message += responseMessageObject.get("longVaccationSugestion");
-					comment = getMessage(event);
-			
+			}
+			else if (leave_balance > 0 && isFestival || isHoliday) {
+				
+				message += responseMessageObject.get("longVaccationSugestion");
+				comment = getMessage(event);
 				AIOutputContext contextOut = new AIOutputContext();
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("comment", new JsonPrimitive(comment));
@@ -588,7 +497,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
-				JSONObject jsonDays = getDays(startDate, startDate);
+				JSONObject jsonDays = DateDetails.getDays(startDate, startDate);
 				Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());		
 				if (isWeekend) {
 					if (event.equalsIgnoreCase("today")) {
@@ -601,24 +510,26 @@ public class MyWebhookServlet extends AIWebhookServlet {
 						isOneDay = true;
 					}
 					message = comment;
-					log.info("Display text event triggred ");
-					AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
-					log.info("rerouting to event : evt trg");
-					output.setFollowupEvent(followupEvent);
-					AIOutputContext contextOut = new AIOutputContext();
+					
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					outParms.put("message", new JsonPrimitive(message));
-					contextOut.setLifespan(1);
-					contextOut.setName("displayMessage");
-					contextOut.setParameters(outParms);
-					output.setContextOut(contextOut);
+					output = Redirections.redirectToDisplayMessage(output, outParms);
 				}
-				HashMap<String, JsonElement> outParms = new HashMap<>();
-				outParms.put("comment", new JsonPrimitive(comment));
-				outParms.put("startDate", new JsonPrimitive(startDate));
-				outParms.put("endDate", new JsonPrimitive(startDate));
-				output = redirectToCustomApply(output, outParms);
-			}
+				if (leave_balance > 0) {
+					HashMap<String, JsonElement> outParms = new HashMap<>();
+					outParms.put("comment", new JsonPrimitive(comment));
+					outParms.put("startDate", new JsonPrimitive(startDate));
+					outParms.put("endDate", new JsonPrimitive(startDate));
+					output = Redirections.redirectToCustomApply(output, outParms);
+				}
+				else{
+					output = Redirections.redirectToDPApproval(output, parameter);
+				}
+				
+			}else if (leave_balance <= 0 ) {
+				log.info("bal < req & no holiday");
+				output = Redirections.redirectToDPApproval(output, parameter);
+			} 
 
 		}
 		if (action.equals("QUERY_LEAVE")) {
@@ -634,21 +545,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
 			if (leave_balance > 0) {
 				if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty()) {
-
-					log.info("redirect to event without asking dates event trig fun");
-					AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
-					log.info("rerouting to event : evt trg");
-					output.setFollowupEvent(followupEvent);
-					AIOutputContext contextOut = new AIOutputContext();
+					
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 
 					outParms.put("comment", new JsonPrimitive(comment));
 					outParms.put("startDate", new JsonPrimitive(startDate));
 					outParms.put("endDate", new JsonPrimitive(endDate));
-					contextOut.setLifespan(1);
-					contextOut.setName("leaveParms");
-					contextOut.setParameters(outParms);
-					output.setContextOut(contextOut);
+					output = Redirections.redirectToCustomApply(output, outParms);
 				} else {
 
 					message += "Hey I just checked you have sufficient leave balance, shall we proceed?";
@@ -657,50 +560,46 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			} else {
 				// message = "Your l You will need Delivery partner approval.";
 				// set event trigg.
-				log.info("DP APPROVAL REQ event trig ");
-				AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-				log.info("rerouting to event : evt trg");
-				output.setFollowupEvent(followupEvent);
+				output = Redirections.redirectToDPApproval(output, parameter);
 			}
 
 		}
 
-		// message += " " + getLeaveInfo(sessionId).get("message") + " ";
-		// JSONObject sugestion = Suggest(parameter, sessionId);
-
-		/*
-		 * if (Boolean.parseBoolean(sugestion.get("present").toString())) {
-		 * log.info("do have a suggestion"); if (event.isEmpty()) {
-		 * log.info("event suggested"); event =
-		 * sugestion.get("event").toString(); message +=
-		 * sugestion.get("message").toString(); AIOutputContext contextOut = new
-		 * AIOutputContext(); HashMap<String, JsonElement> outParms = new
-		 * HashMap<>(); outParms.put("comment", new JsonPrimitive("leave for " +
-		 * event)); outParms.put("event", new JsonPrimitive(event));
-		 * 
-		 * contextOut.setLifespan(1); contextOut.setName("QueryLeave-followup");
-		 * contextOut.setParameters(outParms); // set cont.
-		 * output.setContextOut(contextOut); } else {
-		 * log.info("already had an event"); message +=
-		 * "You have sufficient leave balance. apply"; // triggre event
-		 * log.info("redirectToCustomApply event trig fun"); AIEvent
-		 * followupEvent = new AIEvent("CUSTOM_FORM");
-		 * log.info("rerouting to event : evt trg");
-		 * output.setFollowupEvent(followupEvent); } } else {
-		 * log.info("already had an event"); message += "So shall we proceed ?";
-		 * // triggre event log.info("redirectToCustomApply event trig fun");
-		 * AIEvent followupEvent = new AIEvent("CUSTOM_FORM");
-		 * log.info("rerouting to event : evt trg");
-		 * output.setFollowupEvent(followupEvent); }
-		 */
-
+	if (action.equalsIgnoreCase("QUERY_LEAVE_PARMS")) {
+		startDate = parameter.get("startDate").getAsString().trim();
+		endDate = parameter.get("endDate").getAsString().trim();
+		comment = parameter.get("comment").getAsString().trim();
+		Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+		Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
+		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+			JSONObject holidayMap =  (JSONObject) jsonDays.get("holidayTrack");
+				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday") && ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
+					//redirect to send message
+					message = "Its weekend from "+ Formator.getFormatedDate(start) + " to "+Formator.getFormatedDate(end)+". No need to apply for leave. Enjoy!";
+				
+					HashMap<String, JsonElement> outParms = new HashMap<>();
+					outParms.put("message", new JsonPrimitive(message));
+					output = Redirections.redirectToDisplayMessage(output, outParms);
+				}
+				else if (leave_balance >= noOfLeaves) {
+					message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
+					message += Formator.getWeekendContainsMessage(startDate, endDate);
+				}
+			
+		}
+		else if (leave_balance >= noOfLeaves) {
+			//give suggestion that if weekend
+			message = "Hey I just checked you have sufficient leave balance.";
+			message += Formator.getWeekendContainsMessage(startDate, endDate);
+		}
+	}
 		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
 	}
-
-	
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
 			String action, String sessionId) {
@@ -721,19 +620,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("event :" + event + " comment :" + comment);
 		}
 		// check leave balance > days to apply
-		int leave_balance = Integer.parseInt(getLeaveInfo(sessionId).get("count").toString());
-		JSONObject jsonDays = getDays(startDate, endDate);
+		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
-			message = "Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.";
-			// triggre dp approval inteent
-			log.info("DP APPROVAL REQ event trig ");
-			AIEvent followupEvent = new AIEvent("DP_APPROVAL");
-			log.info("rerouting to event : evt trg");
-			output.setFollowupEvent(followupEvent);
+			log.info("Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.");
+			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			 if (noOfLeaves == 1) { 
@@ -741,25 +636,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			else{
 			message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
-					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment;
+					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment+".";
 			
-			if (isWeekend) {
-				log.info(" dates contains weekend in Between");
-				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
-				log.info("holiday map fetched");
-				message += ". However its,";
-				for (Date date : holidayMap.keySet()) {
-					String day = holidayMap.get(date).toString();
-					message += " " + day + " on " + Formator.getFormatedDate(date);
-				}
-				log.info("message for weekend addded");
-				message += ". Shall we continue the plan?";
-			} else {
-				log.info("no weekend in between ");
-				message += " Should I confirm?";
-				// message += " No weekends or holidays in between. Are you sure
-				// you wanna plan this vaccation ?";
-			}
+			message += Formator.getWeekendContainsMessage(startDate, endDate);
 			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
@@ -794,19 +673,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setSpeech(message);
 			output.setDisplayText(message);
 		} else {
-			message = "Your leave balance is less than : " + noOfLeaves
-					+ ". You will need Delivery partner approval if you will apply. ";
-			log.info(message);
-			output.setSpeech(message);
-			output.setDisplayText(message);
-			AIOutputContext contextOut = new AIOutputContext();
-			HashMap<String, JsonElement> outParms = parameter;
-			outParms.put("comment", new JsonPrimitive(comment));
-			contextOut.setLifespan(1);
-			contextOut.setName("system-sugestion-satisfied-no-follow-up");
-			contextOut.setParameters(outParms);
-			// set cont.
-			output.setContextOut(contextOut);
+			output = Redirections.redirectToDPApproval(output, parameter);
 			// IMP : set out parmas end date- diff
 		}
 		log.info(message);
@@ -817,256 +684,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private static String getMessage(String event) {
 		// TODO Auto-generated method stub
 		return "Leave for " + event;
-	}
-
-	private static JSONObject Suggest(HashMap<String, JsonElement> parameter, String sessionId) {
-		log.info("suggest called");
-		JSONObject holidayData = Data.getHolidays(sessionId);
-		String bday = holidayData.get("birthday").toString();
-		JSONObject response = new JSONObject();
-		try {
-			Date birthday = new SimpleDateFormat("dd/MM/yyyy").parse(bday);
-			String msg = "";
-			String event = "";
-			Boolean check = false;
-			if (isEventWithinRange(birthday)) {
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(birthday);
-				msg = " And! Its your birthday on " + new SimpleDateFormat("MMM d").format(birthday)
-						+ ". Want to go out??";
-				event = "birthday";
-				check = true;
-			} else {
-				JSONObject holidays = (JSONObject) holidayData.get("holidays");
-				for (Iterator iterator = holidays.keySet().iterator(); iterator.hasNext();) {
-					String key = (String) iterator.next();
-					Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(key);
-					if (isEventWithinRange(date1)) {
-						msg = holidays.get(key).toString() + " is coming up.. Wanna apply leave for that?"
-								+ holidays.get(key).toString();
-						event = (String) holidays.get(key);
-						check = true;
-					}
-				}
-			}
-			response.put("event", event);
-			response.put("message", msg);
-			response.put("present", check);
-			log.info("returns from function");
-			log.info(response.toJSONString());
-			return response;
-		} catch (Exception e) {
-			log.severe("error " + e);
-		}
-
-		return response;
-	}
-
-	private static JSONObject getLeaveInfo(String sessionId) {
-		String message = "";
-		JSONObject data = Data.getHolidays(sessionId);
-
-		log.info("data : " + data.toJSONString());
-
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
-
-		log.info("recieved leaves");
-
-		boolean isAvailable = false;
-		int count = PL + CF + OH + OL;
-		JSONObject response = new JSONObject();
-		response.put("isAvailable", isAvailable);
-		response.put("count", count);
-
-		if (PL <= 0) {
-			isAvailable = true;
-			message = "You don't have any privilage leave available.";
-			if (CF <= 0) {
-				log.info("no cf");
-				if (OH <= 0) {
-					log.info("no oh");
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Sorry dear! You don't have any leave balance. ";
-						isAvailable = false;
-					} else {
-						message = "You only have " + OL + " optional leaves left. Are you sure you want to apply now ?";
-					}
-				} else {
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Hey! Buddy. You only have " + OH
-								+ " optional holidays left. Are you sure you want to apply now ? ";
-					} else {
-						message = "You have " + OL + " optional leaves, and " + OH
-								+ " optional holiday left. Are you sure you want to apply now ?";
-					}
-				}
-			} else {
-				log.info("cf avl");
-				if (OH <= 0) {
-					log.info("no oh");
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Great! you have " + CF
-								+ " comp. off available Do consume it, you won't be able to carry forward it.";
-					} else {
-						message = "Great! you have " + CF
-								+ " comp. off available Do consume it, you won't be able to carry forward it.Also, you have "
-								+ OL + " optional leave. You can use it too.";
-					}
-				} else {
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Great! you have " + CF + " comp. off and " + OH
-								+ " optional leaves available Do consume it, they won't be carry forward. I know you don't wanna lose them";
-					} else {
-						message = "Great! you have " + CF + " comp. off , " + OH + " optional leaves" + OL
-								+ " optional leave available Do consume it, they won't be carry forward. I know you don't wanna lose them";
-					}
-				}
-			}
-		} else {
-			message = "You don't have any privilage leave available.";
-			if (CF <= 0) {
-				log.info("no cf");
-				if (OH <= 0) {
-					log.info("no oh");
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Sorry dear! You don't have any leave balance. ";
-					} else {
-						message = "You only have " + OL + " optional leaves left. Are you sure you want to apply now ?";
-					}
-				} else {
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Hey! Buddy. You only have " + OH
-								+ " optional holidays left. Are you sure you want to apply now ? ";
-					} else {
-						message = "You have " + OL + " optional leaves, and " + OH
-								+ " optional holiday left. Are you sure you want to apply now ?";
-					}
-				}
-			} else {
-				log.info("cf avl");
-				if (OH <= 0) {
-					log.info("no oh");
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Buddy! you have " + PL + " previlage leave with you."
-								+ "But I would suggest you should take compensatiory leaves as you have " + CF
-								+ " comp. off available Do consume it, I know you don't wanna lose them.";
-					} else {
-						message = "Buddy! you have " + PL + " previlage leave with you."
-								+ "But I would suggest you should take compensatiory leaves as you have " + CF
-								+ " comp. off available. However you can also opt for optional leave as you have " + OL
-								+ " optional leave available.Do consume it, I know you don't wanna lose them.";
-					}
-				} else {
-					if (OL <= 0) {
-						log.info("no OL");
-						message = "Buddy! you have " + PL + " previlage leave with you."
-								+ "But I would suggest you should take compensatiory leaves as you have " + CF
-								+ " comp. off available. However you can also opt for optional leave as you have " + OL
-								+ " optional leave available.Do consume it, I know you don't wanna lose them.";
-					} else {
-						message = "You have " + PL + " privilage leave " + CF + " comp. offs " + OH
-								+ " optional holidays and " + OL
-								+ " optional leaves with you. So its your call which you wanna consume.Still I would suggest do use out the leaves who don't carry forward.";
-					}
-				}
-			}
-
-		}
-		response.put("message", message);
-		return response;
-	}
-
-	public static boolean isEventWithinRange(Date testDate) {
-		log.info("isEventWithRange ");
-		Date event_date = new Date();
-		try {
-			Date today = new SimpleDateFormat("dd/MM/yyyy")
-					.parse(new SimpleDateFormat("dd/MM/yyyy").format(event_date));
-			String date2 = "31/04/2018";
-			Date last = new SimpleDateFormat("dd/MM/yyyy").parse(date2);
-			log.info("method returns");
-			return testDate.after(today) || testDate.before(last);
-		} catch (Exception e) {
-			log.severe("exception " + e);
-		}
-		return false;
-	}
-
-	private static JSONObject getDays(String startDate, String endDate) {
-		log.info("get days");
-		int days = 0;
-		boolean isWeekEnd = false;
-		JSONObject response = new JSONObject();
-		JSONObject holidayTrack = new JSONObject();
-		response.put("days", days);
-		response.put("holidayTrack", holidayTrack);
-		response.put("isWeekEnd", isWeekEnd);
-		log.info("start date " + startDate + " end date " + endDate);
-		if ((startDate.isEmpty() && endDate.isEmpty())) {
-			return response;
-		}
-		try {
-			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
-			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
-			log.info("s :" + start + " e: " + endDate);
-			Calendar calS = Calendar.getInstance();
-			calS.setTime(start);
-			Calendar calE = Calendar.getInstance();
-			calE.setTime(end);
-			log.info("cal s :" + calS + " cal e: " + calE);
-
-			do {
-
-				if (calS.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-					holidayTrack.put(calS.getTime(), "Saturday");
-					log.info(Calendar.SATURDAY + " : on " + calS.DATE + " saturday");
-					calS.add(Calendar.DATE, 1);
-					isWeekEnd = true;
-				} else if (calS.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-					holidayTrack.put(calS.getTime(), "Sunday");
-					log.info(Calendar.SUNDAY + " : on " + calS.DATE + " sunday");
-					calS.add(Calendar.DATE, 1);
-					isWeekEnd = true;
-
-				} else {
-
-					days++;
-					log.info("inc date");
-					calS.add(Calendar.DATE, 1);
-					log.info("date inc : " + calS.DATE + " " + calS.MONTH);
-					/*
-					 * if (calS.DAY_OF_WEEK == Calendar.SATURDAY) {
-					 * holidayTrack.put(calS, "Saturday"); log.info(
-					 * Calendar.SATURDAY + " : on "+calS.DATE);
-					 * 
-					 * } else if (calS.DAY_OF_WEEK == Calendar.SUNDAY) {
-					 * holidayTrack.put(calS, "Sunday"); log.info(
-					 * Calendar.SUNDAY + " : on "+calS.DATE);
-					 * 
-					 * } isWeekEnd = true;
-					 */
-				}
-			} while (calS.compareTo(calE) <= 0);
-
-			System.out.println("days :" + days);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			log.severe("exception getting days count :" + e);
-		}
-		response.put("days", days);
-		response.put("holidayTrack", holidayTrack);
-		response.put("isWeekEnd", isWeekEnd);
-		return response;
 	}
 
 }
