@@ -33,7 +33,7 @@ public class Formator {
 	}
 	public static String getWeekendContainsMessage(String startDate , String endDate){
 		String message= "";
-		JSONObject jsonDays = getDays(startDate, endDate);
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
 
 		if (isWeekend) {
