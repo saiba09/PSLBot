@@ -118,9 +118,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			case "ONE_DAY_LEAVE":
 				log.info("intent : ONE_DAY_LEAVE");
 				output = queryLeave(output, parameter, sessionId, action, input);
-
 				break;
-
+			case "TO_SUGGEST_LEAVE_TYPE":
+				log.info("intent : LeaveQueryWithParms - yes");
+				output = Redirections.redirectToSuggestLeaveOption(output, parameter);
+				break;
+				
 			case "CONFIRM_LEAVE_APPLY":
 				log.info("intent : CONFIRM_LEAVE_APPLY");
 				output = applyLeaveWithTypes(output, parameter);
@@ -136,6 +139,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				output = getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES",
 						sessionId);
 				break;
+
 			case "GET_LEAVE_BALANCE":
 				log.info("intent : getLeaveBalance");
 				output = getLeaveBalance(output, parameter, sessionId);
@@ -470,16 +474,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			// isHoliday no long weekend || if isfestival no long weekend ||
 			// with long weekend ==>> same intent yes/No || set a boolean
 			// isHoliday
-		 if (leave_balance <= 0 && isHoliday) {
+			if (leave_balance <= 0 && isHoliday) {
 				// intent to display text and break;
 				message = "No leave balance however its holiday for " + event;
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
-				
-			}
-			else if (leave_balance > 0 && isFestival || isHoliday) {
-				
+
+			} else if (leave_balance > 0 && isFestival || isHoliday) {
+
 				message += responseMessageObject.get("longVaccationSugestion");
 				comment = getMessage(event);
 				AIOutputContext contextOut = new AIOutputContext();
@@ -498,7 +501,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
 				JSONObject jsonDays = DateDetails.getDays(startDate, startDate);
-				Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());		
+				Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
 				if (isWeekend) {
 					if (event.equalsIgnoreCase("today")) {
 						comment += " Its weekend today.";
@@ -510,7 +513,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 						isOneDay = true;
 					}
 					message = comment;
-					
+
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					outParms.put("message", new JsonPrimitive(message));
 					output = Redirections.redirectToDisplayMessage(output, outParms);
@@ -521,15 +524,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					outParms.put("startDate", new JsonPrimitive(startDate));
 					outParms.put("endDate", new JsonPrimitive(startDate));
 					output = Redirections.redirectToCustomApply(output, outParms);
-				}
-				else{
+				} else {
 					output = Redirections.redirectToDPApproval(output, parameter);
 				}
-				
-			}else if (leave_balance <= 0 ) {
+
+			} else if (leave_balance <= 0) {
 				log.info("bal < req & no holiday");
 				output = Redirections.redirectToDPApproval(output, parameter);
-			} 
+			}
 
 		}
 		if (action.equals("QUERY_LEAVE")) {
@@ -545,7 +547,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
 			if (leave_balance > 0) {
 				if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty()) {
-					
+
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 
 					outParms.put("comment", new JsonPrimitive(comment));
@@ -565,36 +567,36 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 		}
 
-	if (action.equalsIgnoreCase("QUERY_LEAVE_PARMS")) {
-		startDate = parameter.get("startDate").getAsString().trim();
-		endDate = parameter.get("endDate").getAsString().trim();
-		comment = parameter.get("comment").getAsString().trim();
-		Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
-		Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
-		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
-		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
-			JSONObject holidayMap =  (JSONObject) jsonDays.get("holidayTrack");
-				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday") && ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
-					//redirect to send message
-					message = "Its weekend from "+ Formator.getFormatedDate(start) + " to "+Formator.getFormatedDate(end)+". No need to apply for leave. Enjoy!";
-				
+		if (action.equalsIgnoreCase("QUERY_LEAVE_PARMS")) {
+			startDate = parameter.get("startDate").getAsString().trim();
+			endDate = parameter.get("endDate").getAsString().trim();
+			comment = parameter.get("comment").getAsString().trim();
+			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+			JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
+			int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+			if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+				JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
+				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
+						&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
+					// redirect to send message
+					message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
+							+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
+
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					outParms.put("message", new JsonPrimitive(message));
 					output = Redirections.redirectToDisplayMessage(output, outParms);
-				}
-				else if (leave_balance >= noOfLeaves) {
+				} else if (leave_balance >= noOfLeaves) {
 					message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
 					message += Formator.getWeekendContainsMessage(startDate, endDate);
 				}
-			
+
+			} else if (leave_balance >= noOfLeaves) {
+				// give suggestion that if weekend
+				message = "Hey I just checked you have sufficient leave balance.";
+				message += Formator.getWeekendContainsMessage(startDate, endDate);
+			}
 		}
-		else if (leave_balance >= noOfLeaves) {
-			//give suggestion that if weekend
-			message = "Hey I just checked you have sufficient leave balance.";
-			message += Formator.getWeekendContainsMessage(startDate, endDate);
-		}
-	}
 		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
@@ -627,18 +629,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
-			log.info("Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.");
+			log.info(
+					"Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.");
 			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
-			 if (noOfLeaves == 1) { 
-				message += "You want to apply leave on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
-			}
-			else{
-			message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
-					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment+".";
-			
-			message += Formator.getWeekendContainsMessage(startDate, endDate);
+			if (noOfLeaves == 1) {
+				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " as " + comment
+						+ ". Should I confirm?";
+			} else {
+				message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
+						+ Formator.getFormatedDate(endDate.toString()) + " as " + comment + ".";
+
+				message += Formator.getWeekendContainsMessage(startDate, endDate);
 			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
