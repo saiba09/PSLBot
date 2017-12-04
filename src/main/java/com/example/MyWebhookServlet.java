@@ -300,7 +300,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			day += "s";
 		}
 		if (noOfLeave <= balance) {
-			if (noOfLeave == 1) {
+			if (noOfLeave == 0) {
 				message += "You want to apply 1 "+type+" on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
 
 			}else{
@@ -736,7 +736,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
-			 if (noOfLeaves == 1) {
+			 if (noOfLeaves == 0) { 
 				message += "You want to apply leave on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
 			}
 			else{

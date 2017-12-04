@@ -90,13 +90,14 @@ public class LeaveMessageFormator {
 				message += "You want to apply leave on " + date;
 				if (event.equalsIgnoreCase("today")) {
 					comment += " as you are " + comment;
-					isOneDay = true;
+					
 
 				}
-				if (event.equalsIgnoreCase("tomorrow")) {
+				else if (event.equalsIgnoreCase("tomorrow")) {
 					comment += "as you was " + comment;
-					isOneDay = true;
+//					isOneDay = true;
 				}
+				isOneDay = true;
 
 			}
 			log.info("message : " + message);
