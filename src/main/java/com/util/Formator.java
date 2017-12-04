@@ -31,7 +31,7 @@ public class Formator {
 		log.info("formated Date : "+fDate);
 		return fDate;
 	}
-	public static String getWeekendContainsMessage(String startDate , String endDate){
+	public static String getWeekendContainsMessage(String startDate , String endDate,int check){
 		String message= "";
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
@@ -40,7 +40,11 @@ public class Formator {
 			log.info(" dates contains weekend in Between");
 			HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 			log.info("holiday map fetched");
+			if (check == 1) {
+				message += "As its,";
+			}else{
 			message += " However its,";
+			}
 			for (Date date : holidayMap.keySet()) {
 				String day = holidayMap.get(date).toString();
 				message += " " + day + " on " + Formator.getFormatedDate(date);

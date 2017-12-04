@@ -588,13 +588,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					output = Redirections.redirectToDisplayMessage(output, outParms);
 				} else if (leave_balance >= noOfLeaves) {
 					message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
-					message += Formator.getWeekendContainsMessage(startDate, endDate);
+					message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
 				}
 
 			} else if (leave_balance >= noOfLeaves) {
 				// give suggestion that if weekend
 				message = "Hey I just checked you have sufficient leave balance.";
-				message += Formator.getWeekendContainsMessage(startDate, endDate);
+				message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 			}
 		}
 		log.info(message);
@@ -635,13 +635,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			if (noOfLeaves == 1) {
-				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " as " + comment
-						+ ". Should I confirm?";
+				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " as " + comment+".";
+				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
+
+//						+ ". Should I confirm?";
 			} else {
 				message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
 						+ Formator.getFormatedDate(endDate.toString()) + " as " + comment + ".";
 
-				message += Formator.getWeekendContainsMessage(startDate, endDate);
+				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
 			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
