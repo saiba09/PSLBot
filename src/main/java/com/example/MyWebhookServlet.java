@@ -300,7 +300,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			day += "s";
 		}
 		if (noOfLeave <= balance) {
-			if (noOfLeave == 0) {
+			if (noOfLeave == 1) {
 				message += "You want to apply 1 "+type+" on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
 
 			}else{
@@ -442,7 +442,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (CF != 0 || OH != 0 || OL != 0) {
 				// message += "Do you still want to apply for privilage leave ?
 				// Don't forget these leaves won't carry forward.";
-				message += "Do you still want to apply for privilaged leave?";
+				message += " Do you still want to apply for privilaged leave?";
 			}
 		}
 		log.info(message);
@@ -509,7 +509,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal < no Leaves ");
-			message = "Here you go! Your leaves had been applied in the system.#false";
+			message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you.";
 		} else {
 			message = "Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.";
 			// set event trigg.
@@ -556,7 +556,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				output.setFollowupEvent(followupEvent);
 			} else if (leave_balance <= 0 && isHoliday) {
 				// intent to display text and break;
-				message += "no leave balance however its holiday for " + event;
+				message = "No leave balance however its holiday for " + event;
 				log.info("Display text event triggred ");
 				AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
 				log.info("rerouting to event : evt trg");
@@ -569,7 +569,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
 			} else if (isFestival || isHoliday) {
-			
+				
 					message += responseMessageObject.get("longVaccationSugestion");
 					comment = getMessage(event);
 			
@@ -600,7 +600,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 						comment += "It was weekend yesterday.";
 						isOneDay = true;
 					}
-					message += "";
+					message = comment;
 					log.info("Display text event triggred ");
 					AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
 					log.info("rerouting to event : evt trg");
@@ -651,7 +651,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					output.setContextOut(contextOut);
 				} else {
 
-					message += "You have sufficient leave balance, shall we proceed?";
+					message += "Hey I just checked you have sufficient leave balance, shall we proceed?";
 
 				}
 			} else {
@@ -736,7 +736,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output.setFollowupEvent(followupEvent);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
-			 if (noOfLeaves == 0) { 
+			 if (noOfLeaves == 1) { 
 				message += "You want to apply leave on "+Formator.getFormatedDate(startDate)+" as "+comment+". Should I confirm?";
 			}
 			else{
