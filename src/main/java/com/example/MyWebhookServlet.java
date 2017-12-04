@@ -238,7 +238,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveBreakUp = parameter.get("leaveBreakUp").getAsString().trim();
-		String message = "Your leaves had been applied.#false";
+		String message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you..#false";
 		output.setDisplayText(message);
 		output.setSpeech(message);
 		return output;
@@ -741,19 +741,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			else{
 			message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
-					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment + ".";
+					+ Formator.getFormatedDate(endDate.toString()) + " as " + comment;
 			
 			if (isWeekend) {
 				log.info(" dates contains weekend in Between");
 				HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 				log.info("holiday map fetched");
-				message += " However its,";
+				message += ". However its,";
 				for (Date date : holidayMap.keySet()) {
 					String day = holidayMap.get(date).toString();
 					message += " " + day + " on " + Formator.getFormatedDate(date);
 				}
 				log.info("message for weekend addded");
-				message += " Shall we continue the plan?";
+				message += ". Shall we continue the plan?";
 			} else {
 				log.info("no weekend in between ");
 				message += " Should I confirm?";
