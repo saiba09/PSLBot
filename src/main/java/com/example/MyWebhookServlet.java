@@ -212,8 +212,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			
 		} else if (action.equals("APPLY_ONE_DAY") && isFestival) {
 			// redirect to custom form
-			contextOut.setLifespan(1);
-			contextOut.setName("OneDayLeave-yes-followup");
+			contextOut.setLifespan(1); 
+			contextOut.setName("OneDayLeave-followup"); //OneDayLeave-followup
 		}
 		output.setContextOut(contextOut);
 		output.setSpeech(message);
@@ -538,10 +538,16 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				}
 				if (leave_balance > 0) {
 					HashMap<String, JsonElement> outParms = new HashMap<>();
-					outParms.put("comment", new JsonPrimitive(comment));
+					message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
+					message += "Which type of leave you want to opt for?";
+					AIOutputContext contextOut = new AIOutputContext();
 					outParms.put("startDate", new JsonPrimitive(startDate));
-					outParms.put("endDate", new JsonPrimitive(startDate));
-					output = Redirections.redirectToCustomApply(output, outParms);
+					outParms.put("endDate", new JsonPrimitive(endDate));
+					outParms.put("comment", new JsonPrimitive(comment));
+					contextOut.setParameters(outParms);
+					output.setContextOut(contextOut);
+					
+					//output = Redirections.redirectToCustomApply(output, outParms);
 				} else {
 					output = Redirections.redirectToDPApproval(output, parameter);
 				}
