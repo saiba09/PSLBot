@@ -222,6 +222,7 @@ public class DateDetails {
 		int days = 0; 
 		log.info("start date " + startDate + " end date " + endDate);
 		if ((startDate.isEmpty() && endDate.isEmpty())) {
+			log.info("startdate &7 endDate empty ");
 			return days;
 		}
 		try {
@@ -234,7 +235,7 @@ public class DateDetails {
 			calE.setTime(end);
 			log.info("cal s :" + calS + " cal e: " + calE);
 			do {
-				days++;
+					days++;
 					log.info("inc date");
 					calS.add(Calendar.DATE, 1);
 					log.info("date inc : " + calS.DATE + " " + calS.MONTH);
