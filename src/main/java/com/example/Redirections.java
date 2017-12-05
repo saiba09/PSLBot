@@ -44,6 +44,7 @@ public class Redirections {
 	
 	protected static Fulfillment redirectToSuggestLeaveOption(Fulfillment output, HashMap<String, JsonElement> parameter){
 		log.info("redirect to event without asking dates event trig fun");
+		log.info("parms : " + parameter.get("startDate") + " end date "+parameter.get("endDate") +" comment "+ parameter.get("comment"));
 		AIEvent followupEvent = new AIEvent("SUGGEST_LEAVES_OPTION");
 		log.info("rerouting to event : evt trg");
 		output.setFollowupEvent(followupEvent);
