@@ -127,11 +127,12 @@ public class Formator {
 		log.info("jsonDays : "+jsonDays);
 		int noOfLeaves = DateDetails.getDaysBetweenDates(startDate, endDate);
 		log.info("Days between days : "+ noOfLeaves);
-		
+		int noOfDays = Integer.parseInt(jsonDays.get("days").toString().trim());
 		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
 			log.info("2 day leave : next check for sat sun");
 			JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
-			if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
+			log.info("holiday track : "+holidayMap);
+			if (noOfLeaves == noOfDays && ((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
 					&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
 				// redirect to send message
 				message = "Its weekend from " + Formator.getFormatedDate(start) + " to "

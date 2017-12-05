@@ -50,6 +50,7 @@ public class Redirections {
 		AIOutputContext contextOut = new AIOutputContext();
 		contextOut.setLifespan(1);
 		contextOut.setName("leaveParms");
+		contextOut.setParameters(parameter);
 		output.setContextOut(contextOut);
 		return output;
 	}
