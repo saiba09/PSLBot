@@ -497,6 +497,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setName("oneDayLeaveFollowup");
 				contextOut.setParameters(outParms);
 				output.setContextOut(contextOut);
+				output.setDisplayText(message);
+				output.setSpeech(message);
 			}
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
@@ -573,6 +575,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			comment = parameter.get("comment").getAsString().trim();
 			output = Formator.getLeaveConfirmationMessage(startDate, endDate, comment, leave_balance, output);
 		}
+		return output;
 	}
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
