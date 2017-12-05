@@ -182,28 +182,43 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
+		String event = parameter.get("event").getAsString().trim();
 		Boolean isFestival = Boolean.parseBoolean(parameter.get("isFestival").getAsString().trim());
 		Boolean isHoliday = Boolean.parseBoolean(parameter.get("isHoliday").getAsString().trim());
 		Boolean isOneDay = Boolean.parseBoolean(parameter.get("isOneDay").getAsString().trim());
+		
 		String message = "";
 		log.info("Parms : " + startDate + " " + endDate + " " + comment + " isFest " + isFestival + " isHoliday "
 				+ isHoliday + " isOne " + isOneDay);
 		HashMap<String, JsonElement> outParms = new HashMap<>();
-		outParms.put("comment", new JsonPrimitive(comment));
-		if (action.equals("APPLY_ONE_DAY") || isOneDay) {
-			// Ask leave type
+		
+		if (isHoliday) {
+			message = "Have fun! Happy "+event;
+			outParms.put("message", new JsonPrimitive(message));
+		
+			output = Redirections.redirectToDisplayMessage(output, outParms);
+		}
+		else{
+			message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
+			message += "Which type of leave you want to opt for?";
 			AIOutputContext contextOut = new AIOutputContext();
 			outParms.put("startDate", new JsonPrimitive(startDate));
 			outParms.put("endDate", new JsonPrimitive(endDate));
+			outParms.put("comment", new JsonPrimitive(comment));
 			contextOut.setParameters(outParms);
-			output.setContextOut(contextOut);
-			message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
-			message += "Which type of leave you want to opt for?";
-		} else if (isHoliday || isFestival) {
+			
+		if (isOneDay) {
+			// Ask leave type
+			
+		} else if (action.equals("APPLY_ONE_DAY") && isFestival) {
 			// redirect to custom form
-			output = Redirections.redirectToCustomApply(output, outParms);
+			contextOut.setLifespan(1);
+			contextOut.setName("OneDayLeave-yes-followup");
 		}
-
+		output.setContextOut(contextOut);
+		output.setSpeech(message);
+		output.setDisplayText(message);
+		}
 		return output;
 	}
 
@@ -306,7 +321,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 						+ comment + ". Should I confirm?";
 
 			} else {
-				message += "So want to apply : " + noOfLeave + " " + day + " " + type + " from "
+				message += "So want to apply leave : " + noOfLeave + " " + day + " " + type + " from "
 						+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
 						+ ". Shall I confirm?";
 			}
