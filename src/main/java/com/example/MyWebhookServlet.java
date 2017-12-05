@@ -302,7 +302,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		if (noOfLeave <= balance) {
 			if (noOfLeave == 1) {
-				message += "You want to apply 1 " + type + " on " + Formator.getFormatedDate(startDate) + " as "
+				message += "You want to apply 1 " + type + " on " + Formator.getFormatedDate(startDate) + " for "
 						+ comment + ". Should I confirm?";
 
 			} else {
@@ -456,8 +456,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId,
 			String action, AIWebhookRequest input) throws ParseException {
 		log.info("querry leave function");
-		String startDate;
-		String endDate;
+		String startDate = null;
+		String endDate = null;
 		String comment;
 		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
 		String message = "";
@@ -466,6 +466,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("date").getAsString().trim();
 			String event = parameter.get("dateEvent").getAsString().trim();
 			comment = parameter.get("comment").getAsString().trim();
+			log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 			JSONObject responseMessageObject = LeaveMessageFormator.getMessageForFestival(event, startDate, comment);
 			Boolean isHoliday = Boolean.parseBoolean(responseMessageObject.get("isHoliday").toString());
 			Boolean isFestival = Boolean.parseBoolean(responseMessageObject.get("isFestival").toString());
@@ -540,6 +541,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("startDate").getAsString().trim();
 			endDate = parameter.get("endDate").getAsString().trim();
 			comment = parameter.get("comment").getAsString().trim();
+			log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 			if (comment.isEmpty()) {
 				String event = parameter.get("event").getAsString().trim();
 				if (!event.isEmpty()) {
@@ -559,7 +561,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				} else {
 
 					message += "Hey I just checked you have sufficient leave balance, shall we proceed?";
-
+					output.setDisplayText(message);
+					output.setSpeech(message);
 				}
 			} else {
 				// message = "Your l You will need Delivery partner approval.";
@@ -573,6 +576,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("startDate").getAsString().trim();
 			endDate = parameter.get("endDate").getAsString().trim();
 			comment = parameter.get("comment").getAsString().trim();
+			log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 			output = Formator.getLeaveConfirmationMessage(startDate, endDate, comment, leave_balance, output);
 		}
 		return output;
@@ -612,7 +616,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("req > bal");
 			
 			if (noOfLeaves == 1) {
-				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " as " + comment+".";
+				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " for " + comment+".";
 				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
 
 //						+ ". Should I confirm?";

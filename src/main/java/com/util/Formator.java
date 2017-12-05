@@ -39,7 +39,7 @@ public class Formator {
 		String message= "";
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
-
+		Boolean flag = false;
 		if (isWeekend) {
 			log.info(" dates contains weekend in Between");
 			HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
@@ -51,7 +51,12 @@ public class Formator {
 			}
 			for (Date date : holidayMap.keySet()) {
 				String day = holidayMap.get(date).toString();
-				message += " " + day + " on " + Formator.getFormatedDate(date);
+				if (!flag) {
+					message += " " + day + " on " + Formator.getFormatedDate(date);
+					flag = true;
+				}
+				message += " and " + day + " on " + Formator.getFormatedDate(date);
+
 			}
 			log.info("message for weekend addded");
 			message += ". Shall we continue the plan?";
@@ -117,7 +122,8 @@ public class Formator {
 		String message = "";
 		
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		int noOfLeaves = DateDetails.getDaysBetweenDates(startDate, endDate);
+		log.info("Days between days : "+ noOfLeaves);
 		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
 			JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
 			if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
