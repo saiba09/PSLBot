@@ -11,7 +11,11 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 
 import com.example.Data;
+import com.example.Redirections;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
+import ai.api.model.Fulfillment;
 
 public class Formator {
 	private static final Logger log = Logger.getLogger(Formator.class.getName());
@@ -99,6 +103,46 @@ public class Formator {
 		}
 
 		return response;
+	}
+	public static Fulfillment getLeaveConfirmationMessage(String startDate, String endDate, String comment ,int leave_balance, Fulfillment output){
+		Date start = null;;
+		Date end =null;
+		try {
+			start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+			end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			log.severe("Exception : "+ e);
+		}
+		String message = "";
+		
+		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
+		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+			JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
+			if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
+					&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
+				// redirect to send message
+				message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
+						+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
+
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("message", new JsonPrimitive(message));
+				output = Redirections.redirectToDisplayMessage(output, outParms);
+			} else if (leave_balance >= noOfLeaves) {
+				message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
+				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
+			}
+
+		} else if (leave_balance >= noOfLeaves) {
+			// give suggestion that if weekend
+			message = "Hey I just checked you have sufficient leave balance.";
+			message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
+		}
+		log.info(message);
+		output.setSpeech(message);
+		output.setDisplayText(message);
+		return output;
 	}
 		}
 

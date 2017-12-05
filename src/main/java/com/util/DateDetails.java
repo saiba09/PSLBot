@@ -218,4 +218,34 @@ public class DateDetails {
 		}
 		return false;
 	}
+	public static int getDaysBetweenDates(String startDate ,String endDate){
+		int days = 0; 
+		log.info("start date " + startDate + " end date " + endDate);
+		if ((startDate.isEmpty() && endDate.isEmpty())) {
+			return days;
+		}
+		try {
+			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+			log.info("s :" + start + " e: " + endDate);
+			Calendar calS = Calendar.getInstance();
+			calS.setTime(start);
+			Calendar calE = Calendar.getInstance();
+			calE.setTime(end);
+			log.info("cal s :" + calS + " cal e: " + calE);
+			do {
+				days++;
+					log.info("inc date");
+					calS.add(Calendar.DATE, 1);
+					log.info("date inc : " + calS.DATE + " " + calS.MONTH);
+				
+				} while (calS.compareTo(calE) <= 0);
+			System.out.println("days :" + days);
+			}		
+		 catch (ParseException e) {
+			// TODO Auto-generated catch block
+			log.severe("exception getting days count :" + e);
+		}
+		return days;
+	}
 }

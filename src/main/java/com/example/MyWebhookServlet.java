@@ -553,7 +553,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					outParms.put("comment", new JsonPrimitive(comment));
 					outParms.put("startDate", new JsonPrimitive(startDate));
 					outParms.put("endDate", new JsonPrimitive(endDate));
-					output = Redirections.redirectToCustomApply(output, outParms);
+					output = Redirections.redirectToQueryLeaveWithParms(output, outParms);
 				} else {
 
 					message += "Hey I just checked you have sufficient leave balance, shall we proceed?";
@@ -571,40 +571,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			startDate = parameter.get("startDate").getAsString().trim();
 			endDate = parameter.get("endDate").getAsString().trim();
 			comment = parameter.get("comment").getAsString().trim();
-			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
-			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
-			JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-			int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
-			if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
-				JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
-				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
-						&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
-					// redirect to send message
-					message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
-							+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
-
-					HashMap<String, JsonElement> outParms = new HashMap<>();
-					outParms.put("message", new JsonPrimitive(message));
-					output = Redirections.redirectToDisplayMessage(output, outParms);
-				} else if (leave_balance >= noOfLeaves) {
-					message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
-					message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
-				}
-
-			} else if (leave_balance >= noOfLeaves) {
-				// give suggestion that if weekend
-				message = "Hey I just checked you have sufficient leave balance.";
-				message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
-			}
+			output = Formator.getLeaveConfirmationMessage(startDate, endDate, comment, leave_balance, output);
 		}
-		log.info(message);
-		output.setSpeech(message);
-		output.setDisplayText(message);
-		return output;
 	}
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String action, String sessionId) {
+			String action, String sessionId) throws ParseException {
 		log.info("getConfirmationMessage");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
@@ -626,7 +598,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
-		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
+		int totalDays = DateDetails.getDaysBetweenDates(startDate, endDate);
+		log.info("balance :" + leave_balance + " required :" + noOfLeaves +" total days : "+ totalDays);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
 			log.info(
@@ -634,17 +607,36 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
+			
 			if (noOfLeaves == 1) {
 				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " as " + comment+".";
 				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
 
 //						+ ". Should I confirm?";
-			} else {
-				message = "So you want to apply from " + Formator.getFormatedDate(startDate.toString()) + " to "
-						+ Formator.getFormatedDate(endDate.toString()) + " as " + comment + ".";
+			}else if (totalDays == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+				Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+				Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+				JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
+				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
+						&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
+					// redirect to send message
+					message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
+							+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
 
-				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
-			}
+					HashMap<String, JsonElement> outParms = new HashMap<>();
+					outParms.put("message", new JsonPrimitive(message));
+					output = Redirections.redirectToDisplayMessage(output, outParms);
+				} else if (leave_balance >= noOfLeaves) {
+					message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
+					message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
+				}
+
+			} else if (leave_balance >= noOfLeaves) {
+				// give suggestion that if weekend
+				message = "Hey I just checked you have sufficient leave balance.";
+				message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
+			} 
+			
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				AIOutputContext contextOut = new AIOutputContext();
@@ -658,6 +650,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				contextOut.setParameters(outParms);
 				// set cont.
 				output.setContextOut(contextOut);
+			
 			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_NO")) {
 				/*
@@ -675,14 +668,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				 */}
 			/*			
 			*/
-			output.setSpeech(message);
-			output.setDisplayText(message);
+			
 		} else {
 			output = Redirections.redirectToDPApproval(output, parameter);
 			// IMP : set out parmas end date- diff
 		}
 		log.info(message);
-
+		output.setDisplayText(message);
+		output.setSpeech(message);
 		return output;
 	}
 

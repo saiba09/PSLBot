@@ -16,7 +16,7 @@ import ai.api.model.Fulfillment;
 public class Redirections {
 	private static final Logger log = Logger.getLogger(Redirections.class.getName());
 	
-	protected static Fulfillment redirectToDisplayMessage(Fulfillment output, HashMap<String, JsonElement> parameter){
+	public static Fulfillment redirectToDisplayMessage(Fulfillment output, HashMap<String, JsonElement> parameter){
 		log.info("Display text event triggred ");
 		AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
 		log.info("rerouting to event : evt trg");
@@ -61,6 +61,19 @@ public class Redirections {
 		AIOutputContext contextOut = new AIOutputContext();
 		contextOut.setLifespan(1);
 		contextOut.setName("customFormContext");
+		contextOut.setParameters(parameter);
+		output.setContextOut(contextOut);
+		output.setFollowupEvent(followupEvent);
+		return output;
+	}
+	protected static Fulfillment redirectToQueryLeaveWithParms(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		// Trigger event for custom leave apply
+		log.info("redirectToQueryLeaveWithParms event trig fun");
+		AIEvent followupEvent = new AIEvent("QUERY_LEAVE_PARMS");
+		log.info("rerouting to event : evt trg");
+		AIOutputContext contextOut = new AIOutputContext();
+		contextOut.setLifespan(1);
+		contextOut.setName("leaveParms");
 		contextOut.setParameters(parameter);
 		output.setContextOut(contextOut);
 		output.setFollowupEvent(followupEvent);
