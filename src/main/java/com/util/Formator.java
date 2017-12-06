@@ -145,7 +145,7 @@ public class Formator {
 			}
 		}else if (noOfLeaves <= leave_balance) {
 			if (noOfLeaves == 1) {
-				message = "You want to apply leave on "+Formator.getFormatedDate(start)+" for "+comment;
+				message = "You want to apply leave on "+Formator.getFormatedDate(start)+" for "+comment+". Shall I confirm?";
 				log.info("1 leave msg : "+ message);
 			}
 			else{

@@ -694,7 +694,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					message = "You want to apply leave on " + Formator.getFormatedDate(startDate);
 				else {
 					message = "So you want to apply leave from " + Formator.getFormatedDate(startDate) + " to "
-							+ Formator.getFormatedDate(endDate) + " for " + comment;
+							+ Formator.getFormatedDate(endDate) + " for " + comment+". ";
 					message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 				}
 
