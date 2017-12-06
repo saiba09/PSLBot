@@ -50,9 +50,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("webhook call");
 		String action = input.getResult().getAction();
 		HashMap<String, JsonElement> parameter = input.getResult().getParameters();
-		// String sessionId = input.getSessionId();
-		String sessionId = "milind_pingale";
-		log.info(sessionId);
+		 String sessionId = input.getSessionId();
+			log.info("sessionId =" +sessionId);
+			sessionId = sessionId.substring(0,sessionId.lastIndexOf("_"));
+			log.info("user name : "+ sessionId);
+	//	String sessionId = "milind_pingale";
+	
 		// add constants in file
 		log.info("action : " + action);
 		try {

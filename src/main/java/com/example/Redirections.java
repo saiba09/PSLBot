@@ -127,6 +127,6 @@ public class Redirections {
 		contextOut.setLifespan(1);
 		contextOut.setName("displayMessage");
 		contextOut.setParameters(outParms);
-		return null;
+		return output;
 	}
 }
