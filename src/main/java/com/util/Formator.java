@@ -152,11 +152,12 @@ public class Formator {
 			message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 			}
 			log.info(message);
+			output.setSpeech(message);
+			output.setDisplayText(message);
 		}
 		
 		log.info(message);
-		output.setSpeech(message);
-		output.setDisplayText(message);
+		
 		return output;
 	}
 		}
