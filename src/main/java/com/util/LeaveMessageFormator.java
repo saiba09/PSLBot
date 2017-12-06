@@ -13,6 +13,7 @@ public class LeaveMessageFormator {
 	private static final Logger log = Logger.getLogger(LeaveMessageFormator.class.getName());
 
  public static String getLeaveDetailMessage(String userName){
+	 log.info("get leave detail msg");
 		JSONObject data = Data.getHolidays(userName);
 		Boolean prev = false;
 		String message ="";

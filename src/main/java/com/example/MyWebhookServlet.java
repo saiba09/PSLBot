@@ -483,22 +483,23 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			comment = parameter.get("comment").getAsString().trim();
 			log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 			JSONObject responseMessageObject = LeaveMessageFormator.getMessageForFestival(event, startDate, comment);
+	     	log.info("resp : "+ responseMessageObject);
 			Boolean isHoliday = Boolean.parseBoolean(responseMessageObject.get("isHoliday").toString());
 			Boolean isFestival = Boolean.parseBoolean(responseMessageObject.get("isFestival").toString());
 			Boolean isOneDay = Boolean.parseBoolean(responseMessageObject.get("isOneDay").toString());
+			log.info("boolean : fetched");
 			message += responseMessageObject.get("message").toString();
-			// isHoliday no long weekend || if isfestival no long weekend ||
-			// with long weekend ==>> same intent yes/No || set a boolean
-			// isHoliday
+			log.info("msg : "+message);
 			if (leave_balance <= 0 && isHoliday) {
 				// intent to display text and break;
+				log.info("bal < 0 & holiday");
 				message = "No leave balance however its holiday for " + event;
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
 
 			} else if (leave_balance > 0 && isFestival || isHoliday) {
-
+				log.info("bal > 0 && festival or holiday");
 				message += responseMessageObject.get("longVaccationSugestion");
 				comment = getMessage(event);
 				AIOutputContext contextOut = new AIOutputContext();
@@ -518,9 +519,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			// if is oneday go to SUGGEST_lEAVES_OPTION
 			else if (isOneDay) {
+				log.info("is one day leave");
 				JSONObject jsonDays = DateDetails.getDays(startDate, startDate);
+				log.info("getDays : "+ jsonDays);
 				Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
 				if (isWeekend) {
+					log.info("is week-end");
 					if (event.equalsIgnoreCase("today")) {
 						comment += " Its weekend today.";
 						isOneDay = true;
@@ -537,12 +541,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					output = Redirections.redirectToDisplayMessage(output, outParms);
 				}
 				if (leave_balance > 0) {
+					log.info("bal > 0 ask leave type");
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
 					message += "Which type of leave you want to opt for?";
 					AIOutputContext contextOut = new AIOutputContext();
 					outParms.put("startDate", new JsonPrimitive(startDate));
-					outParms.put("endDate", new JsonPrimitive(endDate));
+					outParms.put("endDate", new JsonPrimitive(startDate));
 					outParms.put("comment", new JsonPrimitive(comment));
 					contextOut.setParameters(outParms);
 					output.setContextOut(contextOut);
