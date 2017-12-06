@@ -45,7 +45,7 @@ public class Formator {
 			HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
 			log.info("holiday map fetched");
 			if (check == 1) {
-				message += "As its,";
+				message += "Because its,";
 			}else{
 			message += " However its,";
 			}
@@ -125,10 +125,10 @@ public class Formator {
 		
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		log.info("jsonDays : "+jsonDays);
-		int noOfLeaves = DateDetails.getDaysBetweenDates(startDate, endDate);
-		log.info("Days between days : "+ noOfLeaves);
-		int noOfDays = Integer.parseInt(jsonDays.get("days").toString().trim());
-		if (noOfLeaves == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+		int noOfDays = DateDetails.getDaysBetweenDates(startDate, endDate);
+		log.info("Days between days : "+ noOfDays);
+		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString().trim());
+		if (noOfDays == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
 			log.info("2 day leave : next check for sat sun");
 			JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
 			log.info("holiday track : "+holidayMap);
@@ -142,7 +142,13 @@ public class Formator {
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
 			} else if (leave_balance >= noOfLeaves) {
-				message = "Hey I just checked you have sufficient leave balance, shall we proceed?";
+				if (noOfLeaves == 1 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+					message = "Hey #usr#! Its weekend.";
+					output = Redirections.redirectToDisplayMessage(output, message);
+				}else if(noOfLeaves == 1)
+					message = "You want to apply leave on "+Formator.getFormatedDate(start);
+					else
+					message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+" for "+comment;
 				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
 				log.info(message);
 			}

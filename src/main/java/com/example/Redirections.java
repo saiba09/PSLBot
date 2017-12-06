@@ -92,6 +92,7 @@ public class Redirections {
 		int OH = Integer.parseInt(data.get("optional_holiday").toString());
 		int OL = Integer.parseInt(data.get("optional_leave").toString());
 		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		
 		int noOfLeave = Integer.parseInt(DateDetails.getDays(startDate, endDate).get("days").toString().trim());
 		log.info("no of leaves: " + noOfLeave + " triggering event combo leave");
 		AIEvent followupEvent = new AIEvent("CUSTOMIZE_LEAVE_TYPE");
@@ -113,5 +114,19 @@ public class Redirections {
 		// set cont.
 		output.setContextOut(contextOut);
 		return output;
+	}
+	public static Fulfillment redirectToDisplayMessage(Fulfillment output, String message) {
+		// TODO Auto-generated method stub
+		log.info("Display text event triggred ");
+		AIEvent followupEvent = new AIEvent("DISPLAY_MESSAGE");
+		log.info("rerouting to event : evt trg");
+		output.setFollowupEvent(followupEvent);
+		AIOutputContext contextOut = new AIOutputContext();
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		outParms.put("comment", new JsonPrimitive(message));
+		contextOut.setLifespan(1);
+		contextOut.setName("displayMessage");
+		contextOut.setParameters(outParms);
+		return null;
 	}
 }
