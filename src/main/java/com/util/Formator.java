@@ -127,39 +127,33 @@ public class Formator {
 		log.info("jsonDays : "+jsonDays);
 		int noOfDays = DateDetails.getDaysBetweenDates(startDate, endDate);
 		log.info("Days between days : "+ noOfDays);
+		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim());
 		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString().trim());
-		if (noOfDays == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
-			log.info("2 day leave : next check for sat sun");
-			JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
-			log.info("holiday track : "+holidayMap);
-			if (noOfLeaves == noOfDays && ((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
-					&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
-				// redirect to send message
+		if (noOfLeaves == 0) {
+			if (noOfDays == 1) {
+				message = "Hey #usr#! Its holiday. No need to apply for leave. Enjoy!";
+				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
+				output = Redirections.redirectToDisplayMessage(output, message);
+			}
+			if (noOfDays == 2) {
 				message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
 						+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
 				log.info(message);
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
-			} else if (leave_balance >= noOfLeaves) {
-				if (noOfLeaves == 1 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
-					message = "Hey #usr#! Its weekend.";
-					output = Redirections.redirectToDisplayMessage(output, message);
-				}else if(noOfLeaves == 1)
-					message = "You want to apply leave on "+Formator.getFormatedDate(start);
-					else
-					message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+" for "+comment;
-				message += Formator.getWeekendContainsMessage(startDate, endDate,noOfLeaves);
-				log.info(message);
 			}
-
-		} else if (leave_balance >= noOfLeaves) {
-			// give suggestion that if weekend
-			message = "Hey I just checked you have sufficient leave balance.";
+		}else if (noOfLeaves >= leave_balance) {
+			if (noOfLeaves == 1) {
+				message = "You want to apply leave on "+Formator.getFormatedDate(start)+" for "+comment;
+			}
+			else{
+			message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+" for "+comment;
 			message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
+			}
 			log.info(message);
-
 		}
+		
 		log.info(message);
 		output.setSpeech(message);
 		output.setDisplayText(message);
