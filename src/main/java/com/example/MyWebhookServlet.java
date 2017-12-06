@@ -551,7 +551,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					outParms.put("comment", new JsonPrimitive(comment));
 					contextOut.setParameters(outParms);
 					output.setContextOut(contextOut);
-					
+					output.setSpeech(message);
+					output.setDisplayText(message);
 					//output = Redirections.redirectToCustomApply(output, outParms);
 				} else {
 					output = Redirections.redirectToDPApproval(output, parameter);
