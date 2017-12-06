@@ -257,7 +257,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveType = parameter.get("leaveType").getAsString().trim();
-		int noOfLeave = parameter.get("noOfLeave").getAsInt();
+		String leave = parameter.get("noOfLeave").getAsString().trim();
+	
+		log.info(leave + " no of leaves");
+		int noOfLeave = Integer.parseInt(leave.substring(0, leave.indexOf(".")));
 		int response = Server.applyLeaveInSystem(startDate, endDate, userName, comment, leaveType, noOfLeave);
 		String message ="";
 		if (response == 200) {

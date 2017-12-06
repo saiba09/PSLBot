@@ -35,7 +35,7 @@ public class Redirections {
 		output.setFollowupEvent(followupEvent);
 		return output;
 	}
-	protected static Fulfillment redirectToDPApproval(Fulfillment output, HashMap<String, JsonElement> parameter){
+	public static Fulfillment redirectToDPApproval(Fulfillment output, HashMap<String, JsonElement> parameter){
 		AIEvent followupEvent = new AIEvent("DP_APPROVAL");
 		log.info("rerouting to event DP_APPROVAL: evt trg");
 		output.setFollowupEvent(followupEvent);

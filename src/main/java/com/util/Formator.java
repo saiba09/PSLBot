@@ -143,19 +143,24 @@ public class Formator {
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
 			}
-		}else if (noOfLeaves >= leave_balance) {
+		}else if (noOfLeaves <= leave_balance) {
 			if (noOfLeaves == 1) {
 				message = "You want to apply leave on "+Formator.getFormatedDate(start)+" for "+comment;
+				log.info("1 leave msg : "+ message);
 			}
 			else{
 			message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+" for "+comment;
 			message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
+			
 			}
 			log.info(message);
 			output.setSpeech(message);
 			output.setDisplayText(message);
 		}
-		
+		else{
+			output = Redirections.redirectToDPApproval(output, null);
+
+		}
 		log.info(message);
 		
 		return output;
