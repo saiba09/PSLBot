@@ -599,20 +599,17 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			log.info("parms :" + startDate + " " + endDate + " comment: " + comment);
 			if (leave_balance > 0) {
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("comment", new JsonPrimitive(comment));
+				outParms.put("startDate", new JsonPrimitive(startDate));
+				outParms.put("endDate", new JsonPrimitive(endDate));
 				if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty()) {
-
-					HashMap<String, JsonElement> outParms = new HashMap<>();
-
-					outParms.put("comment", new JsonPrimitive(comment));
-					outParms.put("startDate", new JsonPrimitive(startDate));
-					outParms.put("endDate", new JsonPrimitive(endDate));
-					output = Redirections.redirectToQueryLeaveWithParms(output, outParms);
+					
 				} else {
-
-					message += "Hey I just checked you have sufficient leave balance, shall we proceed?";
-					output.setDisplayText(message);
-					output.setSpeech(message);
+					String msg = "Great you have sufficient Leave balance, from when you want leave?";
+					outParms.put("msg", new JsonPrimitive(msg));
 				}
+				output = Redirections.redirectToQueryLeaveWithParms(output, outParms);
 			} else {
 				// message = "Your l You will need Delivery partner approval.";
 				// set event trigg.
