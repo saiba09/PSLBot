@@ -33,7 +33,6 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String accessToken = sessionId.substring(sessionId.indexOf("#")+1 );
 		log.info("access token : "+ accessToken);
 		User user = new UserHandler().getUser(userName, accessToken);
-				
 		log.info("user name : " + userName);
 		log.info("action : " + action);
 		try {
