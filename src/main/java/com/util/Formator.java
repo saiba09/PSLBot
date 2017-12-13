@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.example.Data;
 import com.example.Redirections;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -37,7 +36,7 @@ public class Formator {
 		log.info("formated Date : "+fDate);
 		return fDate;
 	}
-	public static String getWeekendContainsMessage(String startDate , String endDate,int check){
+	public static String getWeekendContainsMessage(String startDate , String endDate,float check){
 		String message= "";
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
@@ -72,7 +71,7 @@ public class Formator {
 		}
 		return message;
 	}
-	private static JSONObject Suggest(HashMap<String, JsonElement> parameter, String sessionId) {
+	/*private static JSONObject Suggest(HashMap<String, JsonElement> parameter, String sessionId) {
 		log.info("suggest called");
 		JSONObject holidayData = Data.getHolidays(sessionId);
 		String bday = holidayData.get("birthday").toString();
@@ -113,8 +112,8 @@ public class Formator {
 		}
 
 		return response;
-	}
-	public static Fulfillment getLeaveConfirmationMessage(String startDate, String endDate, String comment ,int leave_balance, Fulfillment output){
+	}*/
+	public static Fulfillment getLeaveConfirmationMessage(String startDate, String endDate, String comment ,float leave_balance, Fulfillment output){
 		Date start = null;;
 		Date end =null;
 		try {
@@ -185,7 +184,7 @@ public class Formator {
 				"Did you eat something that doesn’t agree with you?",
 				"Did you eat something that you are allergic to?",
 				"Did you forget to take your medication?",
-				*/"Do you want to go to the doctor?",
+				"Do you want to go to the doctor?",*/
 				//"I’m sorry that you’re not feeling well, maybe I should bring you home.",
 				//"I think we should bring you to the doctor / hospital.",
 				"I hope you feel better soon.",
@@ -198,23 +197,34 @@ public class Formator {
 		log.info("select : "+ select);
 		return response[select]+"";
 	}
-	public static String getOptionForLeave(){
+	public static JSONObject getOptionForLeave(){
 		String time = DateDetails.getCurrentTime();
 		int hour = Integer.parseInt(time.substring(0, time.indexOf("/")));
 		int min = Integer.parseInt(time.substring(time.indexOf("/"), time.indexOf(":")));
 		String message ="";
+		Boolean isHalfDay = false;
+		Boolean canBeHalfDay = false;
+		Boolean isFullDay = false;
+		JSONObject response = new JSONObject();
 		if (hour > 13) {
 			message = "Its almost half day completed, Do you wish to apply for half day leave?";
+			isHalfDay = true;
 		}else{
 			if (min > 30) {
 				message = "Hey #usr# If you can just wait for "+(60-min)+"min more, we can apply half day leave else will need to apply for a full day leave.";
-				
+				canBeHalfDay = true;
 			}
 			else{
-				message = "#usr# Its just "+time+" you have to apply for a full day leave.";
+				message = "#usr# Its just "+time+" Do you wish to apply for a full day leave.";
+				isFullDay = true;
 			}
 		}
-		return message;
+		response .put("isFullDay", isFullDay);
+		response.put("isHalfDay", isHalfDay);
+		response.put("canBeHalfDay", canBeHalfDay);
+		response.put("message", message);
+		response.put("time", time);
+		return response;
 	}
 		}
 

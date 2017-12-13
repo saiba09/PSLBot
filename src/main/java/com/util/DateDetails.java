@@ -10,11 +10,12 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.example.Data;
+import com.model.User;
 
 
 public class DateDetails {
 	private static final Logger log = Logger.getLogger(DateDetails.class.getName());
+	/*
 	public static JSONObject getLeaveInfo(String sessionId) {
 		String message = "";
 		JSONObject data = Data.getHolidays(sessionId);
@@ -138,7 +139,7 @@ public class DateDetails {
 		response.put("message", message);
 		return response;
 	}
-
+*/
 	public static JSONObject getDays(String startDate, String endDate) {
 		log.info("get days");
 		int days = 0;
@@ -257,6 +258,14 @@ public class DateDetails {
 	     //(df.format(calobj.getTime()));
 		String time = df.format(calobj.getTime());
 		log.info("current time : "+ time);
-       return null;
+       return time;
+	}
+	public static String getCurrentDate(){
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+       Calendar calobj = Calendar.getInstance();
+	     //(df.format(calobj.getTime()));
+		String date = df.format(calobj.getTime());
+		log.info("current time : "+ date);
+       return date;
 	}
 }

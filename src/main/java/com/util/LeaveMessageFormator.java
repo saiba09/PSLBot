@@ -7,20 +7,19 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.example.Data;
+import com.model.User;
 
 public class LeaveMessageFormator {
 	private static final Logger log = Logger.getLogger(LeaveMessageFormator.class.getName());
 
- public static String getLeaveDetailMessage(String userName){
+ public static String getLeaveDetailMessage(User user){
 	 log.info("get leave detail msg");
-		JSONObject data = Data.getHolidays(userName);
 		Boolean prev = false;
 		String message ="";
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		float PL = user.getPrivilagedLeave();
+		float OH = user.getOptionalHoliday();
+		float OL = user.getOptionalLeave();
+		float CF = user.getCompensatioryOff();
 		if (PL != 0 || CF != 0 || OH != 0 || OL != 0) {
 			message += "You have ";
 		

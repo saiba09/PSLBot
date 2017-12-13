@@ -23,7 +23,7 @@ public class Server {
 	private static final Logger log = Logger.getLogger(Server.class.getName());
 	static String urlStr = "https://1-dot-dummyproject-05042017.appspot.com/applyLeave";
 	
-public static int applyLeaveInSystem(String startDate, String  endDate, String empName, String reason, String typeOfLeave, int noOfDays){
+public static int applyLeaveInSystem(String startDate, String  endDate, String empName, String reason, String typeOfLeave, float noOfDays){
 	log.info("creating post call");
 	log.info("---------------->");
 	int response = 400;
@@ -62,7 +62,7 @@ public static int applyLeaveInSystem(String startDate, String  endDate, String e
 	} 
 	return response;
 }
-private static String getJsonStringEntityForElement(String startDate, String endDate, String empName, String reason, String typeOfLeave, int noOfDays) {
+private static String getJsonStringEntityForElement(String startDate, String endDate, String empName, String reason, String typeOfLeave, float noOfDays) {
 	JSONObject obj = new JSONObject();
 	obj.put("startDate", startDate);
 	obj.put("endDate", endDate);

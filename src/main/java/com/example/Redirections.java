@@ -7,7 +7,9 @@ import org.json.simple.JSONObject;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.model.User;
 import com.util.DateDetails;
+import com.util.Formator;
 
 import ai.api.model.AIEvent;
 import ai.api.model.AIOutputContext;
@@ -82,16 +84,15 @@ public class Redirections {
 		return output;
 	}
 	protected static Fulfillment redirectToComboLeaveForm(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String sessionId) {
+			User user) {
 		log.info("redirectToComboLeaveForm event trig fun");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
-		JSONObject data = Data.getHolidays(sessionId);
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		float PL = user.getPrivilagedLeave();
+		float OH = user.getOptionalHoliday();
+		float OL = user.getOptionalLeave();
+		float CF = user.getCompensatioryOff();
 		
 		int noOfLeave = Integer.parseInt(DateDetails.getDays(startDate, endDate).get("days").toString().trim());
 		log.info("no of leaves: " + noOfLeave + " triggering event combo leave");
@@ -128,5 +129,18 @@ public class Redirections {
 		contextOut.setName("displayMessage");
 		contextOut.setParameters(outParms);
 		return output;
+	}
+	public static Fulfillment redirectToSuggestTime(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		// TODO Auto-generated method stub
+		log.info("suggest time event triggred ");
+		AIEvent followupEvent = new AIEvent("SUGGEST_TIME");
+		log.info("rerouting to event : evt trg");
+		output.setFollowupEvent(followupEvent);
+		AIOutputContext contextOut = new AIOutputContext();
+		contextOut.setLifespan(1);
+		contextOut.setName("suggest-time");
+		contextOut.setParameters(parameter);
+		return output;
+	
 	}
 }

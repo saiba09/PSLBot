@@ -1,43 +1,20 @@
 package com.example;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import java.sql.Array;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
 import java.util.logging.Logger;
-
-import javax.swing.text.AbstractDocument.LeafElement;
-import javax.xml.stream.events.StartDocument;
-
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.model.User;
 import com.util.DateDetails;
 import com.util.Formator;
 import com.util.LeaveMessageFormator;
-import com.util.PropertyLoader;
 import com.util.Server;
-
-import ai.api.model.AIEvent;
 import ai.api.model.AIOutputContext;
 import ai.api.model.Fulfillment;
-import ai.api.model.Result;
 import ai.api.web.AIWebhookServlet;
 
 // [START example]
@@ -50,37 +27,40 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("webhook call");
 		String action = input.getResult().getAction();
 		HashMap<String, JsonElement> parameter = input.getResult().getParameters();
-		 String sessionId = input.getSessionId();
-			log.info("sessionId =" +sessionId);
-			sessionId = sessionId.substring(0,sessionId.lastIndexOf("_"));
-			log.info("user name : "+ sessionId);
-	//	String sessionId = "milind_pingale";
-	
+		String sessionId = input.getSessionId();
+		log.info("sessionId =" + sessionId);
+		String userName = sessionId.substring(0, sessionId.lastIndexOf("_"));
+		String accessToken = sessionId.substring(sessionId.indexOf("#") );
+		User user = new UserHandler().getUser(userName, accessToken);
+				
+		log.info("user name : " + sessionId);
+		// String sessionId = "milind_pingale";
+
 		// add constants in file
 		log.info("action : " + action);
 		try {
 			switch (action) {
 			case "QUERY_LEAVE":
 				log.info("in action : query_leave");
-				output = queryLeave(output, parameter, sessionId, action, null);
+				output = queryLeave(output, parameter, user, action, null);
 				break;
 			case "SYSTEM_SUGESTION_SATISFIED_YES":
 				log.info(" intent SYSTEM_SUGESTION_SATISFIED_YES ");
-				output = getConfirmationMessage(output, parameter, "SYSTEM_SUGESTION_SATISFIED_YES", sessionId);
+				output = getConfirmationMessage(output, parameter, "SYSTEM_SUGESTION_SATISFIED_YES", user);
 				break;
 			case "QUERY_LEAVE_PARMS":
 				log.info("intent : QUERY_LEAVE_PARMS");
-				output = queryLeave(output, parameter, sessionId, action, input);
+				output = queryLeave(output, parameter, user, action, input);
 				break;
 			case "SYSTEM_SUGESTION_SATISFIED_NO":
 				log.info("intent : SYSTEM_SUGESTION_SATISFIED_NO");
 				// output = getConfirmationMessage(output, parameter,
-				// "SYSTEM_SUGESTION_SATISFIED_NO",sessionId);
+				// "SYSTEM_SUGESTION_SATISFIED_NO",user);
 				output = exitFlow(output);
 				break;
 			case "SUGGEST_LEAVES_OPTION":
 				log.info("intent : SUGGEST_LEAVES_OPTION");
-				output = getLeaveComboSuggestion(output, parameter, "SUGGEST_LEAVES_OPTION", sessionId);
+				output = getLeaveComboSuggestion(output, parameter, "SUGGEST_LEAVES_OPTION", user);
 				// give suggestion for oh pl combo, calc no of days,
 				break;
 			// case not found
@@ -90,38 +70,38 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "CONFIRM_APPLY":
 				log.info("intent : CONFIRM_APPLY");
-				output = applyLeave(output, parameter, sessionId);
+				output = applyLeave(output, parameter, user);
 				break;
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
 				log.info("SYST_SUG_NOT_SATISFIED_CUST_CONFIRM");
-				output = applyLeave(output, parameter, sessionId);
+				output = applyLeave(output, parameter, user);
 				break;
 
 			case "CUSTOM_FORM_SUBMIT":
 				log.info("intent : CUSTOM_FORM_SUBMIT");
-				 output = getConfirmationMessage(output, parameter, "CUSTOM_FORM_SUBMIT", sessionId);
+				output = getConfirmationMessage(output, parameter, "CUSTOM_FORM_SUBMIT", user);
 				break;
 
 			case "APPLY_COMBO_LEAVE":
 				log.info("intent : APPLY_COMBO_LEAVE");
-				 output = Redirections.redirectToComboLeaveForm(output, parameter, sessionId);
+				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
 				break;
 
 			case "CUSTOM_FORM_SUBMIT_CONFIRM":
 				log.info("INTENT : CUSTOM_FORM_SUBMIT_CONFIRM");
-				output = applyLeave(output, parameter, sessionId);
+				output = applyLeave(output, parameter, user);
 				break;
 
 			case "LEAVE_TYPE_SELECTION":
 				log.info("intent : LEAVE_TYPE_SELECTION");
-				output = getLeaveBreakup(output, parameter, sessionId);
+				output = getLeaveBreakup(output, parameter, user);
 				// message for confirmation returns leave brk up
 				break;
 			// case not found
 			case "ONE_DAY_LEAVE":
 				log.info("intent : ONE_DAY_LEAVE");
-				output = queryLeave(output, parameter, sessionId, action, input);
+				output = queryLeave(output, parameter, user, action, input);
 				break;
 			case "TO_SUGGEST_LEAVE_TYPE":
 				log.info("intent : LeaveQueryWithParms - yes");
@@ -130,23 +110,23 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			case "CONFIRM_LEAVE_APPLY":
 				log.info("intent : CONFIRM_LEAVE_APPLY");
-				output = applyLeaveWithTypes(output, parameter,sessionId);
+				output = applyLeaveWithTypes(output, parameter, user);
 				break;
 
 			case "AGAIN_SELECT_LEAVE_TYPE":
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
-				output = Redirections.redirectToComboLeaveForm(output, parameter, sessionId);
+				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
 				break;
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES":
 				log.info("intent : SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES");
 				output = getLeaveComboSuggestion(output, parameter, "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES",
-						sessionId);
+						user);
 				break;
 
 			case "GET_LEAVE_BALANCE":
 				log.info("intent : getLeaveBalance");
-				output = getLeaveBalance(output, parameter, sessionId);
+				output = getLeaveBalance(output, parameter, user);
 				break;
 			case "FALLBACK":
 				log.info("intent : fallback");
@@ -158,20 +138,30 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "ONE_DAY_LEAVE_YES_FOLLOWUP":
 				log.info("intent : ONE_DAY_LEAVE_YES_FOLLOWUP");
-				output = getResponseForOneDayLeaveIntent(output, parameter, sessionId, action);
+				output = getResponseForOneDayLeaveIntent(output, parameter, user, action);
 				break;
 			case "ONE_DAY_TYPE":
 				log.info("intent : ONE_DAY_TYPE");
-				output = applyLeaveWithTypes(output, parameter,sessionId);
+				output = applyLeaveWithTypes(output, parameter, user);
 				break;
 			case "APPLY_ONE_DAY":
 				log.info("intent : APPLY_ONE_DAY");
-				output = getResponseForOneDayLeaveIntent(output, parameter, sessionId, action);
+				output = getResponseForOneDayLeaveIntent(output, parameter, user, action);
 				break;
-			case "FEELING_SICK" :
+			case "FEELING_SICK":
 				log.info("intent FEELING_SICK");
-				output = getResponseForNotWell(output, parameter,sessionId);
+				output = getResponseForNotWell(output, parameter, user);
 				break;
+			case "FEELING_SICK_CUSTOM_NO_FOLLOWUP":
+				log.info("for intent FEELING_SICK_CUSTOM_NO_FOLLOWUP");
+				output = getResponseForFollowUpNotWell(output, parameter, user);
+				break;
+			case "SUGGEST_TIME":
+				log.info("Event triggred : suggest time");
+				output = GetResponseForSuggestTime(output, parameter, user);
+			case "FEELING_SICK_APPLY_LEAVE":
+				log.info("intent : FEELING_SICK_APPLY_LEAVE");
+				output = getResponseFeelingSickApplyLeave(output,parameter,user);
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -182,22 +172,141 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	}
 
-	private Fulfillment getResponseForNotWell(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
+	private Fulfillment getResponseFeelingSickApplyLeave(Fulfillment output, HashMap<String, JsonElement> parameter,
+			User user ) {
+		// TODO Auto-generated method stub
+		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		outParms.put("startDate", new JsonPrimitive(DateDetails.getCurrentDate()));
+		outParms.put("endDate", new JsonPrimitive(DateDetails.getCurrentDate()));
+		outParms.put("comment", new JsonPrimitive("Not feeling well"));
+		outParms.put("timeConstraint", new JsonPrimitive(timeConstraint));
+		output = Redirections.redirectToSuggestLeaveOption(output, outParms);
+		return output;
+	}
+
+	private Fulfillment GetResponseForSuggestTime(Fulfillment output, HashMap<String, JsonElement> parameter,
+			User user) {
+		// TODO Auto-generated method stub
+
+		return null;
+	}
+
+	private Fulfillment getResponseForFollowUpNotWell(Fulfillment output, HashMap<String, JsonElement> parameter,
+		User user) {
+		// TODO Auto-generated method stub
+		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
+		/*
+		 * String disease = parameter.get("disease").getAsString(); String
+		 * userSays = parameter.get("userSays").getAsString(); String time =
+		 * parameter.get("time").getAsString();
+		 * 
+		 * Boolean isFullDay =
+		 * Boolean.parseBoolean(parameter.get("isFullDay").getAsString().trim())
+		 * ; Boolean isHalfDay =
+		 * Boolean.parseBoolean(parameter.get("isHalfDay").getAsString().trim())
+		 * ; Boolean canBeHalfDay =
+		 * Boolean.parseBoolean(parameter.get("canBeHalfDay").getAsString().trim
+		 * ()); Boolean forLeave =
+		 * Boolean.parseBoolean(parameter.get("forLeave").getAsString().trim());
+		 */
+		JSONObject res = Formator.getOptionForLeave();
+		String message = "";
+		float leave_balance = user.getTotalLeaveBalance();
+		// follow up for user said I m not feeling well
+		if (leave_balance > 0) {
+			if (!timeConstraint.isEmpty()) {
+				// user specified want leave
+				message = "Okay #usr#. You take rest. ";
+				switch (timeConstraint) {
+				case "full":
+					message += "I will apply leave for you.";
+					break;
+				case "half":
+					message += "I will apply half day leave for you.";
+					break;
+				case "now":
+
+					if (Boolean.parseBoolean(res.get("isFullDay").toString())
+							|| Boolean.parseBoolean(res.get("canBeHalfDay").toString())) {
+						message += "I will apply leave for you";
+					} else {
+						message += "I will apply half day leave for you";
+						timeConstraint = "half";
+					}
+					break;
+
+				}
+				output.setSpeech(message);
+				output.setDisplayText(message);
+
+			} else {
+				// give suggestion on time constraint
+				// triggre time suggestion event
+				HashMap<String, JsonElement> outParms = new HashMap<>();
+				outParms.put("token", new JsonPrimitive("UNWELL"));
+				output = Redirections.redirectToSuggestTime(output, outParms);
+			}
+		} else {
+			message = "I’m sorry that you’re not feeling well, for leave you need to ask your manager, as you don't have sufficient leave balance";
+			output = Redirections.redirectToDisplayMessage(output, message);
+		}
+
+		return output;
+	}
+
+	private Fulfillment getResponseForNotWell(Fulfillment output, HashMap<String, JsonElement> parameter,
+			User user) {
 		// TODO Auto-generated method stub
 		String disease = parameter.get("disease").getAsString();
 		String userSays = parameter.get("userSays").getAsString();
 		String message = "";
+		Boolean forLeave = false;
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		float leave_balance = user.getTotalLeaveBalance();
+
 		if (disease.isEmpty()) {
 			message = Formator.getNotWellresponse();
-		}else{
-			message = "I’m sorry that you’re not feeling well, maybe you should take rest at home.";
-		
+			output.setSpeech(message);
+			output.setDisplayText(message);
+		} else {
+			if (leave_balance > 0) {
+				// apply check for leave
+
+				// redirect to time suggestion
+				// trigre event suggesting time options
+				/*
+				 * JSONObject response = Formator.getOptionForLeave(); message =
+				 * "I’m sorry that you’re not feeling well, maybe you should take rest at home."
+				 * + response.get("message"); outParms.put("disease", new
+				 * JsonPrimitive(disease)); outParms.put("userSays", new
+				 * JsonPrimitive(userSays)); outParms.put("isFullDay", new
+				 * JsonPrimitive(response.get("isFullDay").toString()));
+				 * outParms.put("isHalfDay", new
+				 * JsonPrimitive(response.get("isHalfDay ").toString()));
+				 * outParms.put("canBeHalfDay", new
+				 * JsonPrimitive(response.get("canBeHalfDay").toString()));
+				 * outParms.put("time", new
+				 * JsonPrimitive(response.get("time").toString()));
+				 */
+				outParms.put("disease", new JsonPrimitive(disease));
+				outParms.put("userSays", new JsonPrimitive(userSays));
+				outParms.put("token", new JsonPrimitive("ILL"));
+				output = Redirections.redirectToSuggestTime(output, outParms);
+			} else {
+				// redirect to display message with message saying talk to your
+				// manager
+				message = "I’m sorry that you’re not feeling well, for leave you need to ask your manager, as you don't have sufficient leave balance";
+				output = Redirections.redirectToDisplayMessage(output, message);
+			}
+
 		}
-		return null;
+
+		return output;
 	}
 
 	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String sessionId, String action) {
+			User user, String action) {
 		// TODO Auto-generated method stub
 		log.info("getResponseForOneDayLeaveIntent");
 		String startDate = parameter.get("startDate").getAsString().trim();
@@ -213,7 +322,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		HashMap<String, JsonElement> outParms = new HashMap<>();
 		if (action.equalsIgnoreCase("ONE_DAY_LEAVE_YES_FOLLOWUP")) {
 			// redirect to custom form with comment as event
-		
+
 			outParms.put("comment", new JsonPrimitive(comment));
 			output = Redirections.redirectToCustomApply(output, outParms);
 		}
@@ -222,35 +331,31 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message = "Have fun! Happy " + event;
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
-			}
-			else if (isFestival) {
+			} else if (isFestival) {
 				outParms.put("comment", new JsonPrimitive(comment));
 				output = Redirections.redirectToCustomApply(output, outParms);
-			}
-			else{
-			message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
-			message += "Which type of leave would you like to apply?";
-			AIOutputContext contextOut = new AIOutputContext();
-			outParms.put("startDate", new JsonPrimitive(startDate));
-			outParms.put("endDate", new JsonPrimitive(endDate));
-			outParms.put("comment", new JsonPrimitive(comment));
-			contextOut.setParameters(outParms);
-			output.setContextOut(contextOut);
-			output.setSpeech(message);
-			output.setDisplayText(message);
+			} else {
+				message = LeaveMessageFormator.getLeaveDetailMessage(user);
+				message += "Which type of leave would you like to apply?";
+				AIOutputContext contextOut = new AIOutputContext();
+				outParms.put("startDate", new JsonPrimitive(startDate));
+				outParms.put("endDate", new JsonPrimitive(endDate));
+				outParms.put("comment", new JsonPrimitive(comment));
+				contextOut.setParameters(outParms);
+				output.setContextOut(contextOut);
+				output.setSpeech(message);
+				output.setDisplayText(message);
 			}
 		}
 		return output;
 	}
 
-	private Fulfillment getLeaveBalance(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
+	private Fulfillment getLeaveBalance(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
 
-		JSONObject employeeData = Data.getHolidays(sessionId);
-		int PL = Integer.parseInt(employeeData.get("privillage_leave").toString());
-		int OH = Integer.parseInt(employeeData.get("optional_holiday").toString());
-		int OL = Integer.parseInt(employeeData.get("optional_leave").toString());
-		int CF = Integer.parseInt(employeeData.get("compensatiory_off").toString());
-
+		float PL = user.getPrivilagedLeave();
+		float OH = user.getOptionalHoliday();
+		float OL = user.getOptionalLeave();
+		float CF = user.getCompensatioryOff();
 		output.setDisplayText("You have " + PL + " privileged leave, " + OL + " optional leave, " + OH
 				+ " optional holiday and " + CF + " compensatory Off" + " #false");
 		output.setSpeech("You have " + PL + " privileged leave, " + OL + " optional leave, " + OH
@@ -270,22 +375,22 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private Fulfillment applyLeaveWithTypes(Fulfillment output, HashMap<String, JsonElement> parameter, String userName) {
+	private Fulfillment applyLeaveWithTypes(Fulfillment output, HashMap<String, JsonElement> parameter,
+			User user) {
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveType = parameter.get("leaveType").getAsString().trim();
 		String leave = parameter.get("noOfLeave").getAsString().trim();
-	
+
 		log.info(leave + " no of leaves");
-		int noOfLeave = Integer.parseInt(leave.substring(0, leave.indexOf(".")));
-		int response = Server.applyLeaveInSystem(startDate, endDate, userName, comment, leaveType, noOfLeave);
-		String message ="";
+		float noOfLeave = Float.parseFloat(leave);
+		int response = Server.applyLeaveInSystem(startDate, endDate, user.getSession().getUserName(), comment, leaveType, noOfLeave);
+		String message = "";
 		if (response == 200) {
 			message = "Your leaves are applied successfully in the system.#false";
 
-		}
-		else{
+		} else {
 			message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
 		}
 		output.setDisplayText(message);
@@ -293,7 +398,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private Fulfillment getLeaveBreakup(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
+	private Fulfillment getLeaveBreakup(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
 		// TODO Auto-generated method stub
 		log.info("getLeavebreakup");
 		String startDate = parameter.get("startDate").getAsString().trim();
@@ -304,24 +409,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info(leave + " no of leaves");
 		leave = leave.substring(0, leave.indexOf("."));
 		log.info("leave post sub string :" + leave);
-		int noOfLeave = Integer.parseInt(leave.trim());
-		JSONObject data = Data.getHolidays(sessionId);
-		/*
-		 * int noPL = Integer.parseInt(parameter.get("noPL").toString().trim());
-		 * int noOL = Integer.parseInt(parameter.get("noOL").toString().trim());
-		 * int noOH = Integer.parseInt(parameter.get("noOH").toString().trim());
-		 * int noCF = Integer.parseInt(parameter.get("noCF").toString().trim());
-		 * log.info("applied for : PL " + noPL + " CF "+noCF + " OH  "+ noOH +
-		 * "  OL  "+noOL );
-		 */
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		float noOfLeave = Float.parseFloat(leave.trim());
+		float PL = user.getPrivilagedLeave();
+		float OH = user.getOptionalHoliday();
+		float OL = user.getOptionalLeave();
+		float CF = user.getCompensatioryOff();
 		log.info(" pressent values : PL " + PL + " CF " + CF + " OH " + OH + "  OL  " + OL);
 		String message = "";
 		JSONObject leaveJson = new JSONObject();
-		int balance = 0;
+		float balance =0;
 		String type = "";
 		switch (leaveType) {
 		case "PL":
@@ -350,12 +446,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		if (noOfLeave <= balance) {
 			if (noOfLeave == 1) {
-				message += "1 " + type + " on " + Formator.getFormatedDate(startDate)+ ". Is it correct?";
+				message += "1 " + type + " on " + Formator.getFormatedDate(startDate) + ". Is it correct?";
 
 			} else {
-				message += noOfLeave + " " + day + " " + type + " from "
-						+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
-						+ ". Is it correct?";
+				message += noOfLeave + " " + day + " " + type + " from " + Formator.getFormatedDate(startDate) + " to "
+						+ Formator.getFormatedDate(endDate) + ". Is it correct?";
 			}
 			AIOutputContext contextOut = new AIOutputContext();
 			HashMap<String, JsonElement> outParms = new HashMap<>();
@@ -394,7 +489,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment getLeaveComboSuggestion(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String action, String sessionId) {
+			String action, User user) {
 		log.info("getLeaveComboSuggestion");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
@@ -402,19 +497,40 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("parms :" + startDate + " " + endDate);
 		comment = parameter.get("comment").getAsString().trim();
 		log.info("comment " + comment);
-		JSONObject sugestion = Data.getHolidays(sessionId);
+		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
+
+		
 		String message = "";
 		// check leave balance > days to apply
-		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
-		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
-		JSONObject data = Data.getHolidays(sessionId);
-		int PL = Integer.parseInt(data.get("privillage_leave").toString());
-		int OH = Integer.parseInt(data.get("optional_holiday").toString());
-		int OL = Integer.parseInt(data.get("optional_leave").toString());
-		int CF = Integer.parseInt(data.get("compensatiory_off").toString());
+		float leave_balance = user.getTotalLeaveBalance();
+		float noOfLeaves = 0;
+		float PL = user.getPrivilagedLeave();
+		float OH = user.getOptionalHoliday();
+		float OL = user.getOptionalLeave();
+		float CF = user.getCompensatioryOff();
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
-		if (PL < noOfLeaves) {
+		if (! timeConstraint.isEmpty()) {
+			switch (timeConstraint) {
+			case "full":
+				noOfLeaves = 1;
+				break;
+			case "half":
+				break;
+			case "now":
+				noOfLeaves = 1;
+				break;
+
+			}
+		}
+		else{
+			JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
+			noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		}
+		if (PL >=1 && !timeConstraint.isEmpty()) {
+				//apply leave and go to display text
+			output = applyLeaveUrgentCase(output, parameter);
+			}
+		else if (PL < noOfLeaves) {
 			// check if any leave >= req . if give option else go to dp
 			if (CF < noOfLeaves) {
 				if (OH < noOfLeaves) {
@@ -428,22 +544,26 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else {
 			if (CF != 0 || OH != 0 || OL != 0) {
 				message += "You have ";
-			}
-			if (CF != 0) {
-				message += CF + " compensatory off, ";
+				if (CF != 0) {
+					message += CF + " compensatory off, ";
 
+				}
+				if (OH != 0) {
+					message += OH + " optional holiday, ";
+				}
+				if (OL != 0) {
+					message += OL + " optional leave.";
+				}
+				if (CF != 0 || OH != 0 || OL != 0) {
+					// message += "Do you still want to apply for privilage leave ?
+					// Don't forget these leaves won't carry forward.";
+					message += " Do you still want to apply for privilaged leave?";
+				}
 			}
-			if (OH != 0) {
-				message += OH + " optional holiday, ";
+			else{
+				message = "You have "+PL+ "privilaged leave. Shall we proceed?";
 			}
-			if (OL != 0) {
-				message += OL + " optional leave.";
-			}
-			if (CF != 0 || OH != 0 || OL != 0) {
-				// message += "Do you still want to apply for privilage leave ?
-				// Don't forget these leaves won't carry forward.";
-				message += " Do you still want to apply for privilaged leave?";
-			}
+			
 		}
 		log.info(message);
 		// context : system-sugestion-satisfied-yes-yes-suggestOptions-followup
@@ -464,35 +584,46 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	}
 
+	private Fulfillment applyLeaveUrgentCase(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		String startDate = parameter.get("startDate").getAsString().trim();
+		String endDate = parameter.get("endDate").getAsString().trim();
+		String comment = parameter.get("comment").getAsString().trim();
+		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
+
+		//function call for applying leave
+		String message ="Your leave has been applied, take care";
+		output = Redirections.redirectToDisplayMessage(output, message);
+		return output;
+	}
+
 	private Fulfillment exitFlow(Fulfillment output) {
 		// TODO Auto-generated method stub TERMINATE
 		return Redirections.redirectToTerminate(output);
 
 	}
 
-	private Fulfillment applyLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String userName) {
+	private Fulfillment applyLeave(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
 		log.info("apply leave function");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 		String message = "";
-		int leave_balance = Integer.parseInt(Data.getHolidays(userName).get("privillage_leave").toString());
+		float leave_balance = user.getTotalLeaveBalance();
 		// check bal if allow apply
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		float noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		if (leave_balance <= 0) {
 			log.info("bal < 0");
 			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal > no Leaves ");
 			String leaveType = "PL";
-			int response = Server.applyLeaveInSystem(startDate, endDate, userName, comment, leaveType, noOfLeaves);
+			int response = Server.applyLeaveInSystem(startDate, endDate, user.getUserName(), comment, leaveType, noOfLeaves);
 			if (response == 200) {
 				message = "Your leaves are applied successfully in the system.#false";
 
-			}
-			else{
+			} else {
 				message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
 			}
 		} else {
@@ -508,13 +639,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		return output;
 	}
 
-	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId,
+	private Fulfillment queryLeave(Fulfillment output, HashMap<String, JsonElement> parameter, User user,
 			String action, AIWebhookRequest input) throws ParseException {
 		log.info("querry leave function");
 		String startDate = null;
 		String endDate = null;
 		String comment;
-		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
+		float leave_balance = user.getTotalLeaveBalance();
 		String message = "";
 		if (action.equals("ONE_DAY_LEAVE")) {
 			log.info("one day leave apply");
@@ -620,9 +751,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				outParms.put("startDate", new JsonPrimitive(startDate));
 				outParms.put("endDate", new JsonPrimitive(endDate));
 				if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty()) {
-					
+
 				} else {
-					String msg = "Great you have sufficient Leave balance, from when you want leave?";
+					String msg = "Great you have sufficient Leave balance. From when you want leave?";
 					outParms.put("msg", new JsonPrimitive(msg));
 				}
 				output = Redirections.redirectToQueryLeaveWithParms(output, outParms);
@@ -645,13 +776,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment getConfirmationMessage(Fulfillment output, HashMap<String, JsonElement> parameter,
-			String action, String sessionId) throws ParseException {
+			String action,User user) throws ParseException {
 		log.info("getConfirmationMessage");
 		String startDate = parameter.get("startDate").getAsString().trim();
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = "";
 		String event = "";
-		JSONObject sugestion = Data.getHolidays(sessionId);
 		String message = "";
 		log.info("parms :" + startDate + " " + endDate);
 		if (parameter.containsKey("comment")) {
@@ -663,11 +793,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("event :" + event + " comment :" + comment);
 		}
 		// check leave balance > days to apply
-		int leave_balance = Integer.parseInt(DateDetails.getLeaveInfo(sessionId).get("count").toString());
+		float leave_balance = user.getTotalLeaveBalance();
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
-		int noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
+		float noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		Boolean isWeekend = Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString());
-		int totalDays = DateDetails.getDaysBetweenDates(startDate, endDate);
+		float totalDays = DateDetails.getDaysBetweenDates(startDate, endDate);
 		log.info("balance :" + leave_balance + " required :" + noOfLeaves + " total days : " + totalDays);
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
@@ -681,13 +811,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 
 				// + ". Should I confirm?";
-			} 
-			else if (totalDays == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
+			} else if (totalDays == 2 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
 				Date start = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
 				Date end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
 				JSONObject holidayMap = (JSONObject) jsonDays.get("holidayTrack");
-				//check for contains
-				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday") && ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
+				// check for contains
+				if (((String) holidayMap.get(start)).equalsIgnoreCase("Saturday")
+						&& ((String) holidayMap.get(end)).equalsIgnoreCase("Sunday")) {
 					// redirect to send message
 					message = "Its weekend from " + Formator.getFormatedDate(start) + " to "
 							+ Formator.getFormatedDate(end) + ". No need to apply for leave. Enjoy!";
@@ -695,22 +825,20 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					outParms.put("message", new JsonPrimitive(message));
 					output = Redirections.redirectToDisplayMessage(output, outParms);
 				}
-			}
-			 else if (leave_balance >= noOfLeaves) {
+			} else if (leave_balance >= noOfLeaves) {
 				if (noOfLeaves == 1 && Boolean.parseBoolean(jsonDays.get("isWeekEnd").toString().trim())) {
 					message = "Hey #usr#! Its holiday.";
 					message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 					output = Redirections.redirectToDisplayMessage(output, message);
-				} 
-				else if (noOfLeaves == 1)
+				} else if (noOfLeaves == 1)
 					message = "You want to apply leave on " + Formator.getFormatedDate(startDate);
 				else {
 					message = "So you want to apply leave from " + Formator.getFormatedDate(startDate) + " to "
-							+ Formator.getFormatedDate(endDate) +". ";
+							+ Formator.getFormatedDate(endDate) + ". ";
 					message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 				}
 
-			} 
+			}
 			if (action.equalsIgnoreCase("SYSTEM_SUGESTION_SATISFIED_YES")) {
 				log.info("for action :  SYSTEM_SUGESTION_SATISFIED_YES");
 				AIOutputContext contextOut = new AIOutputContext();
@@ -742,8 +870,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				 */}
 			/*			
 			*/
-			}
-		 else {
+		} else {
 			output = Redirections.redirectToDPApproval(output, parameter);
 			// IMP : set out parmas end date- diff
 		}
