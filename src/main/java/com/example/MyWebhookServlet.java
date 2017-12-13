@@ -34,10 +34,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("access token : "+ accessToken);
 		User user = new UserHandler().getUser(userName, accessToken);
 				
-		log.info("user name : " + sessionId);
-		// String sessionId = "milind_pingale";
-
-		// add constants in file
+		log.info("user name : " + userName);
 		log.info("action : " + action);
 		try {
 			switch (action) {
@@ -352,11 +349,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	}
 
 	private Fulfillment getLeaveBalance(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
-
-		float PL = user.getPrivilagedLeave();
-		float OH = user.getOptionalHoliday();
-		float OL = user.getOptionalLeave();
-		float CF = user.getCompensatioryOff();
+		log.info("get leave balance function");
+		float PL = user.getPrivilagedLeave(); log.info("PL :"+PL);
+		float OH = user.getOptionalHoliday(); log.info("OH :"+OH);
+		float OL = user.getOptionalLeave(); log.info("OL :"+OL);
+		float CF = user.getCompensatioryOff(); log.info("CF :"+CF);
 		output.setDisplayText("You have " + PL + " privileged leave, " + OL + " optional leave, " + OH
 				+ " optional holiday and " + CF + " compensatory Off" + " #false");
 		output.setSpeech("You have " + PL + " privileged leave, " + OL + " optional leave, " + OH
