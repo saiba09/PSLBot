@@ -1,9 +1,11 @@
 package com.util;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
@@ -142,7 +144,7 @@ public class DateDetails {
 		int days = 0;
 		boolean isWeekEnd = false;
 		JSONObject response = new JSONObject();
-		JSONObject holidayTrack = new JSONObject();
+		TreeMap<Date, String> holidayTrack = new TreeMap<>(); 
 		response.put("days", days);
 		response.put("holidayTrack", holidayTrack);
 		response.put("isWeekEnd", isWeekEnd);
@@ -248,5 +250,13 @@ public class DateDetails {
 			log.severe("exception getting days count :" + e);
 		}
 		return days;
+	}
+	protected static String getCurrentTime(){
+		DateFormat df = new SimpleDateFormat("HH/mm:ss");
+       Calendar calobj = Calendar.getInstance();
+	     //(df.format(calobj.getTime()));
+		String time = df.format(calobj.getTime());
+		log.info("current time : "+ time);
+       return null;
 	}
 }

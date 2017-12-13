@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
@@ -42,28 +44,30 @@ public class Formator {
 		Boolean flag = false;
 		if (isWeekend) {
 			log.info(" dates contains weekend in Between");
-			HashMap<Date, String> holidayMap = (HashMap<Date, String>) jsonDays.get("holidayTrack");
+			TreeMap<Date, String> holidayMap = (TreeMap<Date, String>) jsonDays.get("holidayTrack");
 			log.info("holiday map fetched");
 			if (check == 1) {
-				message += "Because its,";
+				message += "Because its, weekend";
 			}else{
-			message += " However its,";
+			message += " However its, weekend";
 			}
 			for (Date date : holidayMap.keySet()) {
 				String day = holidayMap.get(date).toString();
 				if (!flag) {
-					message += " " + day + " on " + Formator.getFormatedDate(date);
+					//message += " " + day + " on " + Formator.getFormatedDate(date);
+					message += " on " + Formator.getFormatedDate(date);
 					flag = true;
 				}
 				else{
-				message += " and " + day + " on " + Formator.getFormatedDate(date);
+				//message += " and " + day + " on " + Formator.getFormatedDate(date);
+					message += " on " + Formator.getFormatedDate(date);
 				}
 			}
 			log.info("message for weekend addded");
-			message += ". Shall we continue the plan?";
+			message += ". . Should we proceed with the plan?";
 		} else {
 			log.info("No weekend in between ");
-			message += " Should I confirm?";
+			message += ". Should we proceed with the plan?";
 
 		}
 		return message;
@@ -145,11 +149,11 @@ public class Formator {
 			}
 		}else if (noOfLeaves <= leave_balance) {
 			if (noOfLeaves == 1) {
-				message = "You want to apply leave on "+Formator.getFormatedDate(start)+" for "+comment+". Shall I confirm?";
+				message = "You want to apply leave on "+Formator.getFormatedDate(start)+". Shall I confirm?";
 				log.info("1 leave msg : "+ message);
 			}
 			else{
-			message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+" for "+comment;
+			message = "So you want to apply leave from "+Formator.getFormatedDate(start)+ " to "+Formator.getFormatedDate(end)+".";
 			message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 			
 			}
@@ -164,6 +168,53 @@ public class Formator {
 		log.info(message);
 		
 		return output;
+	}
+	public static String getNotWellresponse(){
+		log.info("getNotWellresponse");
+		String[] response = {
+				//"What’s wrong with you?",
+			//	"Are you sick?",
+				//"How do you feel?",
+				//"Do you feel weak / nauseous?",
+				//"Do you have a headache?",
+				//"Have you been feeling like this for a while?",
+				//"Is something wrong?",
+				//"Are you worried about something?",
+				"Is there anything I can do to help?",
+				/*"Did you eat something bad?",
+				"Did you eat something that doesn’t agree with you?",
+				"Did you eat something that you are allergic to?",
+				"Did you forget to take your medication?",
+				*/"Do you want to go to the doctor?",
+				//"I’m sorry that you’re not feeling well, maybe I should bring you home.",
+				//"I think we should bring you to the doctor / hospital.",
+				"I hope you feel better soon.",
+				"I think you need to drink some water and lie down for a while.",
+				"I know you aren’t feeling well but hopefully the medicine will help.",
+				"I’m sorry, I didn’t realise you were feeling sick. Let’s sit down for a while, shall we?"	
+		};
+		Random r = new Random();
+		int select =  r.nextInt((response.length - 1) + 1) + 0;
+		log.info("select : "+ select);
+		return response[select]+"";
+	}
+	public static String getOptionForLeave(){
+		String time = DateDetails.getCurrentTime();
+		int hour = Integer.parseInt(time.substring(0, time.indexOf("/")));
+		int min = Integer.parseInt(time.substring(time.indexOf("/"), time.indexOf(":")));
+		String message ="";
+		if (hour > 13) {
+			message = "Its almost half day completed, Do you wish to apply for half day leave?";
+		}else{
+			if (min > 30) {
+				message = "Hey #usr# If you can just wait for "+(60-min)+"min more, we can apply half day leave else will need to apply for a full day leave.";
+				
+			}
+			else{
+				message = "#usr# Its just "+time+" you have to apply for a full day leave.";
+			}
+		}
+		return message;
 	}
 		}
 

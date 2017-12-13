@@ -13,7 +13,8 @@
     <servlet-class>com.example.MyServiceServlet</servlet-class>
     <init-param>
       <param-name>apiaiKey</param-name>
-      <param-value>ac3143b5c50a4460b88373c865c1a7dc</param-value>
+      <param-value>66772398a2044816b9b313c3f5c0314c</param-value>
+      
     </init-param>
   </servlet>
   <servlet-mapping>

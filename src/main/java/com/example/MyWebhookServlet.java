@@ -168,6 +168,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : APPLY_ONE_DAY");
 				output = getResponseForOneDayLeaveIntent(output, parameter, sessionId, action);
 				break;
+			case "FEELING_SICK" :
+				log.info("intent FEELING_SICK");
+				output = getResponseForNotWell(output, parameter,sessionId);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -176,6 +180,20 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getResponseForNotWell(Fulfillment output, HashMap<String, JsonElement> parameter, String sessionId) {
+		// TODO Auto-generated method stub
+		String disease = parameter.get("disease").getAsString();
+		String userSays = parameter.get("userSays").getAsString();
+		String message = "";
+		if (disease.isEmpty()) {
+			message = Formator.getNotWellresponse();
+		}else{
+			message = "I’m sorry that you’re not feeling well, maybe you should take rest at home.";
+		
+		}
+		return null;
 	}
 
 	private Fulfillment getResponseForOneDayLeaveIntent(Fulfillment output, HashMap<String, JsonElement> parameter,
@@ -211,7 +229,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 			else{
 			message = LeaveMessageFormator.getLeaveDetailMessage(sessionId);
-			message += "Which type of leave you want to opt for?";
+			message += "Which type of leave would you like to apply?";
 			AIOutputContext contextOut = new AIOutputContext();
 			outParms.put("startDate", new JsonPrimitive(startDate));
 			outParms.put("endDate", new JsonPrimitive(endDate));
@@ -264,7 +282,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		int response = Server.applyLeaveInSystem(startDate, endDate, userName, comment, leaveType, noOfLeave);
 		String message ="";
 		if (response == 200) {
-			message = "Your leaves have been applied successfully in the system. Let me know what else I can do for you.#false";
+			message = "Your leaves are applied successfully in the system.#false";
 
 		}
 		else{
@@ -332,13 +350,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		}
 		if (noOfLeave <= balance) {
 			if (noOfLeave == 1) {
-				message += "You want to apply 1 " + type + " on " + Formator.getFormatedDate(startDate) + " for "
-						+ comment + ". Should I confirm?";
+				message += "1 " + type + " on " + Formator.getFormatedDate(startDate)+ ". Is it correct?";
 
 			} else {
-				message += "So want to apply leave : " + noOfLeave + " " + day + " " + type + " from "
+				message += noOfLeave + " " + day + " " + type + " from "
 						+ Formator.getFormatedDate(startDate) + " to " + Formator.getFormatedDate(endDate)
-						+ ". Shall I confirm?";
+						+ ". Is it correct?";
 			}
 			AIOutputContext contextOut = new AIOutputContext();
 			HashMap<String, JsonElement> outParms = new HashMap<>();
@@ -472,13 +489,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			String leaveType = "PL";
 			int response = Server.applyLeaveInSystem(startDate, endDate, userName, comment, leaveType, noOfLeaves);
 			if (response == 200) {
-				message = "Your leaves have been applied successfully in the system. Let me know what else I can do for you.#false";
+				message = "Your leaves are applied successfully in the system.#false";
 
 			}
 			else{
 				message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
 			}
-			message = "Your leaves have been applied successfully in the system. Let me know what can I do else for you.";
 		} else {
 			log.info("Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.");
 			output = Redirections.redirectToDPApproval(output, parameter);
@@ -517,7 +533,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			if (leave_balance <= 0 && isHoliday) {
 				// intent to display text and break;
 				log.info("bal < 0 & holiday");
-				message = "No leave balance however its holiday for " + event;
+				message = "Its holiday for " + event;
 				HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("message", new JsonPrimitive(message));
 				output = Redirections.redirectToDisplayMessage(output, outParms);
@@ -661,8 +677,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
 			if (noOfLeaves == 1) {
-				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + " for " + comment
-						+ ".";
+				message += "You want to apply leave on " + Formator.getFormatedDate(startDate) + ".";
 				message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 
 				// + ". Should I confirm?";
@@ -691,7 +706,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					message = "You want to apply leave on " + Formator.getFormatedDate(startDate);
 				else {
 					message = "So you want to apply leave from " + Formator.getFormatedDate(startDate) + " to "
-							+ Formator.getFormatedDate(endDate) + " for " + comment+". ";
+							+ Formator.getFormatedDate(endDate) +". ";
 					message += Formator.getWeekendContainsMessage(startDate, endDate, noOfLeaves);
 				}
 
