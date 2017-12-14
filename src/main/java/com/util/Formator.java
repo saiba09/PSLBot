@@ -179,7 +179,7 @@ public class Formator {
 				//"Have you been feeling like this for a while?",
 				//"Is something wrong?",
 				//"Are you worried about something?",
-				"Is there anything I can do to help?",
+				//"Is there anything I can do to help?",
 				/*"Did you eat something bad?",
 				"Did you eat something that doesn’t agree with you?",
 				"Did you eat something that you are allergic to?",
@@ -189,8 +189,8 @@ public class Formator {
 				//"I think we should bring you to the doctor / hospital.",
 				"I hope you feel better soon.",
 				"I think you need to drink some water and lie down for a while.",
-				"I know you aren’t feeling well but hopefully the medicine will help.",
-				"I’m sorry, I didn’t realise you were feeling sick. Let’s sit down for a while, shall we?"	
+				"I know you aren't feeling well but hopefully the medicine will help.",
+				"I'm sorry, I didn't realise you were feeling sick. Let's sit down for a while, shall we?"	
 		};
 		Random r = new Random();
 		int select =  r.nextInt((response.length - 1) + 1) + 0;
