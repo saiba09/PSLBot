@@ -136,18 +136,21 @@ public class ChatbotControl extends HttpServlet {
 
 
 	private int performSentimentAnalysis(String q) {
-		
+		log.info("inside performSentimentAnalysis");
 		JSONObject document = new JSONObject();
-		document.put("type", "type");
+		document.put("type", "PLAIN_TEXT");
 		document.put("content", q);
 		
 		JSONObject data = new JSONObject();
 		data.put("encodingType", "UTF8");
 		data.put("document", document);
 		
+		log.info(data.toJSONString());
 		
 		String apiurl = "https://language.googleapis.com/v1/documents:analyzeSentiment?key="+gcp_access_token;
 		JSONObject apiResponse = postRequest(apiurl, data, "NO HEADER");
+		
+		log.info(apiResponse.toJSONString());
 		
 		JSONObject documentSentiment = (JSONObject) apiResponse.get("documentSentiment");
 		
@@ -236,6 +239,7 @@ public class ChatbotControl extends HttpServlet {
 	private JSONObject postRequest(String apiurl, JSONObject data, String CLIENT_ACCESS_TOKEN) {
 		JSONObject responseData = null;
 		
+		log.info("inside postRequest");
 		try{
 			
 			//System.out.println("apiUrl: "+apiurl);
@@ -246,8 +250,10 @@ public class ChatbotControl extends HttpServlet {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestProperty("Content-Length", "0");
-			
-			conn.setRequestProperty("Authorization", "Basic "+CLIENT_ACCESS_TOKEN);
+			if (! CLIENT_ACCESS_TOKEN.equals("NO_HEADER")) {
+				conn.setRequestProperty("Authorization", "Bearer "+CLIENT_ACCESS_TOKEN);
+
+			}
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
 			
@@ -272,7 +278,7 @@ public class ChatbotControl extends HttpServlet {
 			return responseData;
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			log.severe("exception post req :" + e);
 		}
 		
 		return responseData;
