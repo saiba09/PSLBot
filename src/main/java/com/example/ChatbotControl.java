@@ -250,7 +250,7 @@ public class ChatbotControl extends HttpServlet {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestProperty("Content-Length", "0");
-			if (! CLIENT_ACCESS_TOKEN.equals("NO_HEADER")) {
+			if (! CLIENT_ACCESS_TOKEN.equals("NO HEADER")) {
 				conn.setRequestProperty("Authorization", "Bearer "+CLIENT_ACCESS_TOKEN);
 			}
 			conn.setRequestMethod("POST");
