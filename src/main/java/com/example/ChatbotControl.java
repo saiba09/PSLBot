@@ -10,6 +10,7 @@ import java.net.URL;
 
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -57,10 +58,12 @@ public class ChatbotControl extends HttpServlet {
 				log.severe("sentiment : "+sentimentValue);
 				
 			//Write accessToken to File
+				ServletContext conetxt = getServletContext();
+				String fileName = conetxt.getRealPath("/WEB-INF/accessToken.json");
 				String userName = sessionID.substring(0, sessionID.lastIndexOf("_"));
 				String accessToken = sessionID.substring(sessionID.indexOf("-")+1 );
-				new AccessProperty().writeToFile(userName, accessToken);
-				sessionID = sessionID.substring(0, sessionID.indexOf("#"));
+				new AccessProperty().writeToFile(userName, accessToken,fileName);
+				sessionID = sessionID.substring(0, sessionID.indexOf("-"));
 				
 				log.severe("username :" +userName);
 				log.severe("accesstoken : "+accessToken);

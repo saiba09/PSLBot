@@ -4,25 +4,30 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class AccessProperty {
+	final String fileName = "AccessToken.json";
+	
 	private static final Logger log = Logger.getLogger(AccessProperty.class.getName());
 	ReentrantLock lock;
 	public AccessProperty() {
 		// TODO Auto-generated constructor stub
 		lock = new ReentrantLock(true);
 	}
-public void writeToFile(String userName, String accessToken){
-	File read = new File("accessToken.json");
+public void writeToFile(String userName, String accessToken, String fileName){
+	File read = new File(fileName);
 	JSONObject fileContent;
 	if (read.exists()) {
-		fileContent  = this.readFile();
+		fileContent  = this.readFile(fileName);
 	}
 	else{
 		fileContent = new JSONObject();
@@ -32,7 +37,7 @@ public void writeToFile(String userName, String accessToken){
 	try {
 		if (lock.tryLock(10, TimeUnit.SECONDS)) {
 			log.info("lock accquired writting");
-		 try (FileWriter file = new FileWriter("accessToken.json")) {
+		 try (FileWriter file = new FileWriter(fileName)) {
 			 
 		     file.write(fileContent.toJSONString());
 		     file.flush();
@@ -46,13 +51,13 @@ public void writeToFile(String userName, String accessToken){
 		log.severe("Exception while locking");
 	}
 }
-public JSONObject readFile(){
+public JSONObject readFile(String fileName){
 	JSONObject file = new JSONObject();
 	JSONParser jsonParser = new JSONParser();
 	try {
 		if (lock.tryLock(10, TimeUnit.SECONDS)) {
 			log.info("Lock accquired while reading");
-    try (FileReader reader = new FileReader("accessToken.json"))
+    try (FileReader reader = new FileReader(fileName))
     {
       file = (JSONObject) jsonParser.parse(reader);
 
@@ -67,14 +72,14 @@ public JSONObject readFile(){
 	return file;
 }
 
-public String getAccessToken(String userName){
+public String getAccessToken(String userName, String fileName){
 	JSONObject file = new JSONObject();
 	String accessToken = null;
 	JSONParser jsonParser = new JSONParser();
 	try {
 		if (lock.tryLock(10, TimeUnit.SECONDS)) {
 			log.info("Lock accquired while reading");
-			File read = new File("accessToken.json");
+			File read = new File(fileName);
 			
     try (FileReader reader = new FileReader(read))
     {
