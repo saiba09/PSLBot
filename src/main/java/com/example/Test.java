@@ -45,17 +45,17 @@ public class Test extends HttpServlet {
         try{
             fr = new FileWriter(file);
             br = new BufferedWriter(fr);
-          
+          System.out.println("reader created");
                 br.write(dataWithNewLine);
             
         } catch (IOException e) {
-            e.printStackTrace();
+           System.out.println("Exception : "+e);
         }finally{
             try {
                 br.close();
                 fr.close();
             } catch (IOException e) {
-                e.printStackTrace();
+            	  System.out.println("Exception : "+e);
             }
         }
 		//Files.write(Paths.get(fileName), "hello World".getBytes());
