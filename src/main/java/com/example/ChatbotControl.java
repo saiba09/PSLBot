@@ -58,7 +58,7 @@ public class ChatbotControl extends HttpServlet {
 				
 			//Write accessToken to File
 				String userName = sessionID.substring(0, sessionID.lastIndexOf("_"));
-				String accessToken = sessionID.substring(sessionID.indexOf("#")+1 );
+				String accessToken = sessionID.substring(sessionID.indexOf("-")+1 );
 				new AccessProperty().writeToFile(userName, accessToken);
 				sessionID = sessionID.substring(0, sessionID.indexOf("#"));
 				
