@@ -30,7 +30,7 @@ import com.util.AccessProperty;
 public class ChatbotControl extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = Logger.getLogger(ChatbotControl.class.getName());
-	private static String gcp_access_token = "";
+	private static String gcp_access_token = "AIzaSyCtxCU83hl9_PZKmJXQK4P1nW_gOiGxOIk";
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
@@ -175,7 +175,7 @@ public class ChatbotControl extends HttpServlet {
 
 
 	private JSONObject languageTranslation(String input, String target) {
-
+		log.info("inside lang translation");
 		input = input.replaceAll("#usr#", "<usr>");
 				
 		String traslationURL = "https://translation.googleapis.com/language/translate/v2?key="+gcp_access_token+"&target="+target+"&q="+input;
