@@ -38,7 +38,7 @@ public class ChatbotControl extends HttpServlet {
 		//HttpSession session = request.getSession();
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		
+		request.setCharacterEncoding("UTF-8");
 		try {
 			
 			// GET PARAMETERS
@@ -76,8 +76,8 @@ public class ChatbotControl extends HttpServlet {
 			String speech = (String) apiaiResponse.get("speech");
 			String displayText = (String) apiaiResponse.get("displayText");
 			
-			log.info("speech "+speech);
-			log.info("displayText "+displayText);
+			log.severe("speech "+speech);
+			log.severe("displayText "+displayText);
 
 
 			JSONObject responseObject = new JSONObject();
@@ -121,8 +121,11 @@ public class ChatbotControl extends HttpServlet {
 
 		data.put("query", input);
 		data.put("sessionId", sessionID);
+		data.put("lang", "en");
 		
 		String apiurl = "https://api.api.ai/v1/query?v=20150910";
+		
+		log.severe("data : "+data.toJSONString());
 		
 		// DO POST REQUEST TO API.AI 
 	 	JSONObject apiaiResponse =  postRequest(apiurl, data, CLIENT_ACCESS_TOKEN);
@@ -248,6 +251,8 @@ public class ChatbotControl extends HttpServlet {
 			//System.out.println("apiUrl: "+apiurl);
 			URL url = new URL(apiurl);
 			
+			log.info("url :"+url);
+			
 			//setProxy();
 			
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -264,7 +269,7 @@ public class ChatbotControl extends HttpServlet {
 			outputStream.write(data.toString().getBytes());
 			outputStream.flush();
 			
-			BufferedReader bufferedReaderObject = new BufferedReader(new InputStreamReader((conn.getInputStream())));			
+			BufferedReader bufferedReaderObject = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));			
 			StringBuilder output = new StringBuilder();			
 			
 			String op;
