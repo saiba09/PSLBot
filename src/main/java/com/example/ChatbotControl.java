@@ -43,6 +43,9 @@ public class ChatbotControl extends HttpServlet {
 			// GET PARAMETERS
 				String q = request.getParameter("q");
 				String sessionID = request.getParameter("session_id");
+
+				log.severe("q"+q);
+				log.severe("sessionID"+sessionID);
 			
 			// LANGUAGE TRANSLATION OF q TO ENGLISH
 				JSONObject translationResult = languageTranslation(q, "en");
@@ -51,20 +54,27 @@ public class ChatbotControl extends HttpServlet {
 			// PERFORM SENTIMENT ANALYSIS 
 				double sentimentValue = performSentimentAnalysis(q);
 				
+				log.severe("sentiment : "+sentimentValue);
+				
 			//Write accessToken to File
 				String userName = sessionID.substring(0, sessionID.lastIndexOf("_"));
 				String accessToken = sessionID.substring(sessionID.indexOf("#")+1 );
 				new AccessProperty().writeToFile(userName, accessToken);
 				sessionID = sessionID.substring(0, sessionID.indexOf("#"));
+				
+				log.severe("username :" +userName);
+				log.severe("accesstoken : "+accessToken);
+				
 			// PASS INPUT AND GET RESPONSE FROM API.AI
 				String input = (String) translationResult.get("translatedText");
+				log.severe("input :"+input);
 				JSONObject apiaiResponse = apiaiCall(input, sessionID);
 
 			String speech = (String) apiaiResponse.get("speech");
 			String displayText = (String) apiaiResponse.get("displayText");
-
-			System.out.println("speech "+speech);
-			System.out.println("displayText "+displayText);
+			
+			log.info("speech "+speech);
+			log.info("displayText "+displayText);
 
 
 			JSONObject responseObject = new JSONObject();
@@ -216,7 +226,7 @@ public class ChatbotControl extends HttpServlet {
 			return responseData;
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			log.severe("Exception : "+ e);
 		}
 
 		return responseData;
