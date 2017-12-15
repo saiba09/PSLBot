@@ -1,5 +1,6 @@
 package com.util;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,7 +19,14 @@ public class AccessProperty {
 		lock = new ReentrantLock(true);
 	}
 public void writeToFile(String userName, String accessToken){
-	JSONObject fileContent = this.readFile();
+	File read = new File("accessToken.json");
+	JSONObject fileContent;
+	if (read.exists()) {
+		fileContent  = this.readFile();
+	}
+	else{
+		fileContent = new JSONObject();
+	}
 	log.info("File content "+fileContent); 
 	fileContent.put(userName, accessToken);
 	try {
@@ -66,7 +74,9 @@ public String getAccessToken(String userName){
 	try {
 		if (lock.tryLock(10, TimeUnit.SECONDS)) {
 			log.info("Lock accquired while reading");
-    try (FileReader reader = new FileReader("accessToken.json"))
+			File read = new File("accessToken.json");
+			
+    try (FileReader reader = new FileReader(read))
     {
       file = (JSONObject) jsonParser.parse(reader);
       accessToken = file.get(userName).toString();
