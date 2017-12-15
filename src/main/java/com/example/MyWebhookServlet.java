@@ -149,7 +149,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent FEELING_SICK");
 				output = getResponseForNotWell(output, parameter, user);
 				break;
-			case "FEELING_SICK_CUSTOM_NO_FOLLOWUP":kk
+			case "FEELING_SICK_CUSTOM_NO_FOLLOWUP":
 				log.info("for intent FEELING_SICK_CUSTOM_NO_FOLLOWUP");
 				output = getResponseForFollowUpNotWell(output, parameter, user);
 				break;

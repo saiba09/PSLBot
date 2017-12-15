@@ -26,8 +26,7 @@ public class Server {
 public static int applyLeaveInSystem(String startDate, String  endDate, String empName, String reason, String typeOfLeave, float noOfDays){
 	log.info("creating post call");
 	log.info("---------------->");
-	int response = 400;
-	
+	int response = 400;	
 	try {
 		
 		URL url = new URL(urlStr);
