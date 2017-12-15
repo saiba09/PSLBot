@@ -90,7 +90,7 @@ public class ChatbotControl extends HttpServlet {
 			out.print(responseObject);	
 		}
 		catch (Exception e) {
-
+			log.severe("Exception : "+ e);
 			JSONObject responseObject = new JSONObject();
 			responseObject.put("message", "There is some error");
 			PrintWriter out = response.getWriter();
