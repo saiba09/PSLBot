@@ -154,8 +154,8 @@ public class ChatbotControl extends HttpServlet {
 		
 		JSONObject documentSentiment = (JSONObject) apiResponse.get("documentSentiment");
 		
-		double score = (double) documentSentiment.get("score");
-		double magnitude = (double) documentSentiment.get("magnitude");
+		double score = Double.parseDouble(documentSentiment.get("score").toString());
+		double magnitude = Double.parseDouble( documentSentiment.get("magnitude").toString());
 	
 		int sentimentValue;
 
