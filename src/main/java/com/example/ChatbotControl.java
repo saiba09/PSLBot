@@ -26,7 +26,7 @@ import com.util.AccessProperty;
 /**
  * Servlet implementation class ChatbotControl
  */
-@WebServlet("/ChatbotController")
+@WebServlet("/ChatbotControl")
 public class ChatbotControl extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = Logger.getLogger(ChatbotControl.class.getName());
