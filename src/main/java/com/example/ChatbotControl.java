@@ -252,7 +252,6 @@ public class ChatbotControl extends HttpServlet {
 			conn.setRequestProperty("Content-Length", "0");
 			if (! CLIENT_ACCESS_TOKEN.equals("NO_HEADER")) {
 				conn.setRequestProperty("Authorization", "Bearer "+CLIENT_ACCESS_TOKEN);
-
 			}
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
