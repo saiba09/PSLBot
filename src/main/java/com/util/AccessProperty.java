@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -37,14 +39,21 @@ public void writeToFile(String userName, String accessToken, String fileName){
 	try {
 		if (lock.tryLock(10, TimeUnit.SECONDS)) {
 			log.info("lock accquired writting");
-		 try (FileWriter file = new FileWriter(fileName)) {
+			
+			 try {
+				Files.write(Paths.get(fileName), fileContent.toJSONString().getBytes());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		/* try (FileWriter file = new FileWriter(fileName)) {
 			 
 		     file.write(fileContent.toJSONString());
 		     file.flush();
 
 		 } catch (IOException e) {
 			 log.severe("error writting to file");
-		 }
+		 }*/
 		}
 	} catch (InterruptedException e) {
 		// TODO Auto-generated catch block
