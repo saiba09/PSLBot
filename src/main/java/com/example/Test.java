@@ -1,6 +1,10 @@
 package com.example;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,7 +31,12 @@ public class Test extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		//response.getWriter().append("hello world");
+		ServletContext conetxt = getServletContext();
+		String fileName = conetxt.getRealPath("/WEB-INF/accessToken.json");
+		Files.write(Paths.get(fileName), "hello World".getBytes());
 		response.getWriter().append("hello world");
+
 	}
 
 	/**
