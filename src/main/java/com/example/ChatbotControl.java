@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.net.URLEncoder;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -39,39 +40,41 @@ public class ChatbotControl extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
+		
 		try {
 			
 			// GET PARAMETERS
-				String q = request.getParameter("q");
-				String sessionID = request.getParameter("session_id");
+			String q = request.getParameter("q");
+			String sessionID = request.getParameter("session_id");
 
-				log.severe("q"+q);
-				log.severe("sessionID"+sessionID);
+			log.severe("q"+q);
+			log.severe("sessionID"+sessionID);
 			
 			// LANGUAGE TRANSLATION OF q TO ENGLISH
-				JSONObject translationResult = languageTranslation(q, "en");
+			JSONObject translationResult = languageTranslation(q, "en");
 							
 			
 			// PERFORM SENTIMENT ANALYSIS 
-				double sentimentValue = performSentimentAnalysis(q);
-				
-				log.severe("sentiment : "+sentimentValue);
+			String qEng = (String) translationResult.get("translatedText");
+			double sentimentValue = performSentimentAnalysis(qEng);
+			
+			log.severe("sentiment : "+sentimentValue);
 				
 			//Write accessToken to File
-				ServletContext conetxt = getServletContext();
-				String fileName = conetxt.getRealPath("/WEB-INF/accessToken.json");
-				String userName = sessionID.substring(0, sessionID.lastIndexOf("_"));
-				String accessToken = sessionID.substring(sessionID.indexOf("-")+1 );
-				new AccessProperty().writeToFile(userName, accessToken,fileName);
-				sessionID = sessionID.substring(0, sessionID.indexOf("-"));
-				
-				log.severe("username :" +userName);
-				log.severe("accesstoken : "+accessToken);
+			ServletContext conetxt = getServletContext();
+			String fileName = conetxt.getRealPath("/WEB-INF/accessToken.json");
+			String userName = sessionID.substring(0, sessionID.lastIndexOf("_"));
+			String accessToken = sessionID.substring(sessionID.indexOf("-")+1 );
+			new AccessProperty().writeToFile(userName, accessToken,fileName);
+			sessionID = sessionID.substring(0, sessionID.indexOf("-"));
+			
+			log.severe("username :" +userName);
+			log.severe("accesstoken : "+accessToken);
 				
 			// PASS INPUT AND GET RESPONSE FROM API.AI
-				String input = (String) translationResult.get("translatedText");
-				log.severe("input :"+input);
-				JSONObject apiaiResponse = apiaiCall(input, sessionID);
+			String input = (String) translationResult.get("translatedText");
+			log.severe("input :"+input);
+			JSONObject apiaiResponse = apiaiCall(input, sessionID);
 
 			String speech = (String) apiaiResponse.get("speech");
 			String displayText = (String) apiaiResponse.get("displayText");
@@ -103,7 +106,7 @@ public class ChatbotControl extends HttpServlet {
 			out.print(responseObject);	
 		}
 		catch (Exception e) {
-			log.severe("Exception : "+ e);
+			log.severe("Exception in doGet : "+ e);
 			JSONObject responseObject = new JSONObject();
 			responseObject.put("message", "There is some error");
 			PrintWriter out = response.getWriter();
@@ -184,6 +187,12 @@ public class ChatbotControl extends HttpServlet {
 		log.info("inside lang translation");
 		input = input.replaceAll("#usr#", "<usr>");
 				
+		try {
+			input = URLEncoder.encode(input, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.severe("Error in parsing url "+e);
+		}
+		
 		String traslationURL = "https://translation.googleapis.com/language/translate/v2?key="+gcp_access_token+"&target="+target+"&q="+input;
 		
 		JSONObject traslationResult = getRequest(traslationURL);
@@ -206,11 +215,13 @@ public class ChatbotControl extends HttpServlet {
 	
 	private JSONObject getRequest(String apiurl) {
 		
+		log.severe("inside getRequest");
 		JSONObject responseData = null;
 		try{
 			
 			URL url = new URL(apiurl);
 			
+			log.info("url "+url);
 			//setProxy();
 			
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -235,7 +246,7 @@ public class ChatbotControl extends HttpServlet {
 			return responseData;
 		}
 		catch(Exception e){
-			log.severe("Exception : "+ e);
+			log.severe("Exception in getRequest: "+ e);
 		}
 
 		return responseData;

@@ -33,12 +33,12 @@
     <artifactId>libai-web-servlet</artifactId>
     <version>1.6.12</version>
 	</dependency>
-	
+	<!-- 
 	 <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
       <version>1.9.53</version>
-  </dependency> 
+  </dependency>  -->
   </dependencies>
   <build>
     <!-- for hot reload of the web application -->
@@ -54,11 +54,11 @@
         </configuration>
       </plugin>
       
-         <plugin>
+    <!--      <plugin>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-maven-plugin</artifactId>
         <version>1.9.53</version>
-      </plugin>
+      </plugin> -->
     </plugins>
   </build>
 </project>
