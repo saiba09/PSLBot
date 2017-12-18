@@ -415,7 +415,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 		log.info(leave + " no of leaves");
 		float noOfLeave = Float.parseFloat(leave);
-		int response = Server.applyLeaveInSystem(startDate, endDate, user.getSession().getUserName(), comment,
+		/*int response = Server.applyLeaveInSystem(startDate, endDate, user.getSession().getUserName(), comment,
 				leaveType, noOfLeave);
 		String message = "";
 		if (response == 200) {
@@ -423,7 +423,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 		} else {
 			message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
-		}
+		}*/
+		JSONObject respponse  = PiHandler.applyLeave(user,leave);
+		String message = respponse.get("message").toString();
 		output.setDisplayText(message);
 		output.setSpeech(message);
 		return output;
@@ -619,6 +621,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
 
 		// function call for applying leave
+		
+		
 		String message = "Your leave has been applied, take care";
 		output = Redirections.redirectToDisplayMessage(output, message);
 		return output;
@@ -647,14 +651,16 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("bal > no Leaves ");
 			String leaveType = "PL";
-			int response = Server.applyLeaveInSystem(startDate, endDate, user.getUserName(), comment, leaveType,
+			/*int response = Server.applyLeaveInSystem(startDate, endDate, user.getUserName(), comment, leaveType,
 					noOfLeaves);
 			if (response == 200) {
 				message = "Your leaves are applied successfully in the system.#false";
 
 			} else {
 				message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
-			}
+			}*/
+			JSONObject respponse  = PiHandler.applyLeave(user,"PL");
+			 message = respponse.get("message").toString();
 		} else {
 			log.info("Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.");
 			output = Redirections.redirectToDPApproval(output, parameter);
