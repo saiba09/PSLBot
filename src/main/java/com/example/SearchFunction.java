@@ -69,6 +69,8 @@ public class SearchFunction {
 		
 		return result;
 	}
+	
+	
 /*	
 	public static void main(String[] args) {
 		String question = args[0];
