@@ -159,6 +159,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent : FEELING_SICK_APPLY_LEAVE");
 				output = getResponseFeelingSickApplyLeave(output,parameter,user);
 				break;
+			case "SELECT_LEAVE_TYPE":
+				log.info("intent SELECT_LEAVE_TYPE");
+				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
