@@ -6,11 +6,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.model.User;
+import com.util.AccessProperty;
 
 public class UserHandler {
 	private static final Logger log = Logger.getLogger(UserHandler.class.getName());
-	public User getUser(String userName , String accessToken){
+	public User getUser(String userName ){
 		log.info("inside get user");
+		 String accessToken = new AccessProperty().getAccessToken(userName, "AccessToken.json");
 		User user = new User(userName, accessToken);
 
 		JSONObject employeeDetails = PiHandler.getLeaveBalance(accessToken);

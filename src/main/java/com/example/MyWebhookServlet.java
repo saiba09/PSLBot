@@ -30,9 +30,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String sessionId = input.getSessionId();
 		log.info("sessionId =" + sessionId);
 		String userName = sessionId.substring(0, sessionId.lastIndexOf("_"));
-		String accessToken = sessionId.substring(sessionId.indexOf("#")+1 );
-		log.info("access token : "+ accessToken);
-		User user = new UserHandler().getUser(userName, accessToken);
+		User user = new UserHandler().getUser(userName);
 		log.info("user name : " + userName);
 		log.info("action : " + action);
 		try {
@@ -396,7 +394,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 	private Fulfillment getFallBackResponse(Fulfillment output, AIWebhookRequest input) {
 
 		String question = input.getResult().getResolvedQuery();
-		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question);
+		JSONObject response = SearchFunction.fetchAnswerFromDatastore(question); // call fetch answerFromDatastore
 		log.info(response.toJSONString());
 		String answer = (String) response.get("answer");
 		output.setDisplayText(answer);

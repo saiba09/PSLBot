@@ -2,16 +2,13 @@ package com.util;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletContext;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,9 +39,10 @@ public void writeToFile(String userName, String accessToken, String fileName){
 			
 			 try {
 				Files.write(Paths.get(fileName), fileContent.toJSONString().getBytes());
+				lock.unlock();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.severe("Exception writing to file");
 			}
 		/* try (FileWriter file = new FileWriter(fileName)) {
 			 
@@ -69,7 +67,7 @@ public JSONObject readFile(String fileName){
     try (FileReader reader = new FileReader(fileName))
     {
       file = (JSONObject) jsonParser.parse(reader);
-
+      lock.unlock();
     } catch (IOException | org.json.simple.parser.ParseException e) {
        log.severe("error reading from file");
     }
@@ -81,7 +79,7 @@ public JSONObject readFile(String fileName){
 	return file;
 }
 
-public String getAccessToken(String userName, String fileName){
+public String getAccessToken(String userName,String fileName){
 	JSONObject file = new JSONObject();
 	String accessToken = null;
 	JSONParser jsonParser = new JSONParser();
@@ -94,7 +92,7 @@ public String getAccessToken(String userName, String fileName){
     {
       file = (JSONObject) jsonParser.parse(reader);
       accessToken = file.get(userName).toString();
-
+      lock.unlock();
     } catch (IOException | org.json.simple.parser.ParseException e) {
        log.severe("error reading from file");
     }
