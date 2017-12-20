@@ -2,6 +2,7 @@ package com.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -10,6 +11,38 @@ public class Leave {
 
 	String startDate, endDate;
 	String reason;
+	Boolean isHalfDaySession, isAfterNoon, isAdvancedLeave;
+	public Boolean getIsHalfDaySession() {
+		return isHalfDaySession;
+	}
+
+	public void setIsHalfDaySession(Boolean isHalfDaySession) {
+		this.isHalfDaySession = isHalfDaySession;
+	}
+
+	public Boolean getIsAfterNoon() {
+		return isAfterNoon;
+	}
+
+	public void setIsAfterNoon(Boolean isAfterNoon) {
+		this.isAfterNoon = isAfterNoon;
+	}
+
+	public Boolean getIsAdvancedLeave() {
+		return isAdvancedLeave;
+	}
+
+	public void setIsAdvancedLeave(Boolean isAdvancedLeave) {
+		this.isAdvancedLeave = isAdvancedLeave;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 
 	public Leave(String startDate, String endDate, String reason) {
 		SimpleDateFormat formator = new SimpleDateFormat("dd-MMM-yyyy");
@@ -21,7 +54,10 @@ public class Leave {
 		} catch (ParseException e) {
 			log.severe("Exception parsing while creating leave object");
 		}
-
+		this.reason = reason;
+		isHalfDaySession = false;
+		isAfterNoon = false;
+		isAdvancedLeave = false;
 	}
 
 	public String getStartDate() {
@@ -57,5 +93,30 @@ public class Leave {
 			log.severe("Exception parsing " + e);
 		}
 		return result;
+	}
+	public String getFinnancialYear(){
+		String year = "" ;
+		Date start;
+		try {
+			start = new SimpleDateFormat("dd-MMM-yyyy").parse(this.startDate);
+			Date end = new SimpleDateFormat("dd-MMM-yyyy").parse(this.endDate);
+			log.info("s :" + start + " e: " + endDate);
+			Calendar calS = Calendar.getInstance();
+			calS.setTime(start);
+			Calendar calE = Calendar.getInstance();
+			calE.setTime(end);
+			Calendar today = Calendar.getInstance();
+			if (calS.get(Calendar.MONTH) >= 4 && calS.get(Calendar.MONTH) <=12) {
+				year += calS.get(Calendar.YEAR) + "-"+(calS.get(Calendar.YEAR)+1); //2017-2018
+						
+			}else{
+				year += calS.get(Calendar.YEAR)-1 + "-"+(calS.get(Calendar.YEAR));
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			log.severe("exception "+e); 
+		}
+		log.info("Financial Year : "+year);
+		return year;
 	}
 }

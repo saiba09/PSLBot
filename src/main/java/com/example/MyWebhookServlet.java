@@ -5,14 +5,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+
 import org.json.simple.JSONObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.model.Leave;
 import com.model.User;
 import com.util.DateDetails;
 import com.util.Formator;
 import com.util.LeaveMessageFormator;
-import com.util.Server;
 import ai.api.model.AIOutputContext;
 import ai.api.model.Fulfillment;
 import ai.api.web.AIWebhookServlet;
@@ -30,7 +33,9 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String sessionId = input.getSessionId();
 		log.info("sessionId =" + sessionId);
 		String userName = sessionId.substring(0, sessionId.lastIndexOf("_"));
-		User user = new UserHandler().getUser(userName);
+		ServletContext conetxt = getServletContext();
+		String fileName = conetxt.getRealPath("/WEB-INF/accessToken.json");
+		User user = new UserHandler().getUser(userName,fileName);
 		log.info("user name : " + userName);
 		log.info("action : " + action);
 		try {
@@ -66,6 +71,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			case "CONFIRM_APPLY":
 				log.info("intent : CONFIRM_APPLY");
 				output = applyLeave(output, parameter, user);
+				log.info("output "+ output.getDisplayText());
 				break;
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM":
@@ -412,10 +418,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String endDate = parameter.get("endDate").getAsString().trim();
 		String comment = parameter.get("comment").getAsString().trim();
 		String leaveType = parameter.get("leaveType").getAsString().trim();
-		String leave = parameter.get("noOfLeave").getAsString().trim();
-
+		//String leave = parameter.get("noOfLeave").getAsString().trim();
+		Leave leave = new Leave(startDate, endDate, comment);
 		log.info(leave + " no of leaves");
-		float noOfLeave = Float.parseFloat(leave);
+		//float noOfLeave = Float.parseFloat(leave);
 		/*int response = Server.applyLeaveInSystem(startDate, endDate, user.getSession().getUserName(), comment,
 				leaveType, noOfLeave);
 		String message = "";
@@ -425,7 +431,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		} else {
 			message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
 		}*/
-		JSONObject respponse  = PiHandler.applyLeave(user,leave);
+		JSONObject respponse  = PiHandler.applyLeave(user,leaveType,leave);
 		String message = respponse.get("message").toString();
 		output.setDisplayText(message);
 		output.setSpeech(message);
@@ -642,6 +648,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String comment = parameter.get("comment").getAsString().trim();
 		log.info("parms :" + startDate + " " + endDate + " comment : " + comment);
 		String message = "";
+		Leave leave = new Leave(startDate, endDate, comment);
 		float leave_balance = user.getTotalLeaveBalance();
 		// check bal if allow apply
 		JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
@@ -660,8 +667,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			} else {
 				message = "Sorry #usr#. Unable to apply leave. Please try after sometime.";
 			}*/
-			JSONObject respponse  = PiHandler.applyLeave(user,"PL");
-			 message = respponse.get("message").toString();
+			JSONObject respponse  = PiHandler.applyLeave(user,"PL",leave);
+			 message = respponse.get("Message").toString();
 		} else {
 			log.info("Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.");
 			output = Redirections.redirectToDPApproval(output, parameter);

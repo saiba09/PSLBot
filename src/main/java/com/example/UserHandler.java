@@ -2,6 +2,10 @@ package com.example;
 
 import java.util.logging.Logger;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -10,9 +14,10 @@ import com.util.AccessProperty;
 
 public class UserHandler {
 	private static final Logger log = Logger.getLogger(UserHandler.class.getName());
-	public User getUser(String userName ){
+	public User getUser(String userName,String fileName){
 		log.info("inside get user");
-		 String accessToken = new AccessProperty().getAccessToken(userName, "AccessToken.json");
+	
+		 String accessToken = new AccessProperty().getAccessToken(userName, fileName);
 		 log.info("Accesss Token " + accessToken); 
 		User user = new User(userName, accessToken);
 

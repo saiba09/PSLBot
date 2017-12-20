@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class AccessProperty {
-	final String fileName = "AccessToken.json";
 	
 	private static final Logger log = Logger.getLogger(AccessProperty.class.getName());
 	ReentrantLock lock;
@@ -80,6 +79,7 @@ public JSONObject readFile(String fileName){
 }
 
 public String getAccessToken(String userName,String fileName){
+	
 	log.info("inside get access token ");
 	JSONObject file = new JSONObject();
 	String accessToken = null;

@@ -12,11 +12,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.model.Leave;
 import com.model.User;
 
 public class PiHandler {
 	private static final Logger log = Logger.getLogger(PiHandler.class.getName());
 	static JSONObject getLeaveBalance(String accessToken){
+		log.info("access token : " + accessToken);
 		JSONObject responseData=null;
 		try{
 			log.info("inside getting response of api for leave balance");
@@ -47,67 +49,102 @@ public class PiHandler {
 
 		return responseData;
 	}
-	static JSONObject applyLeave(User user, String val){
+	static JSONObject applyLeave(User user, String val,Leave leave){
 		log.info("inside get test1");
 		String userName = user.getUserName();
 		String accessToken = user.getSession().getAccessToken();
 		
 		
-		int index = -1;
+		String leaveType="";
 		switch (val) {
 		case "PL":
-				index = 0;
+			leaveType = "Privileged Leave";
 			break;
 		case "OL":
-				index = 1;
+			leaveType = "Optional Leave";
 				break;
 		case "ML":
-				index = 2;
-				break;
-		case "CAL":
-				index = 3;
+			leaveType = "Maternity Leave";
 				break;
 		case "OH":
-				index = 4;
+			leaveType = "Optional Holiday";
 				break;
 		case "CF":
-				index = 5;
+			leaveType = "Compensatory Off";
 				break;
+		case "PAT" :
+			leaveType = "Paternity Leave";
+			break;
+		case "CAL" :
+			leaveType = "Child Adoption Leave";
+			break;
+		
 		}
 		
 		JSONArray leaveTypes = getResponseFromLeaveTypeAPI(accessToken, userName);
-		JSONObject obj = (JSONObject) leaveTypes.get(6);
-		int leaveYearCid = Integer.parseInt(obj.get("key").toString());
-		obj = (JSONObject) leaveTypes.get(index);
-		int leaveTypeCid = Integer.parseInt(obj.get("key").toString());
-		
-		///leaveTypeCid need to be set based on leave type
+		String leaveYear = leave.getFinnancialYear();
+		log.info("user : "+userName + " acces token "+accessToken);	
+		int leaveYearCid = 0;	
+		int leaveTypeCid = 0;
+		for (Object object : leaveTypes) {
+			JSONObject current = (JSONObject)object;
+			if (leaveYearCid == 0) {
+				if (current.get("field").toString().equals("LeaveYear")) {
+					log.info("leave year value : "+current.get("value").toString());
+					if (current.get("value").toString().trim().equalsIgnoreCase(leaveYear)) {
+						log.info("true");
+						leaveYearCid = Integer.parseInt(current.get("key").toString());
+					}
+				}
+			}
+			if (leaveTypeCid == 0) {
+				if (current.get("field").toString().trim().equals("LeaveType")) {
+					if (current.get("value").toString().equals(leaveType)) {
+						leaveTypeCid = Integer.parseInt(current.get("key").toString());
+					}
+				}
+			}
+		}
+		//leaveTypeCid need to be set based on leave type
 		
 		JSONArray LeaveInfo = getResponseFromLeaveInfoAPI(accessToken, userName, leaveTypeCid);
-		JSONObject employee = (JSONObject) LeaveInfo.get(9);
-		String employeeHRISCid = employee.get("key").toString();
-		String empName = employee.get("value").toString();
-		log.info("employee name :"+empName);
-		
-		JSONObject approver = (JSONObject)LeaveInfo.get(4);
-		String approverID = approver.get("key").toString();
-		
+		String employeeHRISCid = "";
+		String employeeName = "";
+		String approverID = "";
+		for (Object object : LeaveInfo) {
+			
+			JSONObject current = (JSONObject)object;
+			if (current.get("field").toString().equals("Name")) {
+				employeeHRISCid = current.get("key").toString();
+				employeeName = current.get("value").toString();
+				log.info("Employee Name :"+employeeName + " EmployeeHRISCid : "+employeeHRISCid);
+
+			}
+			if (approverID.equals("")) {
+				if (current.get("field").toString().equals("Approvers")) {
+					approverID = current.get("key").toString();
+					log.info("Approver "+approverID);
+				}
+			}
+			
+		}
+	
 		//setting parameters for leave days api
-		String fromDate = "15-Dec-2017";
-		String toDate = "15-Dec-2017";
-		boolean isHalfDaySession = false;
+		String fromDate = leave.getStartDate(); //"15-Dec-2017"; 
+		String toDate = leave.getEndDate();
+		boolean isHalfDaySession = leave.getIsHalfDaySession();
 		
-		float leaves = getResponseFromLeaveDaysAPI(accessToken, fromDate, toDate, leaveTypeCid, isHalfDaySession, employeeHRISCid);
-		log.info("Leave types, info and days api tested successfully");
+		float leaves = getResponseFromLeaveDaysAPI(accessToken, leaveTypeCid,leave, employeeHRISCid);
+		log.info("getResponseFromLeaveDaysAPI(accessToken, leaveTypeCid,leave, employeeHRISCid) : "+leaves);
 		
-		//setting parameters for leave apply parameters
-		boolean isAfterNoon = false;
-		boolean isAdvancedLeave = false;
-		String Reason = "testing leave apply api";
+		boolean isAfterNoon = leave.getIsAfterNoon();
+		boolean isAdvancedLeave = leave.getIsAdvancedLeave();
+		String Reason = leave.getReason();
 		
-		JSONObject res = applyLeave(empName, leaveTypeCid, fromDate, toDate, isHalfDaySession, isAfterNoon, leaveYearCid, isAdvancedLeave, approverID, Reason, accessToken);
+		JSONObject res = applyLeave(employeeName, leaveTypeCid, fromDate, toDate, isHalfDaySession, isAfterNoon, leaveYearCid, isAdvancedLeave, approverID, Reason, accessToken);
 		return res;
-	}
+		
+	} 
 	static JSONArray getResponseFromLeaveTypeAPI(String accessToken,String userName){
 		JSONArray leaveTypes = null;
 		try{
@@ -134,9 +171,8 @@ public class PiHandler {
 			conn.disconnect();
 			log.info(leaveTypes.toString());
 		}catch(Exception e){
-			log.info("error accessing leave balance :"+e);
+			log.severe("error accessing leave balance :"+e);
 		}
-
 		return leaveTypes;
 	}
 
@@ -166,17 +202,18 @@ public class PiHandler {
 			conn.disconnect();
 			log.info(leaveInfo.toString());
 		}catch(Exception e){
-			log.info("error accessing leave balance :"+e);
+			log.severe("error accessing leave balance :"+e);
 		}
 
 		return leaveInfo;
 	}
 	
-	static float getResponseFromLeaveDaysAPI(String accessToken,String fromDate, String toDate, int leaveTypeCid, boolean isHalfDaySession, String employeeHRISCid){
+	static float getResponseFromLeaveDaysAPI(String accessToken, int leaveTypeCid, Leave leave, String employeeHRISCid){
 		float leaves = 0;
 		try{
 			log.info("inside getting response of api for leave days");
-			String apiurl = "https://api.persistent.com:9020/hr/leavedays/"+fromDate+"/"+toDate+"/"+leaveTypeCid+"/"+isHalfDaySession+"/"+employeeHRISCid;
+			String apiurl = "https://api.persistent.com:9020/hr/leavedays/"+leave.getEndDate()+"/"+leave.getStartDate()+"/"+leaveTypeCid+"/"+leave.getIsHalfDaySession()+"/"+employeeHRISCid;
+			log.info("url : "+apiurl); 
 			URL url = new URL(apiurl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
@@ -197,7 +234,7 @@ public class PiHandler {
 			conn.disconnect();
 			log.info("no of leaves applicable"+leaves);
 		}catch(Exception e){
-			log.info("error accessing leave balance :"+e);
+			log.severe("error accessing leave balance :"+e);
 		}
 
 		return leaves;
@@ -224,7 +261,8 @@ public class PiHandler {
 			requestBody.put("Reason", Reason);
 			log.info("raw post data :"+requestBody);
 			byte[] out = requestBody.toJSONString().getBytes(StandardCharsets.UTF_8);
-			
+			log.info(requestBody.toJSONString());
+
 			URL u = new URL("https://api.persistent.com:9020/hr/leave");
 			HttpURLConnection conn = (HttpURLConnection) u.openConnection();
 			conn.setDoOutput(true);
@@ -234,10 +272,13 @@ public class PiHandler {
 			//conn.setRequestProperty( "Content-Length", String.valueOf(out.length));
 			log.info("setting output stream");
 			OutputStream os = conn.getOutputStream();
+			log.info("os : "+os);
 			os.write(out);
+			log.info("out "+out); 
 			os.flush();
-			
-			BufferedReader bufferedReaderObject = new BufferedReader(new InputStreamReader((conn.getInputStream())));			
+			log.info("flushed");
+			BufferedReader bufferedReaderObject = new BufferedReader(new InputStreamReader((conn.getInputStream())));						
+			log.info("buff reader : "+bufferedReaderObject);
 			StringBuilder output = new StringBuilder();			
 			
 			log.info("getting the output");
@@ -253,7 +294,7 @@ public class PiHandler {
 			log.info("resposne from apply leave API:"+responseData);
 			conn.disconnect();
 		} catch (Exception e) {
-			log.info("exception in applying leave" + e);
+			log.severe("exception in applying leave" + e);
 		}
 		return responseData;
 	}
