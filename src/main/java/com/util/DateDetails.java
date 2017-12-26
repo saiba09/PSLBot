@@ -1,20 +1,47 @@
 package com.util;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import com.example.PiHandler;
 import com.model.User;
 
 
 public class DateDetails {
 	private static final Logger log = Logger.getLogger(DateDetails.class.getName());
+	public static String getNextHoliday(){
+
+		log.info("get next holiday");
+		HashMap<String, String> calander = PiHandler.getLeaveCalander();
+		String message = "";
+		try {
+			Date today =new SimpleDateFormat("yyyy-MM-dd").parse(getCurrentDate()) ;
+			for (String date : calander.keySet()) {
+				Date d1 = new SimpleDateFormat("dd/MM/yyyy").parse(date);
+				if (d1.after(today)) {
+					message = "Its "+calander.get(date)+" comming up on "+Formator.getFormatedDate(d1);
+				}
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			log.info("Exception : "+ e);
+		}
+		log.info("response : "+ message);
+		return message;
+	}
 	/*
 	public static JSONObject getLeaveInfo(String sessionId) {
 		String message = "";

@@ -169,6 +169,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent SELECT_LEAVE_TYPE");
 				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
 				break;
+			case "CALANDER":
+				log.info("intent CALANDER");
+				output =getNextHoliday(output, parameter, user);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -177,6 +181,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getNextHoliday(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
+		// TODO Auto-generated method stub
+		String message = DateDetails.getNextHoliday();
+		output.setDisplayText(message);
+		output.setSpeech(message);
+		return output;
 	}
 
 	private Fulfillment getResponseForLeaveTypeSelectionResponseNo(Fulfillment output,

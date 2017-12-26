@@ -11,12 +11,43 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
 import com.model.Leave;
 import com.model.User;
 
+
 public class PiHandler {
 	private static final Logger log = Logger.getLogger(PiHandler.class.getName());
+	public static JSONObject getLeaveCalander(){
+		log.info("get leave calander");
+		JSONObject responseData = null ;
+		try{
+			log.info("inside getting response of api for holidays");
+			String apiurl = "https://1-dot-dummyproject-05042017.appspot.com/getHolidayData";
+			URL url = new URL(apiurl);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Content-Type", "application/json");
+		
+			BufferedReader bufferedReaderObject = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));			
+			StringBuilder output = new StringBuilder();			
+			
+			String op;
+			while ((op = bufferedReaderObject.readLine()) != null) {
+				output.append(op);
+			}
+			conn.disconnect();
+			JSONParser parser = new JSONParser();
+			responseData = (JSONObject) parser.parse(output.toString());
+			log.info(responseData.toString());
+		}catch(Exception e){
+			log.severe("error accessing leave balance api:"+e);
+		}
+
+		return responseData;
+	
+		
+	}
 	static JSONObject getLeaveBalance(String accessToken){
 		log.info("access token : " + accessToken);
 		JSONObject responseData=null;
