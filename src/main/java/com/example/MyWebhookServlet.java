@@ -116,7 +116,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 			case "AGAIN_SELECT_LEAVE_TYPE":
 				log.info("intent :AGAIN_SELECT_LEAVE_TYPE");
-				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
+				output = getResponseForLeaveTypeSelectionResponseNo(output, parameter, user);
 				break;
 			// not found
 			case "SYST_SUG_NOT_SATISFIED_CUST_CONFIRM_SUGGEST_TYPES":
@@ -179,6 +179,19 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	}
 
+	private Fulfillment getResponseForLeaveTypeSelectionResponseNo(Fulfillment output,
+			HashMap<String, JsonElement> parameter, User user) {
+		Boolean haveOther = Boolean.parseBoolean(parameter.get("token").getAsString());
+		if (haveOther) {
+			output = Redirections.redirectToComboLeaveForm(output, parameter, user);
+
+		}
+		else{
+			output = Redirections.redirectToDisplayMessage(output, "Okay #usr#. As you say.");
+		}
+		return output;
+	}
+
 	private Fulfillment getResponseFeelingSickApplyLeave(Fulfillment output, HashMap<String, JsonElement> parameter,
 			User user) {
 		// TODO Auto-generated method stub
@@ -199,6 +212,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String disease = parameter.get("disease").getAsString();
 		String userSays = parameter.get("userSays").getAsString();
 		String token = parameter.get("token").getAsString();
+		log.info("Parms : "+ disease + "  : "+userSays +" : "+token);
 		HashMap<String, JsonElement> outParms = new HashMap<>();
 		outParms.put("token", new JsonPrimitive(token));
 		String message = "";
@@ -206,6 +220,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			message = "Oh! Do you want me to apply leave for you?";
 		}
 		if (token.equals("UNWELL")) {
+			log.info("unwell token");
 			JSONObject response = Formator.getOptionForLeave();
 			message = response.get("message").toString();
 			outParms.put("disease", new JsonPrimitive(disease));
@@ -538,7 +553,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		comment = parameter.get("comment").getAsString().trim();
 		log.info("comment " + comment);
 		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
-
+		Boolean haveOther = false;
 		String message = "";
 		// check leave balance > days to apply
 		float leave_balance = user.getTotalLeaveBalance();
@@ -580,6 +595,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}
 		} else {
 			if (CF != 0 || OH != 0 || OL != 0) {
+				haveOther = true;
 				message += "You have ";
 				if (CF >= noOfLeaves) {
 					message += CF + " compensatory off, ";
@@ -615,6 +631,14 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		 * contextOut.setParameters(outParms); // set cont.
 		 * output.setContextOut(contextOut);
 		 */
+		AIOutputContext contextOut = new AIOutputContext();
+		HashMap<String, JsonElement> outParms = new HashMap<>();
+		outParms.put("haveOther", new JsonPrimitive(haveOther)); 
+		contextOut.setLifespan(1);
+		contextOut.setName("webhook-parms");
+		contextOut.setParameters(outParms);
+		output.setContextOut(contextOut);
+		//SuggestLeaveOptions-followup
 		output.setSpeech(message);
 		output.setDisplayText(message);
 		return output;
