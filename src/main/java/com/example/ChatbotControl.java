@@ -192,7 +192,8 @@ public class ChatbotControl extends HttpServlet {
 			log.severe("Error in parsing url "+e);
 		}
 		
-		String traslationURL = "https://translation.googleapis.com/language/translate/v2?key="+gcp_access_token+"&target="+target+"&q="+input;
+		String model = "base";
+		String traslationURL = "https://translation.googleapis.com/language/translate/v2?model="+model+"&key="+gcp_access_token+"&target="+target+"&q="+input;
 		
 		JSONObject traslationResult = getRequest(traslationURL);
 		
