@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:web="http://java.sun.com/xml/ns/javaee" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <servlet>
+    <servlet-name>query</servlet-name>
+    <servlet-class>com.example.MyWebhookServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>query</servlet-name>
+    <url-pattern>/actions</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>query1</servlet-name>
+    <servlet-class>com.example.MyServiceServlet</servlet-class>
+    <init-param>
+      <param-name>apiaiKey</param-name>
+      <param-value>66772398a2044816b9b313c3f5c0314c</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>query1</servlet-name>
+    <url-pattern>/ai</url-pattern>
+  </servlet-mapping>
+   <servlet>
+    <description></description>
+    <display-name>Test</display-name>
+    <servlet-name>Test</servlet-name>
+    <servlet-class>com.example.Test</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Test</servlet-name>
+    <url-pattern>/Test</url-pattern>
+  </servlet-mapping> 
+     <servlet>
+    <description></description>
+    <display-name>ChatbotControl</display-name>
+    <servlet-name>ChatbotControl</servlet-name>
+    <servlet-class>com.example.ChatbotControl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ChatbotControl</servlet-name>
+    <url-pattern>/ChatbotController</url-pattern>
+  </servlet-mapping> 
+</web-app>
