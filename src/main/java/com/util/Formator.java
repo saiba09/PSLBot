@@ -179,7 +179,7 @@ public class Formator {
 				//"Have you been feeling like this for a while?",
 				//"Is something wrong?",
 				//"Are you worried about something?",
-				//"Is there anything I can do to help?",
+				//"Is there anything I can do to help?",---
 				/*"Did you eat something bad?",
 				"Did you eat something that doesn’t agree with you?",
 				"Did you eat something that you are allergic to?",
