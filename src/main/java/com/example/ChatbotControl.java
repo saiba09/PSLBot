@@ -74,7 +74,7 @@ public class ChatbotControl extends HttpServlet {
 			String input = (String) translationResult.get("translatedText");
 			log.severe("input :"+input);
 			JSONObject apiaiResponse = apiaiCall(input, sessionID);
-
+//			log.info("response from api ai :" +apiaiResponse); 
 			String speech = (String) apiaiResponse.get("speech");
 			String displayText = (String) apiaiResponse.get("displayText");
 			
@@ -134,7 +134,7 @@ public class ChatbotControl extends HttpServlet {
 		
 		// DO POST REQUEST TO API.AI 
 	 	JSONObject apiaiResponse =  postRequest(apiurl, data, CLIENT_ACCESS_TOKEN);
-		
+		log.info("response from api ai : "+apiaiResponse);
 	 	String speech = (String) ((JSONObject) ((JSONObject)apiaiResponse.get("result")).get("fulfillment") ).get("speech"); 
 	 	
 	 	JSONObject response = new JSONObject();

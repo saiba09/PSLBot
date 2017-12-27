@@ -135,11 +135,13 @@ public class Redirections {
 		log.info("suggest time event triggred ");
 		AIEvent followupEvent = new AIEvent("SUGGEST_TIME");
 		log.info("rerouting to event : evt trg");
+		log.info("params : "+ parameter.get("token"));
 		output.setFollowupEvent(followupEvent);
 		AIOutputContext contextOut = new AIOutputContext();
 		contextOut.setLifespan(1);
 		contextOut.setName("suggest-time");
 		contextOut.setParameters(parameter);
+		output.setContextOut(contextOut);
 		return output;
 	
 	}

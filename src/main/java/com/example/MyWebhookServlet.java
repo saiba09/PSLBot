@@ -167,7 +167,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "SELECT_LEAVE_TYPE":
 				log.info("intent SELECT_LEAVE_TYPE");
-				output = Redirections.redirectToComboLeaveForm(output, parameter, user);
+			
+				output = getResponseForLeaveTypeSelectionResponseNo(output, parameter, user);
 				break;
 			case "CALANDER":
 				log.info("intent CALANDER");
@@ -241,6 +242,8 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			outParms.put("isHalfDay", new JsonPrimitive(response.get("isHalfDay ").toString()));
 			outParms.put("canBeHalfDay", new JsonPrimitive(response.get("canBeHalfDay").toString()));
 			outParms.put("time", new JsonPrimitive(response.get("time").toString()));
+			outParms.put("token", new JsonPrimitive("UNWELL"));
+
 		}
 		AIOutputContext contextOut = new AIOutputContext();
 		contextOut.setLifespan(1);
@@ -303,9 +306,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			} else {
 				// give suggestion on time constraint
 				// triggre time suggestion event
-				HashMap<String, JsonElement> outParms = new HashMap<>();
+				/*HashMap<String, JsonElement> outParms = new HashMap<>();
 				outParms.put("token", new JsonPrimitive("UNWELL"));
-				output = Redirections.redirectToSuggestTime(output, outParms);
+				output = Redirections.redirectToSuggestTime(output, outParms);*/
+				message = "I will apply leave for you. You take care :)" ;
+				output.setSpeech(message);
+				output.setDisplayText(message);
 			}
 		} else {
 			message = "I’m sorry that you’re not feeling well, for leave you need to ask your manager, as you don't have sufficient leave balance";
@@ -325,10 +331,17 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		float leave_balance = user.getTotalLeaveBalance();
 
 		if (disease.isEmpty()) {
+			//if no disease mention get generic response and set (feeling-sick-followup)
 			message = Formator.getNotWellresponse();
+			outParms.put("token", new JsonPrimitive("UNWELL"));
+			AIOutputContext contextOut = new AIOutputContext();
+			contextOut.setParameters(outParms);
+			contextOut.setLifespan(1);
+			contextOut.setName("feeling-sick-followup");
 			output.setSpeech(message);
 			output.setDisplayText(message);
 		} else {
+			//if leave bal suggest for leave (REDIRECT TO SUGGEST TIME INTENT)otherwise go to ask manager
 			if (leave_balance > 0) {
 				// apply check for leave
 

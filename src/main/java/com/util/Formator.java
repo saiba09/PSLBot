@@ -200,7 +200,9 @@ public class Formator {
 	public static JSONObject getOptionForLeave(){
 		String time = DateDetails.getCurrentTime();
 		int hour = Integer.parseInt(time.substring(0, time.indexOf("/")));
+		log.info("hour : "+hour);
 		int min = Integer.parseInt(time.substring(time.indexOf("/")+1, time.indexOf(":")));
+		log.info("min : "+ min);
 		String message ="";
 		Boolean isHalfDay = false;
 		Boolean canBeHalfDay = false;
