@@ -83,13 +83,14 @@ public class ChatbotControl extends HttpServlet {
 
 
 			JSONObject responseObject = new JSONObject();
-			
-			if(! translationResult.get("detectedSourceLanguage").toString().equalsIgnoreCase("en") ) {
-				//LANGUAGE TRANSLATION OF RESPONSE TO SOURCE LANGUAGE
-				String sourceLanguage = (String) translationResult.get("detectedSourceLanguage");
 
-				//add source language code
-				responseObject.put("detectedSourceLanguage", sourceLanguage);
+			//LANGUAGE TRANSLATION OF RESPONSE TO SOURCE LANGUAGE
+			String sourceLanguage = (String) translationResult.get("detectedSourceLanguage");
+
+			//add source language code
+			responseObject.put("detectedSourceLanguage", sourceLanguage);
+
+			if(! sourceLanguage.equalsIgnoreCase("en") ) {
 				
 				JSONObject reverseTranslationResult = languageTranslation(speech, sourceLanguage);
 				responseObject.put("speech", (String) reverseTranslationResult.get("translatedText") );
