@@ -194,7 +194,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	private Fulfillment getResponseForLeaveTypeSelectionResponseNo(Fulfillment output,
 			HashMap<String, JsonElement> parameter, User user) {
-		Boolean haveOther = Boolean.parseBoolean(parameter.get("token").getAsString());
+		Boolean haveOther = Boolean.parseBoolean(parameter.get("haveOther").getAsString());
 		if (haveOther) {
 			output = Redirections.redirectToComboLeaveForm(output, parameter, user);
 
@@ -582,12 +582,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		String message = "";
 		// check leave balance > days to apply
 		float leave_balance = user.getTotalLeaveBalance();
-		float noOfLeaves = 0;
+		float noOfLeaves = 0.0f;
 		float PL = user.getPrivilagedLeave();
 		float OH = user.getOptionalHoliday();
 		float OL = user.getOptionalLeave();
 		float CF = user.getCompensatioryOff();
-		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
 		if (!timeConstraint.isEmpty()) {
 			switch (timeConstraint) {
 			case "full":
@@ -604,10 +603,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			JSONObject jsonDays = DateDetails.getDays(startDate, endDate);
 			noOfLeaves = Integer.parseInt(jsonDays.get("days").toString());
 		}
+		log.info("balance :" + leave_balance + " required :" + noOfLeaves);
+
 		if (PL >= 1 && !timeConstraint.isEmpty()) {
 			// apply leave and go to display text
 			output = applyLeaveUrgentCase(output, parameter);
 		} else if (PL < noOfLeaves) {
+			log.info("PL < REQ");
 			// check if any leave >= req . if give option else go to dp
 			if (CF < noOfLeaves) {
 				if (OH < noOfLeaves) {
@@ -619,7 +621,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				message += "You have in-sufficient privillaged leave, still want to apply for it? You will need toh apply for LWP in that case.";
 			}
 		} else {
-			if (CF != 0 || OH != 0 || OL != 0) {
+			if (CF >= noOfLeaves || OH >= noOfLeaves || OL >= noOfLeaves) {
 				haveOther = true;
 				message += "You have ";
 				if (CF >= noOfLeaves) {
@@ -680,12 +682,13 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		
 		
 		String message = "Your leave has been applied, take care";
+		
 		output = Redirections.redirectToDisplayMessage(output, message);
 		return output;
 	}
 
 	private Fulfillment exitFlow(Fulfillment output) {
-		// TODO Auto-generated method stub TERMINATE
+		// TODO Auto-generated method stub TERMINATE comment
 		return Redirections.redirectToTerminate(output);
 
 	}

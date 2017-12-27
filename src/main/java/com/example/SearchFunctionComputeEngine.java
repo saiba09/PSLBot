@@ -17,7 +17,7 @@ public class SearchFunctionComputeEngine {
 		
 		JSONObject result = new JSONObject();
 
-		result.put("answer","I Missed it, Say that again!");
+		result.put("answer","Sorry I am unable to help you in this case");
 		
 		String[] inputKeywords = question.split(" ");
 		

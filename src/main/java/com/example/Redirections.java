@@ -128,6 +128,7 @@ public class Redirections {
 		contextOut.setLifespan(1);
 		contextOut.setName("displayMessage");
 		contextOut.setParameters(outParms);
+		output.setContextOut(contextOut);
 		return output;
 	}
 	public static Fulfillment redirectToSuggestTime(Fulfillment output, HashMap<String, JsonElement> parameter) {
