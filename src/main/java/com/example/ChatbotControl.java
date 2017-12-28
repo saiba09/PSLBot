@@ -103,7 +103,11 @@ public class ChatbotControl extends HttpServlet {
 				responseObject.put("displayText", displayText);						
 			}
 					
-			responseObject.put("usersSentiment", sentimentValue);
+			if(responseObject.get("speech").toString().equalsIgnoreCase("Sorry I am unable to help you in this case"))
+				responseObject.put("usersSentiment", 5.0);
+			else
+				responseObject.put("usersSentiment", sentimentValue);
+			
 			
 			PrintWriter out = response.getWriter();
 			out.print(responseObject);	
