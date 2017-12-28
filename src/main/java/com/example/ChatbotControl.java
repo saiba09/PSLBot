@@ -171,13 +171,13 @@ public class ChatbotControl extends HttpServlet {
 	
 		int sentimentValue;
 
-		if(score < -0.4)
+		if(score < -0.5)
 			sentimentValue = 0;
-		else if(score < -0.15) 
+		else if(score < -0.25) 
 			sentimentValue = 1;
-		else if (score < 0.15)
+		else if (score < 0.25)
 			sentimentValue = 2;
-		else if(score < 0.4)
+		else if(score < 0.5)
 			sentimentValue = 3;
 		else
 			sentimentValue = 4;
