@@ -82,6 +82,12 @@ public class ChatbotControl extends HttpServlet {
 			log.severe("displayText "+displayText);
 
 
+			//SET SENTIMENT VALUE
+			
+			if(speech.equalsIgnoreCase("Sorry I am unable to help you in this case"))
+				sentimentValue = 5.0;
+			
+
 			JSONObject responseObject = new JSONObject();
 
 			//LANGUAGE TRANSLATION OF RESPONSE TO SOURCE LANGUAGE
@@ -103,10 +109,7 @@ public class ChatbotControl extends HttpServlet {
 				responseObject.put("displayText", displayText);						
 			}
 					
-			if(responseObject.get("speech").toString().equalsIgnoreCase("Sorry I am unable to help you in this case"))
-				responseObject.put("usersSentiment", 5.0);
-			else
-				responseObject.put("usersSentiment", sentimentValue);
+			responseObject.put("usersSentiment", sentimentValue);
 			
 			
 			PrintWriter out = response.getWriter();
