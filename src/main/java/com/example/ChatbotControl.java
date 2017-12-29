@@ -195,7 +195,7 @@ public class ChatbotControl extends HttpServlet {
 	private JSONObject languageTranslation(String input, String target) {
 		log.info("inside lang translation");
 		input = input.replaceAll("#usr#", "<usr>");
-		input = input.replaceAll("#avtr#", "<avtr>");
+		input = input.replaceAll("#av#", "<av>");
 				
 		try {
 			input = URLEncoder.encode(input, "UTF-8");
@@ -219,7 +219,7 @@ public class ChatbotControl extends HttpServlet {
 		JSONObject result = new JSONObject();
 
 		result.put("detectedSourceLanguage", detectedSourceLanguage);
-		result.put("translatedText", translatedText.replaceAll("<usr>", "#usr#").replaceAll("<avtr>", "#avtr#"));
+		result.put("translatedText", translatedText.replaceAll("<usr>", "#usr#").replaceAll("<av>", "#av#"));
 		
 		return result;
 	}
