@@ -83,7 +83,6 @@ public class ChatbotControl extends HttpServlet {
 
 
 			//SET SENTIMENT VALUE
-			
 			if(speech.equalsIgnoreCase("Sorry I am unable to help you in this case"))
 				sentimentValue = 5.0;
 			
@@ -196,6 +195,7 @@ public class ChatbotControl extends HttpServlet {
 	private JSONObject languageTranslation(String input, String target) {
 		log.info("inside lang translation");
 		input = input.replaceAll("#usr#", "<usr>");
+		input = input.replaceAll("#avtr#", "<avtr>");
 				
 		try {
 			input = URLEncoder.encode(input, "UTF-8");
@@ -218,8 +218,8 @@ public class ChatbotControl extends HttpServlet {
 
 		JSONObject result = new JSONObject();
 
-		result.put("detectedSourceLanguage", detectedSourceLanguage.replaceAll("<usr>", "#usr#"));
-		result.put("translatedText", translatedText.replaceAll("<usr>", "#usr#"));
+		result.put("detectedSourceLanguage", detectedSourceLanguage);
+		result.put("translatedText", translatedText.replaceAll("<usr>", "#usr#").replaceAll("<avtr>", "#avtr#"));
 		
 		return result;
 	}
