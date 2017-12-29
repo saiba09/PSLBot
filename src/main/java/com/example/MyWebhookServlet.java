@@ -794,21 +794,23 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				if (isWeekend) {
 					log.info("is week-end");
 					if (event.equalsIgnoreCase("today")) {
-						comment += " Its weekend today.";
+						message = " Its weekend today.";
 						isOneDay = true;
 
 					}
-					if (event.equalsIgnoreCase("tomorrow")) {
-						comment += "It was weekend yesterday.";
+					else if (event.equalsIgnoreCase("tomorrow")) {
+						message = "It was weekend yesterday.";
 						isOneDay = true;
+					}else{
+						message = "Its weekend on "+Formator.getFormatedDate(startDate)+". Have Fun";
 					}
-					message = comment;
+					
 
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					outParms.put("message", new JsonPrimitive(message));
 					output = Redirections.redirectToDisplayMessage(output, outParms);
 				}
-				if (leave_balance > 0) {
+				else if (leave_balance > 0) {
 					log.info("bal > 0 ask leave type");
 					HashMap<String, JsonElement> outParms = new HashMap<>();
 					AIOutputContext contextOut = new AIOutputContext();
