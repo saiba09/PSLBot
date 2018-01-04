@@ -2,18 +2,20 @@ package com.model;
 
 import java.util.ArrayList;
 
+import com.google.cloud.datastore.StringValue;
+
 public class LeaveTransaction {
-private long employeeId;
+private String employeeId;
 private String employeeName;
 private String approver;
 private String approvarComment;
 private Leave date;
 private String leaveType;
 private ArrayList<String> hirerachy;
-public long getEmployeeId() {
+public String getEmployeeId() {
 	return employeeId;
 }
-public void setEmployeeId(long employeeId) {
+public void setEmployeeId(String employeeId) {
 	this.employeeId = employeeId;
 }
 public String getEmployeeName() {

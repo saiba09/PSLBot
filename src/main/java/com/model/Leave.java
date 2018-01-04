@@ -14,12 +14,12 @@ public class Leave {
 	String startDate, endDate;
 	String reason;
 	Boolean isHalfDaySession, isAfterNoon, isAdvancedLeave;
-	int noOfDays;
-	public int getNoOfDays() {
+	long noOfDays;
+	public long getNoOfDays() {
 		return noOfDays;
 	}
 
-	public void setNoOfDays(int noOfDays) {
+	public void setNoOfDays(long noOfDays) {
 		this.noOfDays = noOfDays;
 	}
 
@@ -71,7 +71,22 @@ public class Leave {
 		isAdvancedLeave = false;
 		noOfDays =Integer.parseInt(DateDetails.getDays(startDate, endDate).get("days").toString());
 	}
-
+	public Leave(String startDate, String endDate, String reason,long noOfDays) {
+		SimpleDateFormat formator = new SimpleDateFormat("dd-MMM-yyyy");
+		try {
+			Date start = formator.parse(startDate);
+			Date end = formator.parse(endDate);
+			this.startDate = formator.format(start);
+			this.endDate = formator.format(end);
+		} catch (ParseException e) {
+			log.severe("Exception parsing while creating leave object");
+		}
+		this.reason = reason;
+		isHalfDaySession = false;
+		isAfterNoon = false;
+		isAdvancedLeave = false;
+		this.noOfDays =noOfDays;
+	}
 	public String getStartDate() {
 		return startDate;
 	}
