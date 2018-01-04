@@ -6,12 +6,23 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
+import com.util.DateDetails;
+
 public class Leave {
 	private static final Logger log = Logger.getLogger(Leave.class.getName());
 
 	String startDate, endDate;
 	String reason;
 	Boolean isHalfDaySession, isAfterNoon, isAdvancedLeave;
+	int noOfDays;
+	public int getNoOfDays() {
+		return noOfDays;
+	}
+
+	public void setNoOfDays(int noOfDays) {
+		this.noOfDays = noOfDays;
+	}
+
 	public Boolean getIsHalfDaySession() {
 		return isHalfDaySession;
 	}
@@ -58,6 +69,7 @@ public class Leave {
 		isHalfDaySession = false;
 		isAfterNoon = false;
 		isAdvancedLeave = false;
+		noOfDays =Integer.parseInt(DateDetails.getDays(startDate, endDate).get("days").toString());
 	}
 
 	public String getStartDate() {
