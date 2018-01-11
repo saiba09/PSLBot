@@ -80,7 +80,7 @@ public class LeaveMessageFormator {
 			List<String> listOfFestival = Arrays.asList(arrayFestivals);
 			for (String festival : listOfFestival) {
 				if (festival.equalsIgnoreCase(event)) {
-					message += "Oh! Great so you want to apply leave for on "
+					message += "Oh! Great so you want to apply leave for "+event+" on "
 							+ Formator.getFormatedDate(date) + ". ";
 					isFestival = true;
 					break;

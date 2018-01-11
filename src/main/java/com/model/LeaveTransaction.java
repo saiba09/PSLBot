@@ -12,6 +12,13 @@ private String approvarComment;
 private Leave date;
 private String leaveType;
 private ArrayList<String> hirerachy;
+private Boolean isApproved;
+public Boolean getIsApproved() {
+	return isApproved;
+}
+public void setIsApproved(Boolean isApproved) {
+	this.isApproved = isApproved;
+}
 public String getEmployeeId() {
 	return employeeId;
 }

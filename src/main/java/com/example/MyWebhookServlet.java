@@ -1,7 +1,9 @@
-package com.example;
+ package com.example;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -12,6 +14,7 @@ import org.json.simple.JSONObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.model.Leave;
+import com.model.LeaveTransaction;
 import com.model.User;
 import com.util.DateDetails;
 import com.util.Formator;
@@ -174,6 +177,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent CALANDER");
 				output =getNextHoliday(output, parameter, user);
 				break;
+			case "CKECK_STATUS":
+				log.info("intent CALANDER");
+				output =getLeaveStatus(output, parameter, user);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -182,6 +189,46 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getLeaveStatus(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
+		log.info("get leave status ");
+		String userName = user.getUserName();
+		String message = "";
+		
+		userName = userName.substring(0, userName.indexOf("_")) + " " + userName.substring(userName.indexOf("_")+1);
+		userName = userName.substring(0,1).toUpperCase() + userName.substring(1, userName.indexOf(" ")) + " " + userName.substring(userName.indexOf(" ")+1,userName.indexOf(" ")+2).toUpperCase() +userName.substring(userName.indexOf(" ")+2);
+		//comment
+		ArrayList<LeaveTransaction> transaction = new LeaveTransactionDao().getrecordByName(userName);
+		if (transaction.size() > 0) {
+			String todayString = DateDetails.getCurrentDate();
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			DateFormat tf = new SimpleDateFormat("dd-MMM-yyyy");
+			try {
+				Date today = df.parse(todayString);
+				todayString = tf.format(today);
+				/*if (tf.parse(transaction.get(0).getDate().getStartDate()).before(tf.parse(todayString))) {
+					message = "No pending transaction";
+				}else{*/
+					if ( transaction.get(0).getIsApproved()) {
+						message = "Your leave application from "+transaction.get(0).getDate().getStartDate()+" has been approved.";
+					}else{
+						if (transaction.get(0).getApprovarComment().equals(" ")) {
+							message = "Your leave application from "+transaction.get(0).getDate().getStartDate()+" is not yet approved.";
+						}else{
+							message = "Your leave application from "+transaction.get(0).getDate().getStartDate()+" is not yet approved, with "+transaction.get(0).getApprover()+"'s comments saying "+transaction.get(0).getApprovarComment();
+
+						}
+					} 
+					output.setDisplayText(message);
+					output.setSpeech(message);
+				
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				log.severe("exception parsing date : "+e);
+			}
+		}
+		return output;
 	}
 
 	private Fulfillment getNextHoliday(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {

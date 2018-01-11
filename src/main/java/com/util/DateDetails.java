@@ -287,6 +287,7 @@ public class DateDetails {
 		log.info("current time : "+ time);
        return time;
 	}
+	//comment
 	public static String getCurrentDate(){
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
        Calendar calobj = Calendar.getInstance();

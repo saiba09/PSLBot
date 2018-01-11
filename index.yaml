@@ -1,0 +1,10 @@
+# [START indexes]
+# index yaml
+indexes:
+- namespace: PSL-BOT
+- kind: LeaveTransaction
+  properties:
+  - name: employee_name
+  - name: Leave_start_date
+    direction: desc
+  
