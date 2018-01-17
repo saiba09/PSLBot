@@ -13,6 +13,7 @@ private Leave date;
 private String leaveType;
 private ArrayList<String> hirerachy;
 private Boolean isApproved;
+
 public Boolean getIsApproved() {
 	return isApproved;
 }

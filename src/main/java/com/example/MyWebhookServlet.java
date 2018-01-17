@@ -768,6 +768,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			}*/
 			JSONObject respponse  = PiHandler.applyLeave(user,"PL",leave);
 			 message = respponse.get("Message").toString();
+			 
 		} else {
 			log.info("Your leave balance is less than :" + noOfLeaves + ". You will need Delivery partner approval.");
 			output = Redirections.redirectToDPApproval(output, parameter);

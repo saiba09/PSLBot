@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import com.model.Leave;
+import com.model.LeaveTransaction;
 import com.model.User;
 
 
@@ -142,6 +143,9 @@ public class PiHandler {
 		String employeeHRISCid = "";
 		String employeeName = "";
 		String approverID = "";
+		String approverName = "";
+		JSONObject hirerachy = new JSONObject();
+		JSONArray hirerachyarray = new JSONArray();
 		for (Object object : LeaveInfo) {
 			
 			JSONObject current = (JSONObject)object;
@@ -151,15 +155,22 @@ public class PiHandler {
 				log.info("Employee Name :"+employeeName + " EmployeeHRISCid : "+employeeHRISCid);
 
 			}
+			if (current.get("field").toString().equals("Approvers")) {
+				JSONObject approver = new JSONObject();
+				approver.put("stringValue", current.get("value").toString());
+				hirerachyarray.add(approver);
+			
+			}
 			if (approverID.equals("")) {
 				if (current.get("field").toString().equals("Approvers")) {
 					approverID = current.get("key").toString();
+					approverName = current.get("value").toString();
 					log.info("Approver "+approverID);
 				}
 			}
 			
 		}
-	
+	hirerachy.put("value", hirerachyarray);
 		//setting parameters for leave days api
 		String fromDate = leave.getStartDate(); //"15-Dec-2017"; 
 		String toDate = leave.getEndDate();
@@ -171,7 +182,12 @@ public class PiHandler {
 		boolean isAfterNoon = leave.getIsAfterNoon();
 		boolean isAdvancedLeave = leave.getIsAdvancedLeave();
 		String Reason = leave.getReason();
-		
+		//add to data store
+		LeaveTransaction leaveTransaction = new LeaveTransaction();
+		leaveTransaction.setApprover(approverName); leaveTransaction.setEmployeeId(employeeHRISCid);leaveTransaction.setEmployeeName(employeeName);leaveTransaction.setLeaveType(leaveType);;
+		Leave dates = new Leave(toDate, fromDate, Reason);
+		leaveTransaction.setDate(dates);
+		DataStoreOperation.addTransaction(leaveTransaction, hirerachy);
 		JSONObject res = applyLeave(employeeName, leaveTypeCid, fromDate, toDate, isHalfDaySession, isAfterNoon, leaveYearCid, isAdvancedLeave, approverID, Reason, accessToken);
 		return res;
 		
