@@ -290,7 +290,12 @@ public class PiHandler {
 			requestBody.put("IsAdvanceLeave", isAdvancedLeave);
 			requestBody.put("ApproverId", approverID);
 			requestBody.put("Reason", Reason);
-			log.info("raw post data :"+requestBody);
+			
+			requestBody.put("AddToCcList", "");
+			requestBody.put("OptionalHolidayDate", "");
+			requestBody.put("LeaveStatusCid", 3);
+			
+			log.info("raw post data one :"+requestBody);
 			byte[] out = requestBody.toJSONString().getBytes(StandardCharsets.UTF_8);
 			log.info(requestBody.toJSONString());
 
