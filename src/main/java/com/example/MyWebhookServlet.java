@@ -624,7 +624,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("parms :" + startDate + " " + endDate);
 		comment = parameter.get("comment").getAsString().trim();
 		log.info("comment " + comment);
-		String timeConstraint = parameter.get("timeConstraint").getAsString().trim();
+		String timeConstraint = parameter.get("timeConstraint").getAsString();
 		Boolean haveOther = false;
 		String message = "";
 		// check leave balance > days to apply
