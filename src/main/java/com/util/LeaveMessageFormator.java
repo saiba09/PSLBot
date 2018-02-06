@@ -55,7 +55,7 @@ public class LeaveMessageFormator {
 		// TODO Auto-generated method stub
 		log.info("inside get message");
 		JSONObject response = new JSONObject();
-		String longVaccSugestion = "Do you want to make it a long vaccation?";
+		String longVaccSugestion = "Do you want to take leave and make it a long weekend?";
 		String message = "";
 		Boolean isHoliday = false;
 		Boolean isOneDay = false;

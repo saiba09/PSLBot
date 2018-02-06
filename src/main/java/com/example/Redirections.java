@@ -40,6 +40,7 @@ public class Redirections {
 	public static Fulfillment redirectToDPApproval(Fulfillment output, HashMap<String, JsonElement> parameter){
 		AIEvent followupEvent = new AIEvent("DP_APPROVAL");
 		log.info("rerouting to event DP_APPROVAL: evt trg");
+		
 		output.setFollowupEvent(followupEvent);
 		return output;
 	}

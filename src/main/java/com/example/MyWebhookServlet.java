@@ -624,7 +624,15 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		log.info("parms :" + startDate + " " + endDate);
 		comment = parameter.get("comment").getAsString().trim();
 		log.info("comment " + comment);
-		String timeConstraint = parameter.get("timeConstraint").getAsString();
+		String timeConstraint="";
+		try{
+			timeConstraint = parameter.get("timeConstraint").getAsString();
+			
+		}catch(Exception e){
+			log.info("time constraint not set");
+		}
+		
+		
 		Boolean haveOther = false;
 		String message = "";
 		// check leave balance > days to apply
@@ -665,7 +673,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 					}
 				}
 			} else {
-				message += "You have in-sufficient privillaged leave, still want to apply for it? You will need toh apply for LWP in that case.";
+				message += "You have zero leave balance. I suggest you to please contact with your manager for LWP.";
 			}
 		} else {
 			if (CF >= noOfLeaves || OH >= noOfLeaves || OL >= noOfLeaves) {
@@ -728,7 +736,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		// function call for applying leave
 		
 		
-		String message = "Your leave has been applied, take care";
+		String message = "Consider it done. Take care";
 		
 		output = Redirections.redirectToDisplayMessage(output, message);
 		return output;
@@ -898,7 +906,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				if (!comment.isEmpty() || !startDate.isEmpty() || !endDate.isEmpty()) {
 
 				} else {
-					String msg = "Great you have sufficient Leave balance. From when you want leave?";
+					String msg = "Sure - You have a leave balance to apply for leave. From when you want leave?";
 					outParms.put("msg", new JsonPrimitive(msg));
 				}
 				output = Redirections.redirectToQueryLeaveWithParms(output, outParms);
@@ -947,7 +955,7 @@ public class MyWebhookServlet extends AIWebhookServlet {
 		if (leave_balance <= 0 || leave_balance < noOfLeaves) {
 			log.info("bal < 0");
 			log.info(
-					"Sorry, you have insufficient leave balance, you will need DP approval If want to apply for leave.");
+					"You have zero leave balance. I suggest you to please contact with your manager for LWP.");
 			output = Redirections.redirectToDPApproval(output, parameter);
 		} else if (leave_balance >= noOfLeaves) {
 			log.info("req > bal");
