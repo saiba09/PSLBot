@@ -181,6 +181,10 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				log.info("intent CALANDER");
 				output =getLeaveStatus(output, parameter, user);
 				break;
+			case "LEAVE_TAKER_TYPE" : 
+				log.info("Leave taker type intent");
+				output = getLeaveTackerType(output, parameter);
+				break;
 			default:
 				output.setSpeech("Default case");
 				break;
@@ -189,6 +193,12 @@ public class MyWebhookServlet extends AIWebhookServlet {
 			log.info("exception : " + e);
 		}
 
+	}
+
+	private Fulfillment getLeaveTackerType(Fulfillment output, HashMap<String, JsonElement> parameter) {
+
+		
+		return null;
 	}
 
 	private Fulfillment getLeaveStatus(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
