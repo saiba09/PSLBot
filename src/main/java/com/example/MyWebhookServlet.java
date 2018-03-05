@@ -19,6 +19,8 @@ import com.model.User;
 import com.util.DateDetails;
 import com.util.Formator;
 import com.util.LeaveMessageFormator;
+import com.util.MLUtils;
+
 import ai.api.model.AIOutputContext;
 import ai.api.model.Fulfillment;
 import ai.api.web.AIWebhookServlet;
@@ -183,7 +185,11 @@ public class MyWebhookServlet extends AIWebhookServlet {
 				break;
 			case "LEAVE_TAKER_TYPE" : 
 				log.info("Leave taker type intent");
-				output = getLeaveTackerType(output, parameter);
+				output = getLeaveTakerType(output, parameter);
+				break;
+			case "SUBORDINATE_LEAVE_PLAN" :
+				log.info("SUBORDINATE_LEAVE_PLAN intent");
+				output = getSubordinateLeaveList(output, parameter);
 				break;
 			default:
 				output.setSpeech("Default case");
@@ -195,10 +201,50 @@ public class MyWebhookServlet extends AIWebhookServlet {
 
 	}
 
-	private Fulfillment getLeaveTackerType(Fulfillment output, HashMap<String, JsonElement> parameter) {
+	private Fulfillment getSubordinateLeaveList(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		log.info("getSubordinateLeaveList");
+		ArrayList<String> employees = MLUtils.longLeavePrediction();
+		String message = "May be ";
+		for (String employee : employees) {
+			message += employee+", ";
+		}
+		message = message.trim();
+		message = message.substring(0, message.lastIndexOf(","));
+		message +=". ";
+		output.setDisplayText(message);
+		output.setSpeech(message);
+		return output;
+	}
 
+	private Fulfillment getLeaveTakerType(Fulfillment output, HashMap<String, JsonElement> parameter) {
+		log.info("get leave taker type");
+		String eId = parameter.get("empId").getAsString();
+		String eName = parameter.get("name").getAsString();
+		String title = eName;
+		log.info("Get leave taking pattern fo emp Id : "+eId);
+		String pattern = MLUtils.leaveCategoryPrediction(eId).toUpperCase();
+		String response = "";
+		if(eName.isEmpty())
+			title = "This employee" ;
+		switch(pattern){
+		case "HIGH" : 
+			response = title +" takes leave very frequently.";
+			break;
+		case "AVERAGE" : 
+			response = title +" take a reasonable number of leaves.";
+			break;
+		case "LOW" : 
+			response = title+" take leaves on very rare occasions.";
+			break;
+		default:
+			if(eName.isEmpty())
+				title = "this employee" ;
+			response = "We don't have enough information about "+eName;
+		}
 		
-		return null;
+		output.setDisplayText(response);
+		output.setSpeech(response);
+		return output;
 	}
 
 	private Fulfillment getLeaveStatus(Fulfillment output, HashMap<String, JsonElement> parameter, User user) {
